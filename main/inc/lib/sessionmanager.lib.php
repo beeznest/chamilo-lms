@@ -1083,6 +1083,261 @@ class SessionManager
         }
         return $table;
     }
+    
+    /**
+     * Gets the progress of the given session
+     * And some values with tags
+     * @param int session id
+     * @param int course_id
+     * @param array options order and limit keys
+     * @return array
+     */
+    public static function getSessionProgress($sessionId, $courseId, $options)
+    {
+        $getAllSessions = false;
+        if (empty($sessionId)) {
+            $sessionId = 0;
+            $getAllSessions = true;
+        }
+        //tables
+        $session_course_user = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
+        $user = Database::get_main_table(TABLE_MAIN_USER);
+        $course_rel_user = Database::get_main_table(TABLE_MAIN_COURSE_USER);
+        $workTable = Database::get_course_table(TABLE_STUDENT_PUBLICATION);
+        $workTableAssignment = Database::get_course_table(TABLE_STUDENT_PUBLICATION_ASSIGNMENT);
+        $forum = Database::get_course_table(TABLE_FORUM);
+        $forum_post = Database::get_course_table(TABLE_FORUM_POST);
+        $tbl_course_lp = Database::get_course_table(TABLE_LP_MAIN);
+        $wiki = Database::get_course_table(TABLE_WIKI);
+        $table_stats_default = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_DEFAULT);
+        $table_stats_access = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_ACCESS);
+
+        $course = api_get_course_info_by_id($courseId);
+
+        $where = " WHERE course_code = '%s'
+        AND s.status <> 2 ";
+
+        $limit = null;
+        if (!empty($options['limit'])) {
+            $limit = " LIMIT " . $options['limit'];
+        }
+
+        if (!empty($options['where'])) {
+            $where .= ' AND ' . $options['where'];
+        }
+
+        $order = null;
+        if (!empty($options['order'])) {
+            $order = " ORDER BY " . $options['order'];
+        }
+
+        //TODO, fix create report without session
+        $queryVariables = array($course['code']);
+        if (!empty($sessionId)) {
+            $where .= ' AND id_session = %s';
+            $queryVariables[] = $sessionId;
+            $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, 
+                u.email, s.course_code, s.id_session
+                FROM $session_course_user s
+                INNER JOIN $user u ON u.user_id = s.id_user
+                $where $order $limit";
+        } else {
+            $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, 
+                u.email, s.course_code, s.id_session
+                FROM $session_course_user s
+                INNER JOIN $user u ON u.user_id = s.id_user
+                $where $order $limit";
+        }
+
+        $sql_query = vsprintf($sql, $queryVariables);
+
+        if (self::$_debug) {
+            error_log(preg_replace('/\s+/', ' ', $sql_query));
+        }
+        $rs = Database::query($sql_query);
+        while ($user = Database::fetch_array($rs)) {
+            $users[$user['user_id']] = $user;
+        }
+
+        /**
+         *  Lessons
+         */
+        $sql = "SELECT * FROM $tbl_course_lp
+        WHERE c_id = %s ";  //AND session_id = %s
+        $sql_query = sprintf($sql, $course['real_id']);
+        if (self::$_debug) {
+            error_log(preg_replace('/\s+/', ' ', $sql_query));
+        }
+        $result = Database::query($sql_query);
+        $arrLesson = array(array());
+        while ($row = Database::fetch_array($result)) {
+            if (empty($arrLesson[$row['session_id']]['lessons_total'])) {
+                $arrLesson[$row['session_id']]['lessons_total'] = 1;
+            } else {
+                $arrLesson[$row['session_id']]['lessons_total'] ++;
+            }
+        }
+        
+        //process table info
+        foreach ($users as $user) {
+            //Lessons
+            $lessonProgress = Tracking::get_avg_student_progress(
+                                    $user['user_id'], $course['code'], 
+                                    array(), $user['id_session']
+                                );
+            //Laboratorio
+            $laboratorioProgress = Tracking::get_avg_student_progress(
+                                    $user['user_id'], $course['code'], array(), 
+                                    $user['id_session'], false, 'Laboratorio'
+                                );
+            //AutoAprendizaje
+            $autoaprendizajeProgress = Tracking::get_avg_student_progress(
+                                    $user['user_id'], $course['code'], array(), 
+                                    $user['id_session'], false, 'Autoaprendizaje'
+                                );
+            
+            //Last Connection
+            $lastConnection = Tracking::get_last_connection_date_on_the_course(
+                                    $user['user_id'], $course['code'], 
+                                    $user['id_session'], false
+                                );
+            
+            //Time Spent in Course
+            $timeSpent = Tracking::get_time_spent_on_the_course(
+                                    $user['user_id'], $course['code']
+                    );
+            
+            //Time Spent in the LP Lab
+            $timeSpentLabo = Tracking::get_time_spent_in_lp(
+                                    $user['user_id'], $course['code'], array(),
+                                    $user['id_session'], 'Laboratorio'
+                       );
+            
+            //Time Spent in the LP Selflear
+            $timeSpentSelflear = Tracking::get_time_spent_in_lp(
+                                    $user['user_id'], $course['code'], array(),
+                                    $user['id_session'], 'Autoaprendizaje'
+                       );
+            
+            //Clicks in Laboratorio
+            $clicksLabo = Tracking::getTotalClicksLp(
+                        $user['user_id'], $courseId, $user['id_session'], 
+                        false , 'Laboratorio'
+                      );
+            
+            //Clicks in Autoaprendizaje
+            $clicksSelflear = Tracking::getTotalClicksLp(
+                        $user['user_id'], $courseId, $user['id_session'], 
+                        false , 'Autoaprendizaje'
+                      );
+            
+            //Performance
+            $laboratoryper = $clicksLabo + $timeSpentLabo;
+            $selflearningper = $clicksSelflear + $timeSpentSelflear;
+            
+            // TODO add the graph
+            $table[] = array(
+                        'username' => $user[3],
+                        'lastname' => $user[1],
+                        'firstname' => $user[2],
+                        'timeincourse' => gmdate("H:i:s", $timeSpent),
+                        'lesson' => $lessonProgress . " %",
+                        'laboratorypro' => $laboratorioProgress . " %",
+                        'selflearningpro' => $autoaprendizajeProgress . " %",
+                        'laboratoryper' => $laboratoryper,
+                        'selflearningper' => $selflearningper,
+                        'lastconnection' => ($lastConnection) ? $lastConnection : "",
+                        'graph' => ""
+            );
+        }
+        return $table;
+    }
+    
+    /**
+     * 
+     * @param string $username
+     * @param int $sessionId
+     * @param int $courseId
+     * @param array $options
+     */
+    public function getStudentProgressDetail($username, $sessionId, $courseId, $options = array())
+    {
+        
+        $courseData = api_get_course_info_by_id($courseId);
+        $user = api_get_user_info_from_username($username);
+        $userId = (int)$user['user_id'];
+        $list = new learnpathList($userId, $courseData['code'], $sessionId);
+        $stDetail = array();
+        $lpData = $list->get_flat_list();
+        
+        foreach($lpData as $lpId => $learnPath) {
+             //Lessons
+            $lessonsProgress = Tracking::get_avg_student_progress(
+                                    $user['user_id'], $courseData['code'], 
+                                    array($lpId), $sessionId
+                                );
+        
+            //Laboratorio
+            $laboratorioProgress = Tracking::get_avg_student_progress(
+                                    $user['user_id'], $courseData['code'], 
+                                    array($lpId), $sessionId, 
+                                    false, 'Laboratorio'
+                                );
+            //AutoAprendizaje
+            $autoaprProgress = Tracking::get_avg_student_progress(
+                                    $user['user_id'], $courseData['code'], 
+                                    array($lpId), $sessionId, 
+                                    false, 'Autoaprendizaje'
+                                );
+            
+            //Time Spent in the LP Lab
+            $timeSpentLabo = Tracking::get_time_spent_in_lp(
+                                    $user['user_id'], $courseData['code'], array($lpId),
+                                    $sessionId, 'Laboratorio'
+                       );
+            
+            //Time Spent in the LP Selflear
+            $timeSpentSelflear = Tracking::get_time_spent_in_lp(
+                                    $user['user_id'], $courseData['code'], array($lpId),
+                                    $sessionId, 'Autoaprendizaje'
+                       );
+            
+            //Clicks in Laboratorio
+            $clicksLabo = Tracking::getTotalClicksLp(
+                        $user['user_id'], $courseId, $sessionId, 
+                        $lpId , 'Laboratorio'
+                      );
+            
+            //Clicks in Autoaprendizaje
+            $clicksSelflear = Tracking::getTotalClicksLp(
+                        $user['user_id'], $courseId, $sessionId, 
+                        $lpId , 'Autoaprendizaje'
+                      );
+            
+            //Last LP connection
+            $lastLpConnection = Tracking::get_last_connection_time_in_lp(
+                        $user['user_id'], $courseData['code'], 
+                        $lpId, $sessionId
+                    );
+            
+            $labPerf = $timeSpentLabo + $clicksLabo;
+            $autoPerf = $timeSpentSelflear + $clicksSelflear;
+            
+            $lastConn = !empty($lastLpConnection) ? gmdate("Y-m-d H:i:s", $lastLpConnection) : "";
+            
+            $stDetail[] = array(
+                'lesson' => $learnPath['lp_name'],
+                'lessonpro' => $lessonsProgress . " %",
+                'labpro' => $laboratorioProgress . " %",
+                'autoaprpro' => $autoaprProgress . " %",
+                'labper' => $labPerf,
+                'autoaprper' => $autoPerf,
+                'lastdate' => $lastConn
+            );
+        }
+        
+        return $stDetail;
+    }
 
     function get_number_of_tracking_access_overview()
     {

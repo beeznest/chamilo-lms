@@ -614,6 +614,8 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
     echo ' | <a href="' . api_get_path(WEB_CODE_PATH) . 'tracking/question_course_report.php?view=admin">' . get_lang('LPQuestionListResults') . '</a>';
     echo ' | <a href="' . api_get_path(WEB_CODE_PATH) . 'tracking/course_session_report.php?view=admin">' . get_lang('LPExerciseResultsBySession') . '</a>';
     echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=lpgradereport">' . get_lang('LpGradeReport') . '</a>';
+    echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=studentprogressreport">' . get_lang('StudentProgressReport') . '</a>';
+    echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=evaluationdetailreport">' . get_lang('EvaluationDetailReport') . '</a>';
     echo '<br /><br />';
 
     $listToDisplay = array(
@@ -622,7 +624,9 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                         'progressoverview', 
                         'exerciseprogress', 
                         'surveyoverview', 
-                        'lpgradereport'
+                        'lpgradereport',
+                        'studentprogressreport',
+                        'evaluationdetailreport'
                     );
     
     if ($is_platform_admin && $view == 'admin' && in_array($display, $listToDisplay)) {
@@ -670,6 +674,12 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 break;
             case 'lpgradereport':
                $tool_name = get_lang('DisplayGradeOverview');
+                break;
+            case 'studentprogressreport':
+               $tool_name = get_lang('StudentProgressReport');
+                break;
+            case 'evaluationdetailreport':
+                $tool_name = get_lang('EvaluationDetailReport');
                 break;
         }
 
@@ -720,7 +730,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             $sessionFilter->addElement('select_ajax', 'session_name', get_lang('Search') . " " . get_lang('Section'), null, array('url' => $url, 'defaults' => $sessionList, 'width' => '400px', 'minimumInputLength' => $minimumInputLength));
         }
         //Exercise filter    
-        if (in_array($display, array('exerciseprogress'))) {
+        if (in_array($display, array('exerciseprogress', 'evaluationdetailreport'))) {
 
             $url = $ajax_path .'course.ajax.php?a=search_exercise_by_course&session_id=' . $sessionId . '&course_id=' . $courseId;
             $exerciseList = array();
@@ -811,7 +821,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
         }
 
         //date filter
-        if (!in_array($display, array('surveyoverview', 'progressoverview', 'exerciseprogress', 'lpgradereport'))) {
+        if (!in_array($display, array('surveyoverview', 'progressoverview', 'exerciseprogress', 'lpgradereport', 'studentprogressreport', 'evaluationdetailreport'))) {
             $sessionFilter->addElement('text', 'from', get_lang('From'), array('id' => 'date_from', 'value' => (!empty($_GET['date_from']) ? $_GET['date_from'] : ''), 'style' => 'width:75px' ));
             $sessionFilter->addElement('text', 'to', get_lang('Until'), array('id' => 'date_to', 'value' => (!empty($_GET['date_to']) ? $_GET['date_to'] : ''), 'style' => 'width:75px' ));
        }
@@ -918,7 +928,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 } else {
                     select2("#session_name", "' .  $ajax_path . 'session.ajax.php?a=search_session_by_course&course_id=" + courseId);
                 }
-                if (display == "accessoverview" || display == "exerciseprogress") {
+                if (display == "accessoverview" || display == "exerciseprogress" || display == "evaluationdetailreport") {
                     window.location = "'.$self.'?view=admin&display='.$display.'&session_id="+sessionId+"&course_id="+courseId;
                 }
                 if (typeof $("#survey_name") == "object") {
@@ -982,21 +992,22 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
         </script>';
 
     }
-
-	if ($display === 'useroverview') {
-		MySpace::display_tracking_user_overview();
-    } else if($display == 'teacheroverview') {
-        $file_handle = fopen("/tmp/list.sql", "r");
-        while (!feof($file_handle)) {
+    switch ($display) {
+        case 'useroverview':
+            MySpace::display_tracking_user_overview();
+            break;
+        case 'teacheroverview':
+            $file_handle = fopen("/tmp/list.sql", "r");
+            while (!feof($file_handle)) {
                 $line = fgets($file_handle);
                 $courses = SessionManager::get_course_list_by_session_id(trim($line));
                 $course = current($courses);
                 $data[] = current(Tracking::get_teachers_progress_by_course($course['id'], $course['id_session']));
-        }
-        fclose($file_handle);
-        echo get_lang('Downloading');
-        MySpace::export_csv(
-            array(
+            }
+            fclose($file_handle);
+            echo get_lang('Downloading');
+            MySpace::export_csv(
+                    array(
                 'Name',
                 'Sección',
                 'tutor',
@@ -1006,255 +1017,279 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 'tareas',
                 'wikis',
                 'anuncios',
-                ),
-            $data
-        );
-
-	} else if($display == 'sessionoverview') {
-		MySpace::display_tracking_session_overview();
-	} else if($display == 'accessoverview') {
-        if (!empty($_GET['course_id'])) {
-            if(!empty($_GET['date_to']) && (!empty($_GET['date_from']))) {
-                if (!empty($_GET['student_id'])) {
-                    echo MySpace::display_tracking_access_overview($_GET['session_id'], $_GET['course_id'], $_GET['student_id'], '',  $_GET['date_from'], $_GET['date_to']);
-                } else if (!empty($_GET['profile'])) {
-                    echo MySpace::display_tracking_access_overview($_GET['session_id'], $_GET['course_id'], '', $_GET['profile'], $_GET['date_from'], $_GET['date_to']);
+                    ), $data
+            );
+            break;
+        case 'sessionoverview':
+            MySpace::display_tracking_session_overview();
+            break;
+        case 'accessoverview':
+            if (!empty($_GET['course_id'])) {
+                if (!empty($_GET['date_to']) && (!empty($_GET['date_from']))) {
+                    if (!empty($_GET['student_id'])) {
+                        echo MySpace::display_tracking_access_overview($_GET['session_id'], $_GET['course_id'], $_GET['student_id'], '', $_GET['date_from'], $_GET['date_to']);
+                    } else if (!empty($_GET['profile'])) {
+                        echo MySpace::display_tracking_access_overview($_GET['session_id'], $_GET['course_id'], '', $_GET['profile'], $_GET['date_from'], $_GET['date_to']);
+                    } else {
+                        Display::display_warning_message(get_lang('ChooseStudentOrProfile'));
+                    }
                 } else {
-                    Display::display_warning_message(get_lang('ChooseStudentOrProfile'));
+                    Display::display_warning_message(get_lang('ChooseStartDateAndEndDate'));
                 }
             } else {
-                Display::display_warning_message(get_lang('ChooseStartDateAndEndDate'));
+                Display::display_warning_message(get_lang('ChooseCourse'));
             }
-        } else {
-            Display::display_warning_message(get_lang('ChooseCourse'));
-        }
-    } else if($display == 'lpprogressoverview') {
-        if (!empty($_GET['session_id'])) {
+            break;
+        case 'lpprogressoverview':
+            if (!empty($_GET['session_id'])) {
+                if (!empty($_GET['course_id'])) {
+                    echo MySpace::display_tracking_lp_progress_overview($sessionId, intval($_GET['course_id']), $_GET['date_from'], $_GET['date_to']);
+                } else {
+                    Display::display_warning_message(get_lang('ChooseCourse'));
+                }
+            } else {
+                Display::display_warning_message(get_lang('ChooseSession'));
+            }
+            break;
+        case 'progressoverview':
+            if (!empty($_GET['session_id'])) {
+                if (!empty($_GET['course_id'])) {
+                    echo MySpace::display_tracking_progress_overview($sessionId, intval($_GET['course_id']), $_GET['date_from'], $_GET['date_to']);
+                } else {
+                    Display::display_warning_message(get_lang('ChooseCourse'));
+                }
+            } else {
+                Display::display_warning_message(get_lang('ChooseSession'));
+            }
+            break;
+        case 'exerciseprogress':
             if (!empty($_GET['course_id'])) {
-                echo MySpace::display_tracking_lp_progress_overview($sessionId, intval($_GET['course_id']), $_GET['date_from'], $_GET['date_to']);
+                if (!empty($_GET['exercise_id'])) {
+                    echo MySpace::display_tracking_exercise_progress_overview(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']), $_GET['date_from'], $_GET['date_to']);
+                } else {
+                    Display::display_warning_message(get_lang('ChooseEvaluation'));
+                }
             } else {
                 Display::display_warning_message(get_lang('ChooseCourse'));
             }
-        } else {
-            Display::display_warning_message(get_lang('ChooseSession'));
-        }
-    } else if($display == 'progressoverview') {
-        if (!empty($_GET['session_id'])) {
+            break;
+        case 'evaluationdetailreport':
             if (!empty($_GET['course_id'])) {
-                echo MySpace::display_tracking_progress_overview($sessionId, intval($_GET['course_id']), $_GET['date_from'], $_GET['date_to']);
+                if (!empty($_GET['exercise_id'])) {
+                    echo MySpace::displayTrackingEvaluation(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']), $_GET['date_from'], $_GET['date_to']);
+                } else {
+                    Display::display_warning_message(get_lang('ChooseEvaluation'));
+                }
             } else {
                 Display::display_warning_message(get_lang('ChooseCourse'));
             }
-        } else {
-            Display::display_warning_message(get_lang('ChooseSession'));
-        }
-    } else if($display == 'exerciseprogress') {
-        if (!empty($_GET['course_id'])) {
-            if (!empty($_GET['exercise_id'])) {
-                echo MySpace::display_tracking_exercise_progress_overview(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']), $_GET['date_from'], $_GET['date_to']);
-            } else {
-                Display::display_warning_message(get_lang('ChooseEvaluation'));
-            }
-        } else {
-            Display::display_warning_message(get_lang('ChooseCourse'));
-        }
-    } else if($display == 'lpgradereport') {
-        if (!empty($_GET['course_id'])) {
+            break;
+        case 'lpgradereport':
+            if (!empty($_GET['course_id'])) {
                 echo MySpace::display_tracking_grade_overview(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']));
-        } else {
-            Display::display_warning_message(get_lang('ChooseCourse'));
-        }
-    } else if($display == 'surveyoverview') {
-        if (!empty($_GET['session_id'])) {
-            if (!empty($_GET['course_id'])) {
-                if (!empty($_GET['survey_id'])) {
-                    echo MySpace::display_survey_overview(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['survey_id']), $_GET['date_from'], $_GET['date_to']);
-                } else {
-                    Display::display_warning_message(get_lang('ChooseSurvey'));
-                }
             } else {
                 Display::display_warning_message(get_lang('ChooseCourse'));
             }
-        } else {
-            Display::display_warning_message(get_lang('ChooseSession'));
-        }
-	} else if($display == 'courseoverview') {
-		MySpace::display_tracking_course_overview();
-	} else if(!empty($display)) {
-		if ($export_csv) {
-			$is_western_name_order = api_is_western_name_order(PERSON_NAME_DATA_EXPORT);
-		} else {
-			$is_western_name_order = api_is_western_name_order();
-		}
-		$sort_by_first_name = api_sort_by_first_name();
-		$tracking_column = isset($_GET['tracking_list_coaches_column']) ? $_GET['tracking_list_coaches_column'] : ($is_western_name_order xor $sort_by_first_name) ? 1 : 0;
-		$tracking_direction = (isset($_GET['tracking_list_coaches_direction']) && in_array(strtoupper($_GET['tracking_list_coaches_direction']), array('ASC', 'DESC', 'ASCENDING', 'DESCENDING', '0', '1'))) ? $_GET['tracking_list_coaches_direction'] : 'DESC';
-		// Prepare array for column order - when impossible, use some of user names.
-		if ($is_western_name_order) {
-			$order = array(0 => 'firstname', 1 => 'lastname', 2 => ($sort_by_first_name ? 'firstname' : 'lastname'), 3 => 'login_date', 4 => ($sort_by_first_name ? 'firstname' : 'lastname'), 5 => ($sort_by_first_name ? 'firstname' : 'lastname'));
-		} else {
-			$order = array(0 => 'lastname', 1 => 'firstname', 2 => ($sort_by_first_name ? 'firstname' : 'lastname'), 3 => 'login_date', 4 => ($sort_by_first_name ? 'firstname' : 'lastname'), 5 => ($sort_by_first_name ? 'firstname' : 'lastname'));
-		}
-		$table = new SortableTable('tracking_list_coaches_myspace', 'count_coaches', null, ($is_western_name_order xor $sort_by_first_name) ? 1 : 0);
-		$parameters['view'] = 'admin';
-		$table->set_additional_parameters($parameters);
-		if ($is_western_name_order) {
-			$table->set_header(0, get_lang('FirstName'), true);
-			$table->set_header(1, get_lang('LastName'), true);
-		} else {
-			$table->set_header(0, get_lang('LastName'), true);
-			$table->set_header(1, get_lang('FirstName'), true);
-		}
-		$table->set_header(2, get_lang('TimeSpentOnThePlatform'), false);
-		$table->set_header(3, get_lang('LastConnexion'), false);
-		$table->set_header(4, get_lang('NbStudents'), false);
-		$table->set_header(5, get_lang('CountCours'), false);
-		$table->set_header(6, get_lang('NumberOfSessions'), false);
-		$table->set_header(7, get_lang('Sessions'), false);
+            break;
+        case 'surveyoverview':
+            if (!empty($_GET['session_id'])) {
+                if (!empty($_GET['course_id'])) {
+                    if (!empty($_GET['survey_id'])) {
+                        echo MySpace::display_survey_overview(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['survey_id']), $_GET['date_from'], $_GET['date_to']);
+                    } else {
+                        Display::display_warning_message(get_lang('ChooseSurvey'));
+                    }
+                } else {
+                    Display::display_warning_message(get_lang('ChooseCourse'));
+                }
+            } else {
+                Display::display_warning_message(get_lang('ChooseSession'));
+            }
+            break;
+        case 'courseoverview':
+            MySpace::display_tracking_course_overview();
+            break;
+        case 'studentprogressreport':
+            echo MySpace::displayStudentProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
+            break;
+        default:
+            if (!empty($display)) {
+                if ($export_csv) {
+                    $is_western_name_order = api_is_western_name_order(PERSON_NAME_DATA_EXPORT);
+                } else {
+                    $is_western_name_order = api_is_western_name_order();
+                }
+                $sort_by_first_name = api_sort_by_first_name();
+                $tracking_column = isset($_GET['tracking_list_coaches_column']) ? $_GET['tracking_list_coaches_column'] : ($is_western_name_order xor $sort_by_first_name) ? 1 : 0;
+                $tracking_direction = (isset($_GET['tracking_list_coaches_direction']) && in_array(strtoupper($_GET['tracking_list_coaches_direction']), array('ASC', 'DESC', 'ASCENDING', 'DESCENDING', '0', '1'))) ? $_GET['tracking_list_coaches_direction'] : 'DESC';
+                // Prepare array for column order - when impossible, use some of user names.
+                if ($is_western_name_order) {
+                    $order = array(0 => 'firstname', 1 => 'lastname', 2 => ($sort_by_first_name ? 'firstname' : 'lastname'), 3 => 'login_date', 4 => ($sort_by_first_name ? 'firstname' : 'lastname'), 5 => ($sort_by_first_name ? 'firstname' : 'lastname'));
+                } else {
+                    $order = array(0 => 'lastname', 1 => 'firstname', 2 => ($sort_by_first_name ? 'firstname' : 'lastname'), 3 => 'login_date', 4 => ($sort_by_first_name ? 'firstname' : 'lastname'), 5 => ($sort_by_first_name ? 'firstname' : 'lastname'));
+                }
+                $table = new SortableTable('tracking_list_coaches_myspace', 'count_coaches', null, ($is_western_name_order xor $sort_by_first_name) ? 1 : 0);
+                $parameters['view'] = 'admin';
+                $table->set_additional_parameters($parameters);
+                if ($is_western_name_order) {
+                    $table->set_header(0, get_lang('FirstName'), true);
+                    $table->set_header(1, get_lang('LastName'), true);
+                } else {
+                    $table->set_header(0, get_lang('LastName'), true);
+                    $table->set_header(1, get_lang('FirstName'), true);
+                }
+                $table->set_header(2, get_lang('TimeSpentOnThePlatform'), false);
+                $table->set_header(3, get_lang('LastConnexion'), false);
+                $table->set_header(4, get_lang('NbStudents'), false);
+                $table->set_header(5, get_lang('CountCours'), false);
+                $table->set_header(6, get_lang('NumberOfSessions'), false);
+                $table->set_header(7, get_lang('Sessions'), false);
 
-		if ($is_western_name_order) {
-			$csv_header[] = array (
-				get_lang('FirstName', ''),
-				get_lang('LastName', ''),
-				get_lang('TimeSpentOnThePlatform', ''),
-				get_lang('LastConnexion', ''),
-				get_lang('NbStudents', ''),
-				get_lang('CountCours', ''),
-				get_lang('NumberOfSessions', '')
-			);
-		} else {
-			$csv_header[] = array (
-				get_lang('LastName', ''),
-				get_lang('FirstName', ''),
-				get_lang('TimeSpentOnThePlatform', ''),
-				get_lang('LastConnexion', ''),
-				get_lang('NbStudents', ''),
-				get_lang('CountCours', ''),
-				get_lang('NumberOfSessions', '')
-			);
-		}
+                if ($is_western_name_order) {
+                    $csv_header[] = array(
+                        get_lang('FirstName', ''),
+                        get_lang('LastName', ''),
+                        get_lang('TimeSpentOnThePlatform', ''),
+                        get_lang('LastConnexion', ''),
+                        get_lang('NbStudents', ''),
+                        get_lang('CountCours', ''),
+                        get_lang('NumberOfSessions', '')
+                    );
+                } else {
+                    $csv_header[] = array(
+                        get_lang('LastName', ''),
+                        get_lang('FirstName', ''),
+                        get_lang('TimeSpentOnThePlatform', ''),
+                        get_lang('LastConnexion', ''),
+                        get_lang('NbStudents', ''),
+                        get_lang('CountCours', ''),
+                        get_lang('NumberOfSessions', '')
+                    );
+                }
 
-		$tbl_track_login = Database :: get_statistic_table(TABLE_STATISTIC_TRACK_E_LOGIN);
+                $tbl_track_login = Database :: get_statistic_table(TABLE_STATISTIC_TRACK_E_LOGIN);
 
-		$sqlCoachs = "SELECT DISTINCT scu.id_user as id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
+                $sqlCoachs = "SELECT DISTINCT scu.id_user as id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
 			FROM $tbl_user, $tbl_session_course_user scu, $tbl_track_login
 			WHERE scu.id_user=user_id AND scu.status=2  AND login_user_id=user_id
 			GROUP BY user_id ";
 
-		if ($_configuration['multiple_access_urls']) {
-			$tbl_session_rel_access_url = Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_SESSION);
-			$access_url_id = api_get_current_access_url_id();
-			if ($access_url_id != -1) {
-				$sqlCoachs = "SELECT DISTINCT scu.id_user as id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
+                if ($_configuration['multiple_access_urls']) {
+                    $tbl_session_rel_access_url = Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_SESSION);
+                    $access_url_id = api_get_current_access_url_id();
+                    if ($access_url_id != -1) {
+                        $sqlCoachs = "SELECT DISTINCT scu.id_user as id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
 					FROM $tbl_user, $tbl_session_course_user scu, $tbl_track_login , $tbl_session_rel_access_url session_rel_url
 					WHERE scu.id_user=user_id AND scu.status=2 AND login_user_id=user_id AND access_url_id = $access_url_id AND session_rel_url.session_id=id_session
 					GROUP BY user_id ";
-			}
-		}
-		if (!empty($order[$tracking_column])) {
-			$sqlCoachs .= "ORDER BY ".$order[$tracking_column]." ".$tracking_direction;
-		}
+                    }
+                }
+                if (!empty($order[$tracking_column])) {
+                    $sqlCoachs .= "ORDER BY " . $order[$tracking_column] . " " . $tracking_direction;
+                }
 
-		$result_coaches = Database::query($sqlCoachs);
-		$total_no_coaches = Database::num_rows($result_coaches);
-		$global_coaches = array();
-		while ($coach = Database::fetch_array($result_coaches)) {
-			$global_coaches[$coach['user_id']] = $coach;
-		}
+                $result_coaches = Database::query($sqlCoachs);
+                $total_no_coaches = Database::num_rows($result_coaches);
+                $global_coaches = array();
+                while ($coach = Database::fetch_array($result_coaches)) {
+                    $global_coaches[$coach['user_id']] = $coach;
+                }
 
-		$sql_session_coach = 'SELECT session.id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
-			FROM '.$tbl_user.','.$tbl_sessions.' as session,'.$tbl_track_login.'
+                $sql_session_coach = 'SELECT session.id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
+			FROM ' . $tbl_user . ',' . $tbl_sessions . ' as session,' . $tbl_track_login . '
 			WHERE id_coach=user_id AND login_user_id=user_id
 			GROUP BY user_id
-			ORDER BY login_date '.$tracking_direction;
+			ORDER BY login_date ' . $tracking_direction;
 
-		if ($_configuration['multiple_access_urls']) {
-			$tbl_session_rel_access_url = Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_SESSION);
-			$access_url_id = api_get_current_access_url_id();
-			if ($access_url_id != -1) {
-				$sql_session_coach = 'SELECT session.id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
-					FROM '.$tbl_user.','.$tbl_sessions.' as session,'.$tbl_track_login.' , '.$tbl_session_rel_access_url.' as session_rel_url
-					WHERE id_coach=user_id AND login_user_id=user_id  AND access_url_id = '.$access_url_id.' AND  session_rel_url.session_id=session.id
+                if ($_configuration['multiple_access_urls']) {
+                    $tbl_session_rel_access_url = Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_SESSION);
+                    $access_url_id = api_get_current_access_url_id();
+                    if ($access_url_id != -1) {
+                        $sql_session_coach = 'SELECT session.id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
+					FROM ' . $tbl_user . ',' . $tbl_sessions . ' as session,' . $tbl_track_login . ' , ' . $tbl_session_rel_access_url . ' as session_rel_url
+					WHERE id_coach=user_id AND login_user_id=user_id  AND access_url_id = ' . $access_url_id . ' AND  session_rel_url.session_id=session.id
 					GROUP BY user_id
-					ORDER BY login_date '.$tracking_direction;
-			}
-		}
+					ORDER BY login_date ' . $tracking_direction;
+                    }
+                }
 
-		$result_sessions_coach = Database::query($sql_session_coach);
-		$total_no_coaches += Database::num_rows($result_sessions_coach);
-		while ($coach = Database::fetch_array($result_sessions_coach)) {
-			$global_coaches[$coach['user_id']] = $coach;
-		}
+                $result_sessions_coach = Database::query($sql_session_coach);
+                $total_no_coaches += Database::num_rows($result_sessions_coach);
+                while ($coach = Database::fetch_array($result_sessions_coach)) {
+                    $global_coaches[$coach['user_id']] = $coach;
+                }
 
-		$all_datas = array();
+                $all_datas = array();
 
-		foreach ($global_coaches as $id_coach => $coaches) {
+                foreach ($global_coaches as $id_coach => $coaches) {
 
-			$time_on_platform   = api_time_to_hms(Tracking :: get_time_spent_on_the_platform($coaches['user_id']));
-			$last_connection    = Tracking :: get_last_connection_date($coaches['user_id']);
-			$nb_students        = count(Tracking :: get_student_followed_by_coach($coaches['user_id']));
-			$nb_courses         = count(Tracking :: get_courses_followed_by_coach($coaches['user_id']));
-			$nb_sessions        = count(Tracking :: get_sessions_coached_by_user($coaches['user_id']));
+                    $time_on_platform = api_time_to_hms(Tracking :: get_time_spent_on_the_platform($coaches['user_id']));
+                    $last_connection = Tracking :: get_last_connection_date($coaches['user_id']);
+                    $nb_students = count(Tracking :: get_student_followed_by_coach($coaches['user_id']));
+                    $nb_courses = count(Tracking :: get_courses_followed_by_coach($coaches['user_id']));
+                    $nb_sessions = count(Tracking :: get_sessions_coached_by_user($coaches['user_id']));
 
-			$table_row = array();
-			if ($is_western_name_order) {
-				$table_row[] = $coaches['firstname'];
-				$table_row[] = $coaches['lastname'];
-			} else {
-				$table_row[] = $coaches['lastname'];
-				$table_row[] = $coaches['firstname'];
-			}
-			$table_row[] = $time_on_platform;
-			$table_row[] = $last_connection;
-			$table_row[] = $nb_students;
-			$table_row[] = $nb_courses;
-			$table_row[] = $nb_sessions;
-			$table_row[] = '<a href="session.php?id_coach='.$coaches['user_id'].'"><img src="'.api_get_path(WEB_IMG_PATH).'2rightarrow.gif" border="0" /></a>';
-			$all_datas[] = $table_row;
+                    $table_row = array();
+                    if ($is_western_name_order) {
+                        $table_row[] = $coaches['firstname'];
+                        $table_row[] = $coaches['lastname'];
+                    } else {
+                        $table_row[] = $coaches['lastname'];
+                        $table_row[] = $coaches['firstname'];
+                    }
+                    $table_row[] = $time_on_platform;
+                    $table_row[] = $last_connection;
+                    $table_row[] = $nb_students;
+                    $table_row[] = $nb_courses;
+                    $table_row[] = $nb_sessions;
+                    $table_row[] = '<a href="session.php?id_coach=' . $coaches['user_id'] . '"><img src="' . api_get_path(WEB_IMG_PATH) . '2rightarrow.gif" border="0" /></a>';
+                    $all_datas[] = $table_row;
 
-			if ($is_western_name_order) {
-				$csv_content[] = array(
-					api_html_entity_decode($coaches['firstname'], ENT_QUOTES, $charset),
-					api_html_entity_decode($coaches['lastname'], ENT_QUOTES, $charset),
-					$time_on_platform,
-					$last_connection,
-					$nb_students,
-					$nb_courses,
-					$nb_sessions
-				);
-			} else {
-				$csv_content[] = array(
-					api_html_entity_decode($coaches['lastname'], ENT_QUOTES, $charset),
-					api_html_entity_decode($coaches['firstname'], ENT_QUOTES, $charset),
-					$time_on_platform,
-					$last_connection,
-					$nb_students,
-					$nb_courses,
-					$nb_sessions
-				);
-			}
-		}
+                    if ($is_western_name_order) {
+                        $csv_content[] = array(
+                            api_html_entity_decode($coaches['firstname'], ENT_QUOTES, $charset),
+                            api_html_entity_decode($coaches['lastname'], ENT_QUOTES, $charset),
+                            $time_on_platform,
+                            $last_connection,
+                            $nb_students,
+                            $nb_courses,
+                            $nb_sessions
+                        );
+                    } else {
+                        $csv_content[] = array(
+                            api_html_entity_decode($coaches['lastname'], ENT_QUOTES, $charset),
+                            api_html_entity_decode($coaches['firstname'], ENT_QUOTES, $charset),
+                            $time_on_platform,
+                            $last_connection,
+                            $nb_students,
+                            $nb_courses,
+                            $nb_sessions
+                        );
+                    }
+                }
 
-		if ($tracking_column != 3) {
-			if ($tracking_direction == 'DESC') {
-				usort($all_datas, 'rsort_users');
-			} else {
-				usort($all_datas, 'sort_users');
-			}
-		}
+                if ($tracking_column != 3) {
+                    if ($tracking_direction == 'DESC') {
+                        usort($all_datas, 'rsort_users');
+                    } else {
+                        usort($all_datas, 'sort_users');
+                    }
+                }
 
-		if ($export_csv && $tracking_column != 3) {
-			usort($csv_content, 'sort_users');
-		}
-		if ($export_csv) {
-			$csv_content = array_merge($csv_header, $csv_content);
-		}
+                if ($export_csv && $tracking_column != 3) {
+                    usort($csv_content, 'sort_users');
+                }
+                if ($export_csv) {
+                    $csv_content = array_merge($csv_header, $csv_content);
+                }
 
-		foreach ($all_datas as $row) {
-			$table->addRow($row, 'align="right"');
-		}
-		$table->display();
-	}
+                foreach ($all_datas as $row) {
+                    $table->addRow($row, 'align="right"');
+                }
+                $table->display();
+            }
+            break;
+    }
 }
 
 // Send the csv file if asked

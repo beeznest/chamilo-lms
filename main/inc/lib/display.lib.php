@@ -974,7 +974,11 @@ class Display {
         $json_encode = str_replace(':"false"',':false',$json_encode);
         $json_encode = str_replace('"formatter":"action_formatter"', 'formatter:action_formatter', $json_encode);
         $json_encode = str_replace(array('{"first":"first",','"end":"end"}'), '', $json_encode);
-
+        //Avoid " extra params
+        $json_encode = str_replace(array('"**', '**"'), "", $json_encode);
+        //Avoid \n 
+        $json_encode = str_replace("\\n", "", $json_encode);
+        
         // Creating the jqgrid element.
         $json .= '$("#'.$div_id.'").jqGrid({';
         //$json .= $beforeSelectRow;

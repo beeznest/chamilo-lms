@@ -265,6 +265,7 @@ switch ($action) {
         break;
     case 'get_session_lp_progress':
     case 'get_session_progress':
+    case 'displayStudentProgressReport':
         //@TODO replace this for a more efficient function (not retrieving the whole data)
         $course = api_get_course_info_by_id($_GET['course_id']);
         $users = CourseManager::get_student_list_from_course_code($course['code'], true, $_GET['session_id'], $_GET['date_from'], $_GET['date_to']);
@@ -342,6 +343,23 @@ switch ($action) {
         } else {
             $count = $obj->get_count();
         }
+        break;
+    case 'displayStudentProgressDetail':
+        $courseId = intval($_REQUEST['course_id']);
+        $username = Database::escape_string($_REQUEST['username']);
+        $courseData = api_get_course_info_by_id($courseId);
+        $user = api_get_user_info_from_username($username);
+        $userId = (int)$user['user_id'];
+        $list = new learnpathList($userId, $courseData['code'], $sessionId);
+        $lpData = $list->get_flat_list();
+        $count = count($lpData);
+        break;
+    case 'getEvaluationDetail':
+         //@TODO replace this for a more efficient function (not retrieving the whole data)
+        $records = Tracking::get_exercise_progress(
+                $_GET['session_id'], $_GET['course_id'], 
+                $_GET['exercise_id'], "", "", true);
+        $count = count($records);
         break;
     default:
         exit;
@@ -731,6 +749,61 @@ switch ($action) {
             )
         );
         break;
+    case 'displayStudentProgressReport':
+        $columns = array(
+            'username',
+            'lastname',
+            'firstname',
+            'timeincourse',
+            'lesson',
+            'laboratorypro',
+            'selflearningpro',
+            'laboratoryper',
+            'selflearningper',
+            'lastconnection',
+            'graph'
+            );
+   
+        $sessionId = 0;
+        if (!empty($_GET['course_id'])) {
+            $sessionId  = intval($_GET['session_id']);
+            $courseId   = intval($_GET['course_id']);
+        }
+        $result = SessionManager::getSessionProgress($sessionId, $courseId,
+            array(
+                'where' => $where_condition,
+                'order' => "$sidx $sord",
+                'limit'=> "$start , $limit"
+            )
+        );
+        break;
+    case 'displayStudentProgressDetail':
+        $columns = array(
+            'lesson',
+            'lessonpro',
+            'labpro',
+            'autoaprpro',
+            'labper',
+            'autoaprper',
+            'lastdate'
+        );
+
+        $sessionId = 0;
+        if (!empty($_GET['course_id'])) {
+            $sessionId  = intval($_GET['session_id']);
+            $courseId   = intval($_GET['course_id']);
+        }
+        
+        $username = Database::escape_string($_GET['username']);
+ 
+        $result = SessionManager::getStudentProgressDetail($username, $sessionId, $courseId,
+            array(
+                'where' => $where_condition,
+                'order' => "$sidx $sord",
+                'limit'=> "$start , $limit"
+            )
+        );
+        break;
     case 'get_session_progress':
         $columns = array(
             'lastname',
@@ -1100,6 +1173,42 @@ switch ($action) {
         //Multidimensional sort
         $result = msort($result, $sidx, $sord);
         break;
+    case 'getEvaluationDetail':
+        $sessionId  = intval($_GET['session_id']);
+        $courseId   = intval($_GET['course_id']);
+        $exerciseId = intval($_GET['exercise_id']);
+        $date_from  = $_GET['date_from'];
+        $date_to    = $_GET['date_to'];
+
+        $columns = array(
+            'course',
+            'session',
+            'type',
+            'quiz_title',
+            'username',
+            'lastname',
+            'firstname',
+            'time',
+          //  'attempts',
+            'question_id',
+            'question',
+            'description',
+            'answer',
+            'correct',
+            'grade'
+        );
+
+        $option = array(
+                  'where' => $where_condition,
+                  'order' => "$sidx $sord",
+                  'limit'=> "$start , $limit"
+                 );
+        
+        $result = Tracking::get_exercise_progress(
+                    $sessionId, $courseId, $exerciseId, "", "",
+                    $option, true
+                );
+        break;
     default:
         exit;
 }
@@ -1133,7 +1242,10 @@ $allowed_actions = array(
     //'get_course_exercise_medias',
     'get_user_course_report',
     'get_user_course_report_resumed',
-    'get_exercise_grade'
+    'get_exercise_grade',
+    'displayStudentProgressReport',
+    'displayStudentProgressDetail',
+    'getEvaluationDetail'
 );
 
 //5. Creating an obj to return a json

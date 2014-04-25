@@ -415,6 +415,84 @@ class MySpace {
         $return .= Display::grid_html($tableId);
         return $return;
     }
+    
+    /**
+     * Display a sortable table that contains an overview off all the progress of the user in a session
+     * @param   int $sessionId  The session ID
+     * @param   int $courseId   The course ID
+     * @param   int $exerciseId The quiz ID
+     * @return  string  HTML array of results formatted for gridJS
+     */
+    static function displayTrackingEvaluation($sessionId = 0, $courseId = 0, $exerciseId = 0) {
+        /**
+         * Column names
+         * The column order is important. Check $column variable in the main/inc/ajax/model.ajax.php file
+         */
+        $columns = array(
+            get_lang('CourseCode'),
+            get_lang('Section'),
+            get_lang('Type'),
+            get_lang('ExerciseName'),
+            get_lang('Username'),
+            get_lang('LastName'),
+            get_lang('FirstName'),
+            get_lang('Time'),
+           // get_lang('Attempts'),
+            get_lang('QuestionId'),
+            get_lang('QuestionTitle'),
+            get_lang('langWorkDescription'),
+            get_lang('Answer'),
+            get_lang('Correct'),
+            get_lang('Grade')
+        );
+
+        /**
+         * Column config
+         */
+        $column_model   = array(
+            array('name'=>'code', 'index'=>'code', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'session', 'index'=>'session', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'type', 'index'=>'type', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'quiz_title', 'index'=>'quiz_title', 'align'=>'left', 'search' => 'true'),
+            array('name'=>'username', 'index'=>'username', 'align'=>'left', 'search' => 'true'),
+            array('name'=>'lastname', 'index'=>'lastname', 'align'=>'left', 'search' => 'true'),
+            array('name'=>'firstname', 'index'=>'firstname', 'align'=>'left', 'search' => 'true'),
+            array('name'=>'time', 'index'=>'time', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+           // array('name'=>'attemps', 'index'=>'attemps', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'question_id', 'index'=>'question_id', 'align'=>'left', 'search' => 'true'),
+            array('name'=>'question', 'index'=>'question', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'description', 'index'=>'description', 'align'=>'left', 'width' => '550', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'answer', 'index'=>'answer', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'correct', 'index'=>'correct', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'grade', 'index'=>'grade', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+        );
+        //get dynamic column names
+
+        // jqgrid will use this URL to do the selects
+        $url = api_get_path(WEB_AJAX_PATH).'model.ajax.php?a=getEvaluationDetail&session_id=' . $sessionId . '&course_id=' . $courseId  . '&exercise_id=' . $exerciseId;
+
+        //Autowidth
+        $extra_params['autowidth'] = 'true';
+
+        //height auto
+        $extra_params['height'] = 'auto';
+
+        $tableId = 'evaluationDetail';
+        $table = Display::grid_js($tableId, $url, $columns, $column_model, $extra_params, array(), '', true);
+
+        $return = '<script>$(function() {'. $table .
+            'jQuery("#'.$tableId.'").jqGrid("navGrid","#'.$tableId.'_pager",{view:false, edit:false, add:false, del:false, search:false, excel:true});
+                jQuery("#'.$tableId.'").jqGrid("navButtonAdd","#'.$tableId.'_pager",{
+                       caption:"",
+                       title:"' . get_lang('ExportExcel') . '",
+                       onClickButton : function () {
+                           jQuery("#'.$tableId.'").jqGrid("excelExport",{"url":"'.$url.'&export_format=xls"});
+                       }
+                });
+            });</script>';
+        $return .= Display::grid_html($tableId);
+        return $return;
+    }
 
     /**
      * Display a sortable table that contains an overview off all the progress of the user in a session
@@ -2374,6 +2452,149 @@ class MySpace {
 		xml_parser_free($parser);
 		return $users;
 	}
+        
+        
+    
+    /**
+     * Display a sortable table that contains the student progress report
+     * with a detail
+     * @param int $sessionId
+     * @param int $courseId
+     * @return string
+     */
+    static function displayStudentProgressReport($sessionId = 0, $courseId = 0) {
+
+        /**
+         * Column name
+         * The order is important you need to check the $column variable in the model.ajax.php file
+         */
+        $columns = array(
+            get_lang('Username'),
+            get_lang('LastName'),
+            get_lang('FirstName'),
+            get_lang('TimeInCourse'),
+            get_lang('Lesson'), //Progress
+            get_lang('Laboratory'), //Progress
+            get_lang('SelfLearning'), //Progress
+            get_lang('Laboratory'), //Performance
+            get_lang('SelfLearning'), //Performance
+            get_lang('LastConnection'),
+            get_lang('Graph')
+        );
+        
+        /**
+         * Column config
+         */
+        $column_model = array(
+            array('name'=>'username', 'index'=>'username', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'firstname', 'index'=>'firstname', 'align'=>'left', 'search' => 'true'),
+            array('name'=>'lastname', 'index'=>'lastname', 'align'=>'left', 'search' => 'true'),
+            array('name'=>'timeincourse', 'index'=>'timeincourse', 'align'=>'center', 'search' => 'false'),
+            array('name'=>'lessonpro', 'index'=>'lessonpro', 'align'=>'center', 'search' => 'false'),
+            array('name'=>'laboratorypro', 'index'=>'laboratorypro', 'align'=>'center', 'search' => 'false'),
+            array('name'=>'selflearningpro', 'index'=>'selflearningpro', 'align'=>'center', 'search' => 'false'),
+            array('name'=>'laboratoryper', 'index'=>'laboratoryper', 'align'=>'center', 'search' => 'false'),
+            array('name'=>'selflearningper', 'index'=>'selflearningper', 'align'=>'center', 'search' => 'false'),
+            array('name'=>'lastconnection', 'index'=>'lastconnection', 'align'=>'center', 'search' => 'true'),
+            array('name'=>'detail', 'index'=>'detail', 'align'=>'center', 'search' => 'false'),
+        );
+        
+        $action_links = '';
+
+        // jqgrid will use this URL to do the selects
+        $url = api_get_path(WEB_AJAX_PATH).'model.ajax.php?a=displayStudentProgressReport&session_id=' . $sessionId . '&course_id=' . $courseId;
+        $urlDetail = api_get_path(WEB_AJAX_PATH).'model.ajax.php?a=displayStudentProgressDetail&session_id=' . $sessionId . '&course_id=' . $courseId;
+
+        $tableId = 'stn_prgss_rprt';
+        $extra_params['autowidth'] = 'true';
+        $extra_params['sortname'] = 'u.lastname';
+        $extra_params['height'] = 'auto';
+        $extra_params['subGrid'] = 'true';
+        $extra_params['groupHeaders'] = array(
+            'progress' => array(
+                "startColumnName"   => 'lessonpro',
+                "numberOfColumns"   =>  3,
+                "titleText"         =>  get_lang('Progress'),
+                ),
+            'performance' => array(
+                "startColumnName"   => 'laboratoryper',
+                "numberOfColumns"   =>  2,
+                "titleText"         =>  get_lang('Performance'),
+                ),
+        );
+        
+        $extra_params['subGridOptions'] = array(
+                'plusicon' => 'ui-icon-triangle-1-e',
+                'minusicon' => 'ui-icon-triangle-1-s',
+                'openicon' => 'ui-icon-arrowreturn-1-e', 
+                'reloadOnExpand' => 'false',
+                'selectOnExpand' => 'true'
+        );
+        
+        $extra_params['subGridRowExpanded'] = "**function(subgrid_id, row_id) {
+            var subgrid_table_id, pager_id, user_data; 
+            subgrid_table_id = subgrid_id+'_t';
+            pager_id = 'p_'+subgrid_table_id;
+            user_data = $('#" . $tableId . "').jqGrid('getRowData', row_id);
+            $('#'+subgrid_id).html('<table id='+subgrid_table_id+' class=\"scroll\"></table><div id='+pager_id+' class=\"scroll\"></div>');
+            $('#'+subgrid_table_id).jqGrid({
+                url: '" . $urlDetail . "&username=' + user_data.username,
+                datatype: 'json',
+                caption: '" . get_lang('StudentDetail') . "',
+                colNames: ['" . get_lang('LearningPath') . "', '" . get_lang('Lesson') . "', 
+                           '" . get_lang('Laboratory') . "', '" . get_lang('SelfLearning') . "',
+                           '" . get_lang('Laboratory') . "', '" . get_lang('SelfLearning') . "',
+                           '" . get_lang('LastDate') . "'],
+                colModel: [ 
+                            {name:'lessonname', index:'lessonname', width:450, key:true},
+                            {name:'lessonpro', index:'lessonpro', width:70, align:'center'},
+                            {name:'labpro', index:'labpro', width:70, align:'center'},
+                            {name:'autoaprpro', index:'autoaprpro', width:70, align:'center'},
+                            {name:'lessonper', index:'lessonper', width:70, align:'center'},
+                            {name:'labper', index:'labper', width:70, align:'center'},
+                            {name:'autoaprper', index:'autoaprper', width:150, align:'center'}
+                          ], 
+                rowNum:20,
+                pager: pager_id,
+                sortname: 'u.lastname',
+                sortorder: 'asc', height: '100%' });
+                
+            $('#'+subgrid_table_id).jqGrid('navGrid','#'+pager_id,{edit:false,add:false,del:false});
+
+            $('#'+subgrid_table_id).jqGrid('setGroupHeaders', {
+                useColSpanStyle: false,                    
+                groupHeaders: [
+                    {
+                        startColumnName:'lessonpro',
+                        numberOfColumns:3,
+                        titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Progress') . "</div>'
+                     },
+                     {
+                        startColumnName:'lessonper',
+                        numberOfColumns:2,
+                        titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Performance') . "</div>'
+                     },
+                ]
+            });
+        }**";
+        
+        $table = Display::grid_js($tableId, $url, $columns, $column_model, $extra_params, array(), $action_links, true);
+
+        $return = '<script>$(function() {'. $table .
+            'jQuery("#' . $tableId . '").jqGrid("navGrid","#' . $tableId . '_pager",{view:false, edit:false, add:false, del:false, search:false, excel:true});
+                jQuery("#' . $tableId . '").jqGrid("navButtonAdd","#' . $tableId . '_pager",{
+                       caption:"",
+                       title:"' . get_lang('ExportExcel') . '",
+                       onClickButton : function () {
+                           jQuery("#'.$tableId.'").jqGrid("excelExport",{"url":"' . $url . '&export_format=xls"});
+                       }
+                });
+            });</script>';
+        
+        $return .= Display::grid_html($tableId);
+
+        return $return;
+    }
 }
 
     
