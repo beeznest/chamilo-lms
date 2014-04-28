@@ -2462,7 +2462,8 @@ class MySpace {
      * @param int $courseId
      * @return string
      */
-    static function displayStudentProgressReport($sessionId = 0, $courseId = 0) {
+    static function displayStudentProgressReport($sessionId = 0, $courseId = 0)
+    {
 
         /**
          * Column name
@@ -2481,29 +2482,29 @@ class MySpace {
             get_lang('LastConnection'),
             get_lang('Graph')
         );
-        
+
         /**
          * Column config
          */
         $column_model = array(
-            array('name'=>'username', 'index'=>'username', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
-            array('name'=>'firstname', 'index'=>'firstname', 'align'=>'left', 'search' => 'true'),
-            array('name'=>'lastname', 'index'=>'lastname', 'align'=>'left', 'search' => 'true'),
-            array('name'=>'timeincourse', 'index'=>'timeincourse', 'align'=>'center', 'search' => 'false'),
-            array('name'=>'lessonpro', 'index'=>'lessonpro', 'align'=>'center', 'search' => 'false'),
-            array('name'=>'laboratorypro', 'index'=>'laboratorypro', 'align'=>'center', 'search' => 'false'),
-            array('name'=>'selflearningpro', 'index'=>'selflearningpro', 'align'=>'center', 'search' => 'false'),
-            array('name'=>'laboratoryper', 'index'=>'laboratoryper', 'align'=>'center', 'search' => 'false'),
-            array('name'=>'selflearningper', 'index'=>'selflearningper', 'align'=>'center', 'search' => 'false'),
-            array('name'=>'lastconnection', 'index'=>'lastconnection', 'align'=>'center', 'search' => 'true'),
-            array('name'=>'detail', 'index'=>'detail', 'align'=>'center', 'search' => 'false'),
+            array('name' => 'username', 'index' => 'username', 'align' => 'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name' => 'firstname', 'index' => 'firstname', 'align' => 'left', 'search' => 'true'),
+            array('name' => 'lastname', 'index' => 'lastname', 'align' => 'left', 'search' => 'true'),
+            array('name' => 'timeincourse', 'index' => 'timeincourse', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'lessonpro', 'index' => 'lessonpro', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'laboratorypro', 'index' => 'laboratorypro', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'selflearningpro', 'index' => 'selflearningpro', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'laboratoryper', 'index' => 'laboratoryper', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'selflearningper', 'index' => 'selflearningper', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'lastconnection', 'index' => 'lastconnection', 'align' => 'center', 'search' => 'true'),
+            array('name' => 'detail', 'index' => 'detail', 'align' => 'center', 'search' => 'false'),
         );
-        
+
         $action_links = '';
 
         // jqgrid will use this URL to do the selects
-        $url = api_get_path(WEB_AJAX_PATH).'model.ajax.php?a=displayStudentProgressReport&session_id=' . $sessionId . '&course_id=' . $courseId;
-        $urlDetail = api_get_path(WEB_AJAX_PATH).'model.ajax.php?a=displayStudentProgressDetail&session_id=' . $sessionId . '&course_id=' . $courseId;
+        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressReport&session_id=' . $sessionId . '&course_id=' . $courseId;
+        $urlDetail = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressDetail&session_id=' . $sessionId . '&course_id=' . $courseId;
 
         $tableId = 'stn_prgss_rprt';
         $extra_params['autowidth'] = 'true';
@@ -2512,25 +2513,25 @@ class MySpace {
         $extra_params['subGrid'] = 'true';
         $extra_params['groupHeaders'] = array(
             'progress' => array(
-                "startColumnName"   => 'lessonpro',
-                "numberOfColumns"   =>  3,
-                "titleText"         =>  get_lang('Progress'),
-                ),
+                "startColumnName" => 'lessonpro',
+                "numberOfColumns" => 3,
+                "titleText" => get_lang('Progress'),
+            ),
             'performance' => array(
-                "startColumnName"   => 'laboratoryper',
-                "numberOfColumns"   =>  2,
-                "titleText"         =>  get_lang('Performance'),
-                ),
+                "startColumnName" => 'laboratoryper',
+                "numberOfColumns" => 2,
+                "titleText" => get_lang('Performance'),
+            ),
         );
-        
+
         $extra_params['subGridOptions'] = array(
-                'plusicon' => 'ui-icon-triangle-1-e',
-                'minusicon' => 'ui-icon-triangle-1-s',
-                'openicon' => 'ui-icon-arrowreturn-1-e', 
-                'reloadOnExpand' => 'false',
-                'selectOnExpand' => 'true'
+            'plusicon' => 'ui-icon-triangle-1-e',
+            'minusicon' => 'ui-icon-triangle-1-s',
+            'openicon' => 'ui-icon-arrowreturn-1-e',
+            'reloadOnExpand' => 'false',
+            'selectOnExpand' => 'true'
         );
-        
+
         $extra_params['subGridRowExpanded'] = "**function(subgrid_id, row_id) {
             var subgrid_table_id, pager_id, user_data; 
             subgrid_table_id = subgrid_id+'_t';
@@ -2577,27 +2578,187 @@ class MySpace {
                 ]
             });
         }**";
-        
+
         $table = Display::grid_js($tableId, $url, $columns, $column_model, $extra_params, array(), $action_links, true);
 
-        $return = '<script>$(function() {'. $table .
-            'jQuery("#' . $tableId . '").jqGrid("navGrid","#' . $tableId . '_pager",{view:false, edit:false, add:false, del:false, search:false, excel:true});
+        $return = '<script>$(function() {' . $table .
+                'jQuery("#' . $tableId . '").jqGrid("navGrid","#' . $tableId . '_pager",{view:false, edit:false, add:false, del:false, search:false, excel:true});
                 jQuery("#' . $tableId . '").jqGrid("navButtonAdd","#' . $tableId . '_pager",{
                        caption:"",
                        title:"' . get_lang('ExportExcel') . '",
                        onClickButton : function () {
-                           jQuery("#'.$tableId.'").jqGrid("excelExport",{"url":"' . $url . '&export_format=xls"});
+                           jQuery("#' . $tableId . '").jqGrid("excelExport",{"url":"' . $url . '&export_format=xls"});
                        }
                 });
             });</script>';
-        
+
         $return .= Display::grid_html($tableId);
 
         return $return;
     }
+
+    /**
+     * 
+     * @param int $sessionId
+     * @param int $courseId
+     * @return string
+     */
+    static function displaySessionProgressReport($sessionId, $courseId)
+    {
+        /**
+         * Column name
+         * The order is important you need to check the $column variable in the model.ajax.php file
+         */
+        $columns = array(
+            get_lang('SessionId'),
+            get_lang('CourseId'),
+            get_lang('Course'),
+            get_lang('Session'),
+            get_lang('TeacherId'),
+            get_lang('TeacherLastname'),
+            get_lang('TeacherFirstname'),
+            get_lang('NroStudents'), 
+            //get_lang('Progress'),
+            get_lang('Lessons'),
+            get_lang('Laboratory'),
+            get_lang('SelfLearning'),
+            get_lang('Lessons'),
+            get_lang('Laboratory'),
+            get_lang('SelfLearning')
+        );
+
+        /**
+         * Column config
+         */
+        $column_model = array(
+            array('name' => 'sessionid', 'index' => 'sessionid', 'align' => 'left', 'hidden' => "true"),
+            array('name' => 'courseid', 'index' => 'courseid', 'align' => 'left', 'hidden' => "true"),
+            array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name' => 'session', 'index' => 'session', 'align' => 'left', 'search' => 'true'),
+            array('name' => 'teacherId', 'index' => 'teacherId', 'align' => 'left', 'search' => 'true'),
+            array('name' => 'teacherLastname', 'index' => 'teacherLastname', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'teacherFirstname', 'index' => 'teacherFirstname', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'nroStudents', 'index' => 'nroStudents', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'lessonPro', 'index' => 'lessonPro', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'laboratoryPro', 'index' => 'laboratoryPro', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'selfLearningPro', 'index' => 'selfLearningPro', 'align' => 'center', 'search' => 'true'),
+            array('name' => 'lessonPer', 'index' => 'lessonPer', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'laboratoryPer', 'index' => 'laboratoryPer', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'selfLearningPer', 'index' => 'selfLearningPer', 'align' => 'center', 'search' => 'true')
+        );
+
+        $action_links = '';
+
+        // jqgrid will use this URL to do the selects
+        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displaySessionProgressReport&session_id=' . $sessionId . '&course_id=' . $courseId;
+        $urlDetail = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressReport';
+
+        $tableId = 'session_progress';
+        $extra_params['autowidth'] = 'true';
+        $extra_params['sortname'] = 'u.lastname';
+        $extra_params['height'] = 'auto';
+        $extra_params['rowNum'] = '50';
+        $extra_params['subGrid'] = 'true';
+        $extra_params['groupHeaders'] = array(
+            'progress' => array(
+                "startColumnName" => 'lessonpro',
+                "numberOfColumns" => 3,
+                "titleText" => get_lang('Progress'),
+            ),
+            'performance' => array(
+                "startColumnName" => 'laboratoryper',
+                "numberOfColumns" => 3,
+                "titleText" => get_lang('Performance'),
+            ),
+        );
+        
+        $extra_params['subGridOptions'] = array(
+            'plusicon' => 'ui-icon-triangle-1-e',
+            'minusicon' => 'ui-icon-triangle-1-s',
+            'openicon' => 'ui-icon-arrowreturn-1-e',
+            'reloadOnExpand' => 'false',
+            'selectOnExpand' => 'true'
+        );
+
+        $extra_params['subGridRowExpanded'] = "**function(subgrid_id, row_id) {
+            var subgrid_table_id, pager_id, grid_data; 
+            subgrid_table_id = subgrid_id+'_t';
+            pager_id = 'p_'+subgrid_table_id;
+            grid_data = $('#" . $tableId . "').jqGrid('getRowData', row_id);
+            $('#'+subgrid_id).html('<table id='+subgrid_table_id+' class=\"scroll\"></table><div id='+pager_id+' class=\"scroll\"></div>');
+            $('#'+subgrid_table_id).jqGrid({
+                url: '" . $urlDetail . "&session_id=' + grid_data.sessionid + '&course_id=' + grid_data.courseid,
+                datatype: 'json',
+                caption: '" . get_lang('StudentDetail') . "',
+                colNames: ['" . get_lang('Code') . "', 
+                           '" . get_lang('Lastname') . "', 
+                           '" . get_lang('Firstname') . "', 
+                           '" . get_lang('TimeInCourse') . "',
+                           '" . get_lang('Lesson') . "', 
+                           '" . get_lang('Laboratory') . "',
+                           '" . get_lang('SelfLearning') . "',
+                           '" . get_lang('Laboratory') . "',
+                           '" . get_lang('SelfLearning') . "',
+                           '" . get_lang('LastConnection') . "',
+                           '" . get_lang('Detail') . "'],
+                colModel: [ 
+                            {'name': 'username', 'index': 'username', 'align': 'left', 'width': 60}, 
+                            {'name': 'lastname', 'index': 'lastname', 'align': 'left', 'width': 180}, 
+                            {'name': 'firstname', 'index': 'firstname', 'align': 'left', 'width': 180}, 
+                            {'name': 'timeincourse', 'index': 'timeincourse', 'align': 'center', 'width': 80}, 
+                            {'name': 'lessonpro', 'index': 'lessonpro', 'align': 'center', 'width': 60}, 
+                            {'name': 'laboratorypro', 'index': 'laboratorypro', 'align': 'center', 'width': 60}, 
+                            {'name': 'selflearningpro', 'index': 'selflearningpro', 'align': 'center', 'width': 60}, 
+                            {'name': 'laboratoryper', 'index': 'laboratoryper', 'align': 'center', 'width': 60}, 
+                            {'name': 'selflearningper', 'index': 'selflearningper', 'align': 'center', 'width': 60}, 
+                            {'name': 'lastconnection', 'index': 'lastconnection', 'align': 'center', 'width': 120},
+                            {'name': 'detail', 'index': 'detail', 'align': 'center', 'width': 60}
+                          ], 
+                rowNum: 20,
+                pager: pager_id,
+                sortname: 'u.lastname',
+                sortorder: 'asc',
+                height: '100%'});
+                
+            $('#'+subgrid_table_id).jqGrid('navGrid','#'+pager_id,{edit:false,add:false,del:false});
+
+            $('#'+subgrid_table_id).jqGrid('setGroupHeaders', {
+                useColSpanStyle: false,                    
+                groupHeaders: [
+                    {
+                        startColumnName:'lessonpro',
+                        numberOfColumns:3,
+                        titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Progress') . "</div>'
+                     },
+                     {
+                        startColumnName:'lessonper',
+                        numberOfColumns:2,
+                        titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Performance') . "</div>'
+                     },
+                ]
+            });
+        }**";
+        
+        $table = Display::grid_js($tableId, $url, $columns, $column_model, $extra_params, array(), $action_links, true);
+
+        $return = '<script>$(function() {' . $table .
+                'jQuery("#' . $tableId . '").jqGrid("navGrid","#' . $tableId . '_pager",{view:false, edit:false, add:false, del:false, search:false, excel:true});
+                jQuery("#' . $tableId . '").jqGrid("navButtonAdd","#' . $tableId . '_pager",{
+                       caption:"",
+                       title:"' . get_lang('ExportExcel') . '",
+                       onClickButton : function () {
+                           jQuery("#' . $tableId . '").jqGrid("excelExport",{"url":"' . $url . '&export_format=xls"});
+                       }
+                });
+            });</script>';
+
+        $return .= Display::grid_html($tableId);
+
+        return $return;
+    }
+
 }
 
-    
 function get_stats($user_id, $course_code, $start_date = null, $end_date = null) {
     // Database table definitions
     $tbl_track_course   = Database :: get_statistic_table(TABLE_STATISTIC_TRACK_E_COURSE_ACCESS);

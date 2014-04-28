@@ -616,6 +616,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
     echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=lpgradereport">' . get_lang('LpGradeReport') . '</a>';
     echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=studentprogressreport">' . get_lang('StudentProgressReport') . '</a>';
     echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=evaluationdetailreport">' . get_lang('EvaluationDetailReport') . '</a>';
+    echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=sessionprogressreport">' . get_lang('SessionProgressReport') . '</a>';
     echo '<br /><br />';
 
     $listToDisplay = array(
@@ -626,7 +627,8 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                         'surveyoverview', 
                         'lpgradereport',
                         'studentprogressreport',
-                        'evaluationdetailreport'
+                        'evaluationdetailreport',
+                        'sessionprogressreport'
                     );
     
     if ($is_platform_admin && $view == 'admin' && in_array($display, $listToDisplay)) {
@@ -680,6 +682,9 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 break;
             case 'evaluationdetailreport':
                 $tool_name = get_lang('EvaluationDetailReport');
+                break;
+            case 'sessionprogressreport':
+                $tool_name = get_lang('SessionProgressReport');
                 break;
         }
 
@@ -820,8 +825,17 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                     });';
         }
 
+        $opts = array(
+                'surveyoverview', 
+                'progressoverview', 
+                'exerciseprogress', 
+                'lpgradereport', 
+                'studentprogressreport',
+                'sessionprogressreport'
+            );
+        
         //date filter
-        if (!in_array($display, array('surveyoverview', 'progressoverview', 'exerciseprogress', 'lpgradereport', 'studentprogressreport', 'evaluationdetailreport'))) {
+        if (!in_array($display, $opts)) {
             $sessionFilter->addElement('text', 'from', get_lang('From'), array('id' => 'date_from', 'value' => (!empty($_GET['date_from']) ? $_GET['date_from'] : ''), 'style' => 'width:75px' ));
             $sessionFilter->addElement('text', 'to', get_lang('Until'), array('id' => 'date_to', 'value' => (!empty($_GET['date_to']) ? $_GET['date_to'] : ''), 'style' => 'width:75px' ));
        }
@@ -992,6 +1006,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
         </script>';
 
     }
+    
     switch ($display) {
         case 'useroverview':
             MySpace::display_tracking_user_overview();
@@ -1111,6 +1126,9 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             break;
         case 'studentprogressreport':
             echo MySpace::displayStudentProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
+            break;
+        case 'sessionprogressreport':
+            echo MySpace::displaySessionProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
             break;
         default:
             if (!empty($display)) {

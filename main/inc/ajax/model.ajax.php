@@ -354,6 +354,17 @@ switch ($action) {
         $lpData = $list->get_flat_list();
         $count = count($lpData);
         break;
+    case 'displaySessionProgressReport':
+        $sessionId = intval($_REQUEST['session_id']);
+        $courseId = intval($_REQUEST['course_id']);
+        $course = api_get_course_info_by_id($courseId);
+        if ($sessionId === 0) {
+            $session = SessionManager::get_session_by_course($course['code']);
+        } else {
+            $session = api_get_session_info($sessionId);
+        }
+        $count = count($session);
+        break;
     case 'getEvaluationDetail':
          //@TODO replace this for a more efficient function (not retrieving the whole data)
         $records = Tracking::get_exercise_progress(
@@ -1209,6 +1220,32 @@ switch ($action) {
                     $option, true
                 );
         break;
+    case 'displaySessionProgressReport':
+        $columns = array(
+            'sessionid',
+            'courseid',
+            'course',
+            'session',
+            'teacherid',
+            'tlastname',
+            'tfirstname',
+            'nrostudents', 
+            'lessonpro',
+            'laboratorypro',
+            'selflearningpro',
+            'lessonper',
+            'laboratoryper',
+            'selflearningper'
+        );
+        if ($sessionId === 0) {
+            foreach ($session as $sess) {
+                $arrSession[] = $sess['id'];
+            }
+        } else {
+            $arrSession = array($session['id']);
+        }
+        $result = SessionManager::sessionProgressByCourse($course['code'], $arrSession);
+        break;
     default:
         exit;
 }
@@ -1245,6 +1282,7 @@ $allowed_actions = array(
     'get_exercise_grade',
     'displayStudentProgressReport',
     'displayStudentProgressDetail',
+    'displaySessionProgressReport',
     'getEvaluationDetail'
 );
 

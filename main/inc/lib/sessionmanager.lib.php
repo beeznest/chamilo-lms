@@ -1203,8 +1203,9 @@ class SessionManager
                                 );
             
             //Time Spent in Course
-            $timeSpent = Tracking::get_time_spent_on_the_course(
-                                    $user['user_id'], $course['code']
+            $timeSpent = Tracking::get_time_spent_in_lp(
+                                    $user['user_id'], $course['code'], 
+                                    array(), $user['id_session']
                     );
             
             //Time Spent in the LP Lab
@@ -1220,6 +1221,11 @@ class SessionManager
                        );
             
             //Clicks in Laboratorio
+            $clicksLp = Tracking::getTotalClicksLp(
+                        $user['user_id'], $courseId, $user['id_session']
+                      );
+            
+            //Clicks in Laboratorio
             $clicksLabo = Tracking::getTotalClicksLp(
                         $user['user_id'], $courseId, $user['id_session'], 
                         false , 'Laboratorio'
@@ -1232,6 +1238,7 @@ class SessionManager
                       );
             
             //Performance
+            $lessonper = $clicksLp + $timeSpent;
             $laboratoryper = $clicksLabo + $timeSpentLabo;
             $selflearningper = $clicksSelflear + $timeSpentSelflear;
             
@@ -1244,6 +1251,7 @@ class SessionManager
                         'lesson' => $lessonProgress . " %",
                         'laboratorypro' => $laboratorioProgress . " %",
                         'selflearningpro' => $autoaprendizajeProgress . " %",
+                        'lessonper' => $lessonper,
                         'laboratoryper' => $laboratoryper,
                         'selflearningper' => $selflearningper,
                         'lastconnection' => ($lastConnection) ? $lastConnection : "",
@@ -1469,12 +1477,20 @@ class SessionManager
         //Search for ip, we do less querys if we iterate the final array
         foreach ($return as $key => $info) {
             //closest lower ip
-            $sql = sprintf("SELECT login_ip FROM $track_e_login WHERE login_user_id = %d AND login_date < '%s' ORDER BY login_date DESC LIMIT 1", $info['user_id'], $info['logindate']); //TODO add select by user too
+            $sql = sprintf("SELECT login_ip FROM $track_e_login 
+                            WHERE login_user_id = %d 
+                            AND login_date < '%s' 
+                            ORDER BY login_date DESC LIMIT 1", 
+                            $info['user_id'], $info['logindate']); //TODO add select by user too
             $result = Database::query($sql);
             $ip = Database::fetch_assoc($result);
             //if no ip founded, we search the closest higher ip
             if (empty($ip['login_ip'])) {
-                $sql = sprintf("SELECT login_ip FROM $track_e_login WHERE login_user_id = %d AND login_date > '%s'  ORDER BY login_date ASC LIMIT 1", $info['user_id'], $info['logindate']); //TODO add select by user too
+                $sql = sprintf("SELECT login_ip FROM $track_e_login 
+                                WHERE login_user_id = %d 
+                                AND login_date > '%s'  
+                                ORDER BY login_date ASC LIMIT 1", 
+                                $info['user_id'], $info['logindate']); //TODO add select by user too
                 $result = Database::query($sql);
                 $ip = Database::fetch_assoc($result);
             }
@@ -4342,4 +4358,71 @@ class SessionManager
         }
     }
 
+    public static function sessionProgressByCourse($courseCode, $sessionIds = array())
+    {
+        $result = array();
+        if (!empty($sessionIds)) {
+            foreach ($sessionIds as $sessionId) {
+                $teacherId = self::getCoachesByCourseSession($sessionId, $courseCode);
+                $courseInfo = api_get_course_info($courseCode);
+                $sessionInfo = api_get_session_info($sessionId);
+                $teacherInfo = api_get_user_info($teacherId[0]);
+                $students = self::getSessionProgress($sessionId, $courseInfo['real_id']);
+                $nroStudent = count($students);
+                //Initilize sums
+                $lessonpro = 0;
+                $laboratorypro = 0;
+                $selflearningpro = 0;
+                $lessonper = 0;
+                $laboratoryper = 0;
+                $selflearningper = 0;
+                foreach ($students as $student) {
+                    $lessonpro += self::formatPercentageString($student['lesson']);
+                    $laboratorypro += self::formatPercentageString($student['laboratorypro']);
+                    $selflearningpro += self::formatPercentageString($student['selflearningpro']);
+                    $lessonper += self::formatPercentageString($student['lessonper']);
+                    $laboratoryper += self::formatPercentageString($student['laboratoryper']);
+                    $selflearningper += self::formatPercentageString($student['selflearningper']);
+                }
+              
+                $result[] = array(
+                    'sessionid' => $sessionId,
+                    'courseid' => $courseInfo['real_id'],
+                    'course'=> $courseCode,
+                    'session' => $sessionInfo['name'],
+                    'teacherid' => $teacherInfo['username'],
+                    'tlastname' => $teacherInfo['lastname'],
+                    'tfirstname' => $teacherInfo['firstname'],
+                    'nrostudents' => $nroStudent,
+                    'lessonpro' => self::avg($lessonpro, $nroStudent) . '%',
+                    'laboratorypro' => self::avg($laboratorypro, $nroStudent) . '%',
+                    'selflearningpro' => self::avg($selflearningpro, $nroStudent) . '%',
+                    'lessonper' => self::avg($lessonper, $nroStudent),
+                    'laboratoryper' => self::avg($laboratoryper, $nroStudent),
+                    'selflearningper' => self::avg($selflearningper, $nroStudent)
+                );
+            }
+        }
+        return $result;
+    }
+    
+    static function formatPercentageString($percentageStr)
+    {
+         $number = trim(str_replace("%", "", $percentageStr));
+         if (empty($number)) {
+             return 0;
+         } else {
+            return (float) $number;
+         }
+    }
+    
+    static function avg($num, $den, $precision = 2)
+    {
+        if ($den == 0) {
+            return 0;
+        } else {
+            $prom = $num / $den;
+            return round($prom, $precision);
+        }
+    }
 }
