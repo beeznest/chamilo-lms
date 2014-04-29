@@ -1182,8 +1182,8 @@ class SessionManager
         foreach ($users as $user) {
             //Lessons
             $lessonProgress = Tracking::get_avg_student_progress(
-                                    $user['user_id'], $course['code'], 
-                                    array(), $user['id_session']
+                                    $user['user_id'], $course['code'], array(), 
+                                    $user['id_session'], false, 'Leccion'
                                 );
             //Laboratorio
             $laboratorioProgress = Tracking::get_avg_student_progress(
@@ -1202,10 +1202,10 @@ class SessionManager
                                     $user['id_session'], false
                                 );
             
-            //Time Spent in Course
+            //Time Spent in Lp
             $timeSpent = Tracking::get_time_spent_in_lp(
-                                    $user['user_id'], $course['code'], 
-                                    array(), $user['id_session']
+                                    $user['user_id'], $course['code'], array(),
+                                    $user['id_session'], 'Leccion'
                     );
             
             //Time Spent in the LP Lab
@@ -1220,9 +1220,10 @@ class SessionManager
                                     $user['id_session'], 'Autoaprendizaje'
                        );
             
-            //Clicks in Laboratorio
+            //Clicks in Leccion
             $clicksLp = Tracking::getTotalClicksLp(
-                        $user['user_id'], $courseId, $user['id_session']
+                        $user['user_id'], $courseId, $user['id_session'], 
+                        false , 'Leccion'
                       );
             
             //Clicks in Laboratorio
@@ -1242,8 +1243,14 @@ class SessionManager
             $laboratoryper = $clicksLabo + $timeSpentLabo;
             $selflearningper = $clicksSelflear + $timeSpentSelflear;
             
+            $sessData = api_get_session_info($user['id_session']);
+            
             // TODO add the graph
             $table[] = array(
+                        'session' => $sessData['name'],
+                        'course' => $course['code'],
+                        'sessionid' => $user['id_session'],
+                        'courseid' => $courseId,
                         'username' => $user[3],
                         'lastname' => $user[1],
                         'firstname' => $user[2],
@@ -1282,7 +1289,8 @@ class SessionManager
              //Lessons
             $lessonsProgress = Tracking::get_avg_student_progress(
                                     $user['user_id'], $courseData['code'], 
-                                    array($lpId), $sessionId
+                                    array($lpId), $sessionId, 
+                                    false, 'Leccion'
                                 );
         
             //Laboratorio

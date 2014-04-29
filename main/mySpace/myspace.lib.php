@@ -2470,7 +2470,11 @@ class MySpace {
          * The order is important you need to check the $column variable in the model.ajax.php file
          */
         $columns = array(
-            get_lang('Username'),
+            get_lang('SessionId'),
+            get_lang('CourseId'),
+            get_lang('Course'),
+            get_lang('Section'),
+            get_lang('Code'),
             get_lang('LastName'),
             get_lang('FirstName'),
             get_lang('TimeInCourse'),
@@ -2487,6 +2491,10 @@ class MySpace {
          * Column config
          */
         $column_model = array(
+            array('name' => 'sessionid', 'index' => 'sessionid', 'align' => 'left', 'hidden' => 'true'),
+            array('name' => 'courseid', 'index' => 'courseid', 'align' => 'left', 'hidden' => 'true'),
+            array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'session', 'index' => 'session', 'align' => 'left', 'search' => 'false'),
             array('name' => 'username', 'index' => 'username', 'align' => 'left', 'search' => 'true', 'wrap_cell' => "true"),
             array('name' => 'firstname', 'index' => 'firstname', 'align' => 'left', 'search' => 'true'),
             array('name' => 'lastname', 'index' => 'lastname', 'align' => 'left', 'search' => 'true'),
@@ -2504,7 +2512,7 @@ class MySpace {
 
         // jqgrid will use this URL to do the selects
         $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressReport&session_id=' . $sessionId . '&course_id=' . $courseId;
-        $urlDetail = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressDetail&session_id=' . $sessionId . '&course_id=' . $courseId;
+        $urlDetail = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressDetail';
 
         $tableId = 'stn_prgss_rprt';
         $extra_params['autowidth'] = 'true';
@@ -2539,7 +2547,7 @@ class MySpace {
             user_data = $('#" . $tableId . "').jqGrid('getRowData', row_id);
             $('#'+subgrid_id).html('<table id='+subgrid_table_id+' class=\"scroll\"></table><div id='+pager_id+' class=\"scroll\"></div>');
             $('#'+subgrid_table_id).jqGrid({
-                url: '" . $urlDetail . "&username=' + user_data.username,
+                url: '" . $urlDetail . "&username=' + user_data.username + '&session_id=' + user_data.sessionid + '&course_id=' + user_data.courseid,
                 datatype: 'json',
                 caption: '" . get_lang('StudentDetail') . "',
                 colNames: ['" . get_lang('LearningPath') . "', '" . get_lang('Lesson') . "', 
@@ -2690,7 +2698,9 @@ class MySpace {
                 url: '" . $urlDetail . "&session_id=' + grid_data.sessionid + '&course_id=' + grid_data.courseid,
                 datatype: 'json',
                 caption: '" . get_lang('StudentDetail') . "',
-                colNames: ['" . get_lang('Code') . "', 
+                colNames: ['" . get_lang('SessionId') . "', 
+                           '" . get_lang('CourseId') . "',
+                           '" . get_lang('Code') . "', 
                            '" . get_lang('Lastname') . "', 
                            '" . get_lang('Firstname') . "', 
                            '" . get_lang('TimeInCourse') . "',
@@ -2702,6 +2712,8 @@ class MySpace {
                            '" . get_lang('LastConnection') . "',
                            '" . get_lang('Detail') . "'],
                 colModel: [ 
+                            {'name': 'sessionid', 'index': 'sessionid', 'align': 'left', 'hidden': true}, 
+                            {'name': 'courseid', 'index': 'courseid', 'align': 'left', 'hidden': true}, 
                             {'name': 'username', 'index': 'username', 'align': 'left', 'width': 60}, 
                             {'name': 'lastname', 'index': 'lastname', 'align': 'left', 'width': 180}, 
                             {'name': 'firstname', 'index': 'firstname', 'align': 'left', 'width': 180}, 
@@ -2756,7 +2768,7 @@ class MySpace {
 
         return $return;
     }
-
+    
 }
 
 function get_stats($user_id, $course_code, $start_date = null, $end_date = null) {

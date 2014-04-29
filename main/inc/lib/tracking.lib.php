@@ -814,10 +814,11 @@ class Tracking
                     $sql_maxes = "SELECT MAX(view_count), progress
                                   FROM $tbl_course_lp_view lp_view
                                   INNER JOIN $tblFieldVal lv ON lv.lp_id = lp_view.lp_id
-                                  INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
-                                                             AND lo.option_value = '$type'
-                                  INNER JOIN $tblField lf ON lf.id =  lo.field_id
+                                  INNER JOIN $tblField lf ON lf.id =  lv.field_id
                                                              AND lf.field_variable = 'Tipo'
+                                  INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
+                                                             AND lf.id = lo.field_id
+                                                             AND lo.option_value = '$type'
                                   WHERE c_id = {$course_info['real_id']} 
                                   AND $condition_user session_id = $session_id 
                                   AND lp_view.lp_id IN (" . implode(',',$lp_id) . ")
@@ -3720,7 +3721,7 @@ class Tracking
                 AND q.c_id = $courseIdx
                   $where $order $limit";
             $sql_query = vsprintf($sql, $whereParams);
-            
+
             // Now browse through the results and get the data
             $rs = Database::query($sql_query);
             $userIds = array();
@@ -3742,7 +3743,6 @@ class Tracking
                                FROM $tquiz_question tq, $tquiz_answer tqa
                                WHERE tqa.question_id =tq.id and tqa.c_id = tq.c_id
                                  AND tq.c_id = $courseIdx AND tq.id IN (".implode(',',$questionIds).")";
-
             $resQuestions = Database::query($sqlQuestions);
             $answer = array();
             $question = array();
@@ -3769,7 +3769,6 @@ class Tracking
             foreach ($data as $id => $row) {
                 $rowQuestId = $row['question_id'];
                 $rowAnsId = $row['answer_id'];
-                
                 $data[$id]['session'] = $sessions[$row['session_id']]['name'];
                 $data[$id]['firstname'] = $users[$row['user_id']]['firstname'];
                 $data[$id]['lastname'] = $users[$row['user_id']]['lastname'];

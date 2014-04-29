@@ -762,6 +762,10 @@ switch ($action) {
         break;
     case 'displayStudentProgressReport':
         $columns = array(
+            'sessionid',
+            'courseid',
+            'course',
+            'session',
             'username',
             'lastname',
             'firstname',
@@ -1200,6 +1204,7 @@ switch ($action) {
             'lastname',
             'firstname',
             'time',
+           
           //  'attempts',
             'question_id',
             'question',

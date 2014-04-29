@@ -1092,6 +1092,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             if (!empty($_GET['course_id'])) {
                 if (!empty($_GET['exercise_id'])) {
                     echo MySpace::displayTrackingEvaluation(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']), $_GET['date_from'], $_GET['date_to']);
+                    echo MySpace::displayTrackingEvaluationSupervisor(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']), $_GET['date_from'], $_GET['date_to']);
                 } else {
                     Display::display_warning_message(get_lang('ChooseEvaluation'));
                 }
@@ -1122,13 +1123,25 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             }
             break;
         case 'courseoverview':
-            MySpace::display_tracking_course_overview();
+            if (!empty($_GET['course_id'])) {
+                MySpace::display_tracking_course_overview();
+            } else {
+                Display::display_warning_message(get_lang('ChooseCourse'));
+            }
             break;
         case 'studentprogressreport':
-            echo MySpace::displayStudentProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
+            if (!empty($_GET['course_id'])) {
+                echo MySpace::displayStudentProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
+            } else {
+                Display::display_warning_message(get_lang('ChooseCourse'));
+            }
             break;
         case 'sessionprogressreport':
-            echo MySpace::displaySessionProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
+            if (!empty($_GET['course_id'])) {
+                echo MySpace::displaySessionProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
+            } else {
+                Display::display_warning_message(get_lang('ChooseCourse'));
+            }
             break;
         default:
             if (!empty($display)) {
