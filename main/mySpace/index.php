@@ -170,7 +170,14 @@ echo '<a href="javascript: void(0);" onclick="javascript: window.print()">'.
     Display::return_icon('printer.png', get_lang('Print'),'',ICON_SIZE_MEDIUM).'</a>';
 echo '</span>';
 
-if (!empty($session_id) && !in_array($display, array('accessoverview','lpprogressoverview','progressoverview','exerciseprogress', 'surveyoverview'))) {
+$options = array(
+                'accessoverview', 'lpprogressoverview',
+                'progressoverview', 'exerciseprogress', 
+                'surveyoverview', 'lpgradereport',
+                'studentprogressreport', 'evaluationdetailreport',
+                'sessionprogressreport'
+            );
+if (!empty($session_id) && !in_array($display, $options)) {
     echo '<a href="index.php">'.Display::return_icon('back.png', get_lang('Back'),'',ICON_SIZE_MEDIUM).'</a>';
     if (!api_is_platform_admin()) {
         if (api_get_setting('add_users_by_coach') == 'true') {
@@ -1092,7 +1099,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             if (!empty($_GET['course_id'])) {
                 if (!empty($_GET['exercise_id'])) {
                     echo MySpace::displayTrackingEvaluation(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']), $_GET['date_from'], $_GET['date_to']);
-                    echo MySpace::displayTrackingEvaluationSupervisor(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']), $_GET['date_from'], $_GET['date_to']);
+                    //echo MySpace::displayTrackingEvaluationSupervisor(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']), $_GET['date_from'], $_GET['date_to']);
                 } else {
                     Display::display_warning_message(get_lang('ChooseEvaluation'));
                 }

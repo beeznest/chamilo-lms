@@ -3801,6 +3801,235 @@ class Tracking
         }
         return $data;
     }
+    
+    /**
+    * 
+    * @param int $sessionId
+    * @param int $courseId
+    * @param int $exerciseId
+    * @param string $date_from
+    * @param string $date_to
+    * @param array $options
+    * @param bool $type
+    * @return array
+    */
+    public static function getExerciseProgressSession(
+            $sessionId = 0, $courseId = 0, $exerciseId = 0, 
+            $date_from, $date_to, $options = array(), $type = false)
+    {
+        $sessionId  = intval($sessionId);
+        $courseId   = intval($courseId);
+        $exerciseId = intval($exerciseId);
+        $date_from  = Database::escape_string($date_from);
+        $date_to    = Database::escape_string($date_to);
+        /*
+         * This method gets the data by blocks, as previous attempts at one single
+         * query made it take ages. The logic of query division is described below
+         */
+        // Get tables names
+        $tuser = Database::get_main_table(TABLE_MAIN_USER);
+        $tquiz = Database::get_course_table(TABLE_QUIZ_TEST);
+        $tquiz_answer = Database::get_course_table(TABLE_QUIZ_ANSWER);
+        $tquiz_question = Database::get_course_table(TABLE_QUIZ_QUESTION);
+        $tquiz_rel_question = Database::get_course_table(TABLE_QUIZ_TEST_QUESTION);
+        $ttrack_exercises  = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
+        $ttrack_attempt    = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_ATTEMPT);
+        $tblFieldVal = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
+        $tblFieldOpt = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
+        $tblField = Database::get_main_table(TABLE_MAIN_LP_FIELD);
+ 
+        require_once api_get_path(SYS_CODE_PATH).'exercice/exercise.lib.php';
+        
+        $sessions = array();
+        $courses = array();
+        // if session ID is defined but course ID is empty, get all the courses
+        // from that session
+        if (!empty($sessionId) && empty($courseId)) {
+            // $courses is an array of course int id as index and course details hash as value
+            $courses = SessionManager::get_course_list_by_session_id($sessionId);
+            $sessions[$sessionId] = api_get_session_info($sessionId);
+        } elseif (empty($sessionId) && !empty($courseId)) {
+            // if, to the contrary, course is defined but not sessions, get the sessions that include this course
+            // $sessions is an array like: [0] => ('id' => 3, 'name' => 'Session 35'), [1] => () etc;
+            $course = api_get_course_info_by_id($courseId);
+            $sessionsTemp = SessionManager::get_session_by_course($course['code']);
+            $courses[$courseId] = $course;
+            foreach ($sessionsTemp as $sessionItem) {
+                $sessions[$sessionItem['id']] = $sessionItem;
+            }
+        } elseif (!empty($courseId) && !empty($sessionId)) {
+            //none is empty
+            $course = api_get_course_info_by_id($courseId);
+            $courses[$courseId] = array($course['code']);
+            $courses[$courseId]['code'] = $course['code'];
+            $sessions[$sessionId] = api_get_session_info($sessionId);
+        } else {
+            //both are empty, not enough data, return an empty array
+            return array();
+        }
+        // Now we have two arrays of courses and sessions with enough data to proceed
+        // If no course could be found, we shouldn't return anything. Sessions can be empty (then we only return the pure-course-context results)
+        if (count($courses) < 1) {
+            return array();
+        }
+
+        $data = array();
+        // The following loop is less expensive than what it seems:
+        // - if a course was defined, then we only loop through sessions
+        // - if a session was defined, then we only loop through courses
+        // - if a session and a course were defined, then we only loop once
+        $fieldType = "";
+        $extraField = "";
+        if ($type) {
+           $extraField = ", lo.option_display_text";
+           $fieldType = "LEFT JOIN $tblFieldVal lv ON lv.lp_id = te.orig_lp_id
+                         LEFT JOIN $tblFieldOpt lo ON lv.field_value = lo.id
+                         LEFT JOIN $tblField lf ON lf.id =  lo.field_id 
+                                                AND lf.field_variable = 'Tipo'";            
+        }
+        
+        foreach ($courses as $courseIdx => $courseData) {
+            $where = '';
+            $whereParams = array();
+            $whereCourseCode = $courseData['code'];
+            $whereSessionParams = '';
+            if (count($sessions > 0)) {
+                foreach ($sessions as $sessionIdx => $sessionData) {
+                    if (!empty($sessionIdx)) {
+                        $whereSessionParams .= $sessionIdx.',';
+                    }
+                }
+                $whereSessionParams = substr($whereSessionParams,0,-1);
+            }
+
+            if (!empty($exerciseId)) {
+                $exerciseId = intval($exerciseId);
+                $where .= ' AND q.id = %d ';
+                $whereParams[] = $exerciseId;
+            }
+
+            $limit = '';
+            if (!empty($options['limit'])) {
+                $limit = " LIMIT ".$options['limit'];
+            }
+
+            if (!empty($options['where'])) {
+                $where .= ' AND '.Database::escape_string($options['where']);
+            }
+
+            $order = '';
+            if (!empty($options['order'])) {
+                $order = " ORDER BY ".$options['order'];
+            }
+
+            if (!empty($date_to) && !empty($date_from)) {
+                $where .= sprintf(" AND (te.start_date BETWEEN '%s 00:00:00' AND '%s 23:59:59')", $date_from, $date_to);
+            }
+
+            $sql = "SELECT
+                te.session_id,
+                ta.id as attempt_id,
+                te.exe_user_id as user_id,
+                te.exe_id as exercise_attempt_id,
+                ta.question_id,
+                ta.answer as answer_id,
+                ta.tms as time,
+                te.exe_exo_id as quiz_id,
+                CONCAT ('c', q.c_id, '_e', q.id) as exercise_id,
+                q.title as quiz_title,
+                qq.description as description,
+                ta.marks as grade,
+                te.exe_cours_id
+                $extraField
+                FROM $ttrack_exercises te
+                INNER JOIN $ttrack_attempt ta ON ta.exe_id = te.exe_id
+                INNER JOIN $tquiz q ON q.id = te.exe_exo_id
+                INNER JOIN $tquiz_rel_question rq ON rq.exercice_id = q.id AND rq.c_id = q.c_id
+                INNER JOIN $tquiz_question qq ON qq.id = rq.question_id 
+                                                AND qq.c_id = rq.c_id 
+                                                AND qq.position = rq.question_order 
+                                                AND ta.question_id = rq.question_id
+                $fieldType
+                WHERE te.exe_cours_id = '$whereCourseCode' ".(empty($whereSessionParams)?'':"AND te.session_id IN ($whereSessionParams)")."
+                AND q.c_id = $courseIdx
+                  $where $order $limit";
+            $sql_query = vsprintf($sql, $whereParams);
+
+            // Now browse through the results and get the data
+            $rs = Database::query($sql_query);
+            $userIds = array();
+            $questionIds = array();
+            $answerIds = array(); 
+            while ($row = Database::fetch_array($rs)) {
+                //only show if exercise is visible
+                if (api_get_item_visibility($courseData, 'quiz', $row['exercise_id'])) {
+                    $userIds[$row['user_id']] = $row['user_id'];
+                    $questionIds[$row['question_id']] = $row['question_id'];
+                    $answerIds[$row['question_id']][$row['answer_id']] = $row['answer_id'];
+                    $row['session'] = $sessions[$row['session_id']];
+                    $data[] = $row;
+                }
+            }
+            // Now fill questions data. Query all questions and answers for this test to avoid
+            $sqlQuestions = "SELECT tq.c_id, tq.id as question_id, tq.question, tqa.id_auto, 
+                                    tqa.answer, tqa.correct, tq.position, tqa.id_auto as answer_id
+                               FROM $tquiz_question tq, $tquiz_answer tqa
+                               WHERE tqa.question_id =tq.id and tqa.c_id = tq.c_id
+                                 AND tq.c_id = $courseIdx AND tq.id IN (".implode(',',$questionIds).")";
+            $resQuestions = Database::query($sqlQuestions);
+            $answer = array();
+            $question = array();
+            while ($rowQuestion = Database::fetch_assoc($resQuestions)) {
+                $questionId = $rowQuestion['question_id'];
+                $answerId = $rowQuestion['answer_id'];
+                $answer[$questionId][$answerId] = array(
+                                                        'position' => $rowQuestion['position'],
+                                                        'question' => $rowQuestion['question'],
+                                                        'answer' => $rowQuestion['answer'],
+                                                        'correct' => $rowQuestion['correct']
+                                                       );
+                $question[$questionId]['question'] = $rowQuestion['question'];
+                
+            }
+            
+            // Now fill users data
+            $sqlUsers = "SELECT user_id, username, lastname, firstname 
+                         FROM $tuser 
+                         WHERE user_id IN (" . implode(',',$userIds) . ")";
+            $resUsers = Database::query($sqlUsers);
+            while ($rowUser = Database::fetch_assoc($resUsers)) {
+                $users[$rowUser['user_id']] = $rowUser;
+            }
+            $summary = array();
+            foreach ($data as $id => $row) {
+                $rowQuestId = $row['question_id'];
+                $rowSession = $row['session_id'];
+                if (!isset($summary[$rowSession][$rowQuestId]['grade'])) {
+                    $summary[$rowSession][$rowQuestId]['session'] = $sessions[$row['session_id']]['name'];
+                    $summary[$rowSession][$rowQuestId]['course'] = $row['exe_cours_id'];
+                    $summary[$rowSession][$rowQuestId]['type'] = $row['option_display_text'];
+                    $summary[$rowSession][$rowQuestId]['question'] = $question[$rowQuestId]['question'];
+                    $summary[$rowSession][$rowQuestId]['question_id'] = $rowQuestId;
+                    $summary[$rowSession][$rowQuestId]['description'] = $row['description'];
+                    $summary[$rowSession][$rowQuestId]['quiz_title'] = $row['quiz_title'];
+                    $summary[$rowSession][$rowQuestId]['grade'] = 0;
+                    $summary[$rowSession][$rowQuestId]['count'] = 1;
+                } else {
+                    $summary[$rowSession][$rowQuestId]['grade'] += $row['grade'];
+                    $summary[$rowSession][$rowQuestId]['count']++;
+                }
+            }
+        }
+        
+        $result = array();
+        foreach ($summary as $session) {
+            foreach ($session as $questions) {
+                $result[] = $questions;
+            }
+        }
+        
+        return $result;
+    }
 }
 
 /**

@@ -372,6 +372,13 @@ switch ($action) {
                 $_GET['exercise_id'], "", "", true);
         $count = count($records);
         break;
+    case 'getEvaluationDetailDHR':
+         //@TODO replace this for a more efficient function (not retrieving the whole data)
+        $records = Tracking::getExerciseProgressSession(
+                $_GET['session_id'], $_GET['course_id'], 
+                $_GET['exercise_id'], "", "", true);
+        $count = count($records);
+        break;
     default:
         exit;
 }
@@ -1225,6 +1232,35 @@ switch ($action) {
                     $option, true
                 );
         break;
+    case 'getEvaluationDetailDHR':
+        $sessionId  = intval($_GET['session_id']);
+        $courseId   = intval($_GET['course_id']);
+        $exerciseId = intval($_GET['exercise_id']);
+        $date_from  = $_GET['date_from'];
+        $date_to    = $_GET['date_to'];
+        
+        $columns = array(
+            'session',
+            'course',
+            'type',
+            'quiz_title',
+            'question',
+            'question_id',
+            'description',
+            'grade'
+        );
+
+        $option = array(
+                  'where' => $where_condition,
+                  'order' => "$sidx $sord",
+                  'limit'=> "$start , $limit"
+                 );
+        
+        $result = Tracking::getExerciseProgressSession(
+                    $sessionId, $courseId, $exerciseId, "", "",
+                    $option, true
+                );
+        break;
     case 'displaySessionProgressReport':
         $columns = array(
             'sessionid',
@@ -1288,7 +1324,8 @@ $allowed_actions = array(
     'displayStudentProgressReport',
     'displayStudentProgressDetail',
     'displaySessionProgressReport',
-    'getEvaluationDetail'
+    'getEvaluationDetail',
+    'getEvaluationDetailDHR'
 );
 
 //5. Creating an obj to return a json

@@ -493,6 +493,72 @@ class MySpace {
         $return .= Display::grid_html($tableId);
         return $return;
     }
+    
+    
+    /**
+     * Display a sortable table that contains an overview off all the progress of the session
+     * @param   int $sessionId  The session ID
+     * @param   int $courseId   The course ID
+     * @param   int $exerciseId The quiz ID
+     * @return  string  HTML array of results formatted for gridJS
+     */
+    static function displayTrackingEvaluationSupervisor($sessionId = 0, $courseId = 0, $exerciseId = 0) {
+        /**
+         * Column names
+         * The column order is important. Check $column variable in the main/inc/ajax/model.ajax.php file
+         */
+        
+        $columns = array(
+            get_lang('CourseCode'),
+            get_lang('Section'),
+            get_lang('Type'),
+            get_lang('ExerciseName'),
+            get_lang('QuestionId'),
+            get_lang('QuestionTitle'),
+            get_lang('langWorkDescription'),
+            get_lang('Grade')
+        );
+
+        /**
+         * Column config
+         */
+        $column_model   = array(
+            array('name'=>'code', 'index'=>'code', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'session', 'index'=>'session', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'type', 'index'=>'type', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'quiz_title', 'index'=>'quiz_title', 'align'=>'left', 'search' => 'true'),
+            array('name'=>'question_id', 'index'=>'question_id', 'align'=>'left', 'search' => 'true'),
+            array('name'=>'question', 'index'=>'question', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'description', 'index'=>'description', 'align'=>'left', 'width' => '550', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'grade', 'index'=>'grade', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+        );
+        //get dynamic column names
+
+        // jqgrid will use this URL to do the selects
+        $url = api_get_path(WEB_AJAX_PATH).'model.ajax.php?a=getEvaluationDetailDHR&session_id=' . $sessionId . '&course_id=' . $courseId  . '&exercise_id=' . $exerciseId;
+
+        //Autowidth
+        $extra_params['autowidth'] = 'true';
+
+        //height auto
+        $extra_params['height'] = 'auto';
+
+        $tableId = 'evaluationDetailDHR';
+        $table = Display::grid_js($tableId, $url, $columns, $column_model, $extra_params, array(), '', true);
+
+        $return = '<script>$(function() {'. $table .
+            'jQuery("#'.$tableId.'").jqGrid("navGrid","#'.$tableId.'_pager",{view:false, edit:false, add:false, del:false, search:false, excel:true});
+                jQuery("#'.$tableId.'").jqGrid("navButtonAdd","#'.$tableId.'_pager",{
+                       caption:"",
+                       title:"' . get_lang('ExportExcel') . '",
+                       onClickButton : function () {
+                           jQuery("#'.$tableId.'").jqGrid("excelExport",{"url":"'.$url.'&export_format=xls"});
+                       }
+                });
+            });</script>';
+        $return .= Display::grid_html($tableId);
+        return $return;
+    }
 
     /**
      * Display a sortable table that contains an overview off all the progress of the user in a session
