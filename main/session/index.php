@@ -493,14 +493,31 @@ if (empty($my_reporting)) {
 }
 
 // Main headers
-$headers        = array(get_lang('Courses'), get_lang('LearningPaths'), get_lang('MyQCM'), get_lang('MyStatistics'));
+$headers = array(
+    get_lang('Courses'),
+    get_lang('LearningPaths'),
+    get_lang('MyQCM'),
+    get_lang('MyStatistics'),
+    get_lang('Reports')
+);
 // Subheaders
 $sub_header     = array(get_lang('AllLearningPaths'), get_lang('PerWeek'), get_lang('ByCourse'));
 
 // Sub headers data
 $lp_tabs           =  Display::tabs($sub_header, array(Display::grid_html('list_default'), Display::grid_html('list_week'), Display::grid_html('list_course')), 'sub_tab');
 $courses_tab       =  Display::grid_html('courses');
+
+//DataReports
+$reports = MySpace::displayStudentProgressReport($session_id, $course_info['real_id']);
+
 // Main headers data
-echo Display::tabs($headers, array($courses_tab, $lp_tabs, Display::grid_html('exercises'), $my_reporting));
+$data = array(  
+            $courses_tab, 
+            $lp_tabs, 
+            Display::grid_html('exercises'), 
+            $my_reporting,
+            $reports
+        );
+echo Display::tabs($headers, $data);
 
 Display::display_footer();

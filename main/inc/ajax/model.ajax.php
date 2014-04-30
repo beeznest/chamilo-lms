@@ -47,7 +47,10 @@ if (!in_array(
         'get_usergroups_teacher',
         'get_user_course_report_resumed',
         'get_user_course_report',
-        'get_sessions_tracking'
+        'get_sessions_tracking',
+        'displayCourseProgressSummary',
+        'displaySessionProgressSummary',
+        'displayStudentProgressDetail'
     )
 )) {
     api_protect_admin_script(true);
@@ -378,6 +381,14 @@ switch ($action) {
                 $_GET['session_id'], $_GET['course_id'], 
                 $_GET['exercise_id'], "", "", true);
         $count = count($records);
+        break;
+    case 'displayCourseProgressSummary':
+        $count = 1;
+        break;
+    case 'displaySessionProgressSummary':
+        $sessionId = intval($_REQUEST['session_id']);
+        $courseId = intval($_REQUEST['course_id']);
+        $count = count(SessionManager::getSessionProgressSummary($courseId, $sessionId));
         break;
     default:
         exit;
@@ -798,6 +809,41 @@ switch ($action) {
                 'limit'=> "$start , $limit"
             )
         );
+        break;
+    case 'displayCourseProgressSummary':
+        $columns = array(
+            'courseid',
+            'course',
+            'lesson',
+            'laboratorypro',
+            'selflearningpro',
+            'laboratoryper',
+            'selflearningper',
+            );
+        if (!empty($_GET['course_id'])) {
+            $courseId   = intval($_GET['course_id']);
+        }
+      
+        $result = SessionManager::getCourseProgress($courseId);
+        break;
+    case 'displaySessionProgressSummary':
+        $columns = array(
+            'sessionid',
+            'courseid',
+            'session',
+            'course',
+            'lesson',
+            'laboratorypro',
+            'selflearningpro',
+            'laboratoryper',
+            'selflearningper',
+            );
+        if (!empty($_GET['course_id'])) {
+            $courseId = intval($_GET['course_id']);
+            $sessionId = intval($_GET['session_id']);
+        }
+        
+        $result = SessionManager::getSessionProgressSummary($courseId, $sessionId);
         break;
     case 'displayStudentProgressDetail':
         $columns = array(
@@ -1325,6 +1371,8 @@ $allowed_actions = array(
     'displayStudentProgressDetail',
     'displaySessionProgressReport',
     'getEvaluationDetail',
+    'displayCourseProgressSummary',
+    'displaySessionProgressSummary',
     'getEvaluationDetailDHR'
 );
 

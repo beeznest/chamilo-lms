@@ -1138,7 +1138,8 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             break;
         case 'studentprogressreport':
             if (!empty($_GET['course_id'])) {
-                echo MySpace::displayStudentProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
+                echo MySpace::displayCourseProgressSummary(intval($_GET['course_id']), intval($_GET['session_id']));
+                //echo MySpace::displayStudentProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
             } else {
                 Display::display_warning_message(get_lang('ChooseCourse'));
             }

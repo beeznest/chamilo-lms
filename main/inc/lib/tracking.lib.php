@@ -4012,7 +4012,7 @@ class Tracking
                     $summary[$rowSession][$rowQuestId]['question_id'] = $rowQuestId;
                     $summary[$rowSession][$rowQuestId]['description'] = $row['description'];
                     $summary[$rowSession][$rowQuestId]['quiz_title'] = $row['quiz_title'];
-                    $summary[$rowSession][$rowQuestId]['grade'] = 0;
+                    $summary[$rowSession][$rowQuestId]['grade'] = $row['grade'];
                     $summary[$rowSession][$rowQuestId]['count'] = 1;
                 } else {
                     $summary[$rowSession][$rowQuestId]['grade'] += $row['grade'];
