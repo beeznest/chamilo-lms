@@ -864,7 +864,7 @@ switch ($action) {
         
         $username = Database::escape_string($_GET['username']);
  
-        $result = SessionManager::getStudentProgressDetail($username, $sessionId, $courseId,
+        $result = SessionManager::getStudentProgressDetailUnit($username, $sessionId, $courseId,
             array(
                 'where' => $where_condition,
                 'order' => "$sidx $sord",

@@ -814,6 +814,7 @@ class Tracking
                     $sql_maxes = "SELECT MAX(view_count), progress
                                   FROM $tbl_course_lp_view lp_view
                                   INNER JOIN $tblFieldVal lv ON lv.lp_id = lp_view.lp_id
+                                                            AND lv.c_id = lp_view.c_id
                                   INNER JOIN $tblField lf ON lf.id =  lv.field_id
                                                              AND lf.field_variable = 'Tipo'
                                   INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
@@ -1226,6 +1227,7 @@ class Tracking
             $filterType = "";
             if (!empty($type)) {
                 $filterType = "INNER JOIN $tblFieldVal lv ON lv.lp_id = view.lp_id
+                                                          AND lv.c_id = view.c_id
                                INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
                                                           AND lo.option_value = '$type'
                                INNER JOIN $tblField lf ON lf.id =  lo.field_id
@@ -2455,6 +2457,7 @@ class Tracking
         $filterType = "";
         if (!empty($type)) {
             $filterType = "INNER JOIN $tblFieldVal lv ON lv.lp_id = v.lp_id
+                                                      AND lv.c_id = v.c_id
                            INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
                                                       AND lo.option_value = '$type'
                            INNER JOIN $tblField lf ON lf.id =  lo.field_id
@@ -3639,6 +3642,7 @@ class Tracking
         if ($type) {
            $extraField = ", lo.option_display_text";
            $fieldType = "LEFT JOIN $tblFieldVal lv ON lv.lp_id = te.orig_lp_id
+                                                   AND lv.c_id = q.c_id
                          LEFT JOIN $tblFieldOpt lo ON lv.field_value = lo.id
                          LEFT JOIN $tblField lf ON lf.id =  lo.field_id 
                                                 AND lf.field_variable = 'Tipo'";            
@@ -3883,6 +3887,7 @@ class Tracking
         if ($type) {
            $extraField = ", lo.option_display_text";
            $fieldType = "LEFT JOIN $tblFieldVal lv ON lv.lp_id = te.orig_lp_id
+                                                   AND lv.c_id = q.c_id
                          LEFT JOIN $tblFieldOpt lo ON lv.field_value = lo.id
                          LEFT JOIN $tblField lf ON lf.id =  lo.field_id 
                                                 AND lf.field_variable = 'Tipo'";            

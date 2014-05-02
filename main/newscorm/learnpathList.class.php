@@ -127,7 +127,7 @@ class learnpathList {
                 'lp_visibility'     => $vis,
                 'lp_published'	    => $pub,
                 'lp_prevent_reinit' => $row['prevent_reinit'],
-          			'seriousgame_mode' => $row['seriousgame_mode'],
+          	'seriousgame_mode' => $row['seriousgame_mode'],
                 'lp_scorm_debug'    => $row['debug'],
                 'lp_display_order'  => $row['display_order'],
                 'lp_preview_image'  => stripslashes($row['preview_image']),
@@ -189,5 +189,37 @@ class learnpathList {
             }
         }
         return $lessons;
+    }
+    
+    /**
+     * Gets a table of the different learnpaths we have at the moment
+     * group by units (it works just for UTP)
+     * @return	array	Learnpath info as [lp_id] => ([lp_type]=> ..., [lp_name]=>...,[lp_desc]=>...,[lp_path]=>...)
+     */
+    function getUnitsList() {
+        $tblField = Database::get_main_table(TABLE_MAIN_LP_FIELD);
+        $tblFieldOpt = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
+        $tblFieldVal = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
+        $tblCourse = Database::get_main_table(TABLE_MAIN_COURSE);
+
+        $units = array();
+        foreach ($this->list as $lpId => $lp) {
+            $sql = "SELECT lo.option_value
+                    FROM $tblFieldVal lv
+                    INNER JOIN $tblField lf ON lf.id =  lv.field_id
+                                               AND lf.field_variable = 'Unidad'
+                    INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
+                                               AND lf.id = lo.field_id
+                    INNER JOIN $tblCourse c ON c.id = lv.c_id
+                    WHERE lv.lp_id = {$lpId}
+                    AND c.code = {$this->course_code}
+                    GROUP BY lo.option_value";
+            $res = Database::query($sql);
+            while ($row = Database::fetch_array($res,'ASSOC')) {
+                $units[$row['option_value']] = $lp;
+                $units[$row['option_value']]['lp_id'] = $lpId;
+            }
+        }
+        return $units;
     }
 }
