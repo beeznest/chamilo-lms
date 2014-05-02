@@ -820,7 +820,7 @@ class Tracking
                                   INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
                                                              AND lf.id = lo.field_id
                                                              AND lo.option_value = '$type'
-                                  WHERE c_id = {$course_info['real_id']} 
+                                  WHERE lp_view.c_id = {$course_info['real_id']} 
                                   AND $condition_user session_id = $session_id 
                                   AND lp_view.lp_id IN (" . implode(',',$lp_id) . ")
                                   GROUP BY lp_view.lp_id, user_id";

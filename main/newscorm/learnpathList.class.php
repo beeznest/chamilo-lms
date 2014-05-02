@@ -212,8 +212,9 @@ class learnpathList {
                                                AND lf.id = lo.field_id
                     INNER JOIN $tblCourse c ON c.id = lv.c_id
                     WHERE lv.lp_id = {$lpId}
-                    AND c.code = {$this->course_code}
+                    AND c.code = '{$this->course_code}'
                     GROUP BY lo.option_value";
+                    
             $res = Database::query($sql);
             while ($row = Database::fetch_array($res,'ASSOC')) {
                 $units[$row['option_value']] = $lp;
