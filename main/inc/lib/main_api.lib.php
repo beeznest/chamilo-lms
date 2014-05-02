@@ -2479,6 +2479,27 @@ function api_is_session_admin() {
  */
 function api_is_drh() {
     global $_user;
+
+    if (api_is_allowed_to_create_course()) {
+        if (isset($_configuration['permissions_teacher_make_course_sessions_drh']) &&
+            $_configuration['permissions_teacher_make_course_sessions_drh']
+        ) {
+            $courseInfo = api_get_course_info();
+            $sessionId = api_get_session_id();
+            if (!empty($courseInfo) && !empty($sessionId)) {
+                $sessionList = SessionManager::get_session_by_course($courseInfo['code']);
+                if (!empty($sessionList)) {
+                    foreach ($sessionList as $sessionInfo) {
+                        if ($sessionId == $sessionInfo['id']) {
+                            return true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     return isset($_user['status']) && $_user['status'] == DRH;
 }
 
@@ -2751,6 +2772,13 @@ function api_is_allowed_to_edit($tutor = false, $coach = false, $session_coach =
             if ($check_student_view) {
                 $is_allowed = $is_allowed && $_SESSION['studentview'] != 'studentview';
             }
+
+            /*global $_configuration;
+            if (isset($_configuration['permissions_teacher_make_course_sessions_drh']) &&
+                $_configuration['permissions_teacher_make_course_sessions_drh']
+            ) {
+                $is_allowed = $is_courseAdmin;
+            }*/
         } else {
             if ($check_student_view) {
                 $is_allowed = $is_courseAdmin && $_SESSION['studentview'] != 'studentview';

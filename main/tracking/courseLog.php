@@ -376,6 +376,21 @@ if (count($a_students) > 0) {
     echo Display::display_warning_message(get_lang('NoUsersInCourse'));
 }
 
+if (isset($_configuration['permissions_teacher_make_course_sessions_drh']) &&
+    $_configuration['permissions_teacher_make_course_sessions_drh']
+) {
+    $sessionList = SessionManager::get_session_by_course($course_info['code']);
+    if (!empty($sessionList)) {
+        echo Display::page_subheader2(get_lang('SessionList'));
+        $sessionToShow = array();
+        foreach ($sessionList as $session) {
+            $url = api_get_path(WEB_CODE_PATH).'mySpace/course.php?id_session='.$session['id'].'&cidReq='.$course_info['code'];
+            $sessionToShow[] = Display::url($session['name'], $url);
+        }
+        echo implode(', ', $sessionToShow);
+    }
+}
+
 // Send the csv file if asked.
 if ($export_csv) {
     $csv_headers = array();
