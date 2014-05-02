@@ -2481,6 +2481,7 @@ function api_is_drh() {
     global $_user;
 
     if (api_is_allowed_to_create_course()) {
+        global $_configuration;
         if (isset($_configuration['permissions_teacher_make_course_sessions_drh']) &&
             $_configuration['permissions_teacher_make_course_sessions_drh']
         ) {
