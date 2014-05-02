@@ -480,6 +480,7 @@ $(function() {
     //Generate tabs with jquery-ui
     $('#tabs').tabs();
     $( "#sub_tab" ).tabs();
+    $( "#rep_tab" ).tabs();
 });
 </script>
 
@@ -507,8 +508,12 @@ $sub_header     = array(get_lang('AllLearningPaths'), get_lang('PerWeek'), get_l
 $lp_tabs           =  Display::tabs($sub_header, array(Display::grid_html('list_default'), Display::grid_html('list_week'), Display::grid_html('list_course')), 'sub_tab');
 $courses_tab       =  Display::grid_html('courses');
 
-//DataReports
-$reports = MySpace::displayStudentProgressReport($session_id, $course_info['real_id']);
+// Sub headers Informes
+$sub_headers = array(get_lang('StudentProgressReport'), get_lang('EvaluationDetailReport'));
+$courseId = $course_info['real_id'];
+$courseProgress = MySpace::displayCourseProgressSummary(intval($courseId), intval($session_id));
+$evalDetail = MySpace::displayTrackingEvaluation(intval($session_id), intval($courseId));
+$reports_tab = Display::tabs($sub_headers, array($courseProgress, $evalDetail), 'rep_tab');
 
 // Main headers data
 $data = array(  
@@ -516,7 +521,7 @@ $data = array(
             $lp_tabs, 
             Display::grid_html('exercises'), 
             $my_reporting,
-            $reports
+            $reports_tab
         );
 echo Display::tabs($headers, $data);
 

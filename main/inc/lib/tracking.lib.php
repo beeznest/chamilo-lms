@@ -3576,9 +3576,18 @@ class Tracking
             $sessionId = 0, $courseId = 0, $exerciseId = 0, 
             $date_from, $date_to, $options = array(), $type = false)
     {
-        $sessionId  = intval($sessionId);
-        $courseId   = intval($courseId);
-        $exerciseId = intval($exerciseId);
+        if (api_is_teacher() || api_is_student()) {
+            $sessionId = api_get_session_id();
+            $courseData = SessionManager::get_course_list_by_session_id($sessionId);
+            $courseId = key($courseData);
+            $exerciseId = 0;
+            $userId = api_get_user_id();
+        } else {
+            $sessionId  = intval($sessionId);
+            $courseId   = intval($courseId);
+            $exerciseId = intval($exerciseId);
+        }
+      
         $date_from  = Database::escape_string($date_from);
         $date_to    = Database::escape_string($date_to);
         /*
@@ -3641,10 +3650,10 @@ class Tracking
         $extraField = "";
         if ($type) {
            $extraField = ", lo.option_display_text";
-           $fieldType = "LEFT JOIN $tblFieldVal lv ON lv.lp_id = te.orig_lp_id
+           $fieldType = "INNER JOIN $tblFieldVal lv ON lv.lp_id = te.orig_lp_id
                                                    AND lv.c_id = q.c_id
-                         LEFT JOIN $tblFieldOpt lo ON lv.field_value = lo.id
-                         LEFT JOIN $tblField lf ON lf.id =  lo.field_id 
+                         INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
+                         INNER JOIN $tblField lf ON lf.id =  lo.field_id 
                                                 AND lf.field_variable = 'Tipo'";            
         }
         
@@ -3696,7 +3705,11 @@ class Tracking
             if (!empty($date_to) && !empty($date_from)) {
                 $where .= sprintf(" AND (te.start_date BETWEEN '%s 00:00:00' AND '%s 23:59:59')", $date_from, $date_to);
             }
-
+            
+            if (api_is_student()) {
+                $where .= ' AND te.exe_user_id = ' . $userId;
+            }
+            
             $sql = "SELECT
                 te.session_id,
                 ta.id as attempt_id,

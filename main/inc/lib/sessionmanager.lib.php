@@ -1130,6 +1130,13 @@ class SessionManager
         if (!empty($options['order'])) {
             $order = " ORDER BY " . $options['order'];
         }
+        
+        if (api_is_student()) {
+            $sessionId = api_get_session_id();
+            $courseId = api_get_course_id();
+            $userId = api_get_user_id();
+            $where .= ' AND u.user_id = ' . $userId;
+        }
 
         //TODO, fix create report without session
         $queryVariables = array($course['code']);
@@ -1712,12 +1719,21 @@ class SessionManager
     {
         
         $courseData = api_get_course_info_by_id($courseId);
-        $user = api_get_user_info_from_username($username);
+        $user = api_get_user_info_from_username($username);        
+        
+        if (api_is_student()) {
+            $session_id = api_get_session_id();
+            $courses = SessionManager::get_course_list_by_session_id($session_id);
+            $courseData = current($courses);
+            $courseId = $courseData['id'];
+            $user = api_get_user_info();
+        }
+        
         $userId = (int)$user['user_id'];
         $list = new learnpathList($userId, $courseData['code'], $sessionId);
         $stDetail = array();
         $lpData = $list->getUnitsList();
-        
+
         foreach($lpData as $lpUnit => $learnPath) {
             $lpId = $learnPath['lp_id'];
              //Lessons

@@ -190,7 +190,7 @@ class ExtraFieldValue extends Model
         } else {
             $value_to_insert = Database::escape_string($value);
         }
-
+        
         if (!empty($this->extraFields)) {
             foreach ($this->extraFields as $extraField => $extraValue) {
                 $params[$extraField] = Database::escape_string($extraValue);
@@ -372,6 +372,17 @@ class ExtraFieldValue extends Model
                         }
                     }
                 } else {
+//                    if ($this->type == 'lp') {
+//                        $whCond = array('where' => array(
+//                                    'lp_id = ? AND 
+//                                     field_id = ? AND
+//                                     c_id = ?' => array(
+//                                    $params['lp_id'],
+//                                    $params['field_id'],
+//                                    $params['c_id']
+//                        )));
+//                        $field_values['id'] = $this->getItemIdByFields($whCond);
+//                    }
                     $params['id'] = $field_values['id'];
                     return parent::update($params, $show_query);
                 }
@@ -379,6 +390,18 @@ class ExtraFieldValue extends Model
         }
     }
 
+    /**
+     * Returns the id of the values tables
+     * @param array $whereCond
+     * @return int id
+     */
+    public function getItemIdByFields($whereCond)
+    {
+        $data = Database::select('id', $this->table, $whereCond);
+        $id = key($data);
+        return $id;
+    }
+    
     /**
      * Returns the value of the given extra field on the given resource
      * @param int Item ID (It could be a session_id, course_id or user_id)

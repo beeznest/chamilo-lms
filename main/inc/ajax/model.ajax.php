@@ -48,6 +48,8 @@ if (!in_array(
         'get_user_course_report_resumed',
         'get_user_course_report',
         'get_sessions_tracking',
+        'getEvaluationDetail',
+        'displayStudentProgressReport',
         'displayCourseProgressSummary',
         'displaySessionProgressSummary',
         'displayStudentProgressDetail'
@@ -369,14 +371,12 @@ switch ($action) {
         $count = count($session);
         break;
     case 'getEvaluationDetail':
-         //@TODO replace this for a more efficient function (not retrieving the whole data)
         $records = Tracking::get_exercise_progress(
                 $_GET['session_id'], $_GET['course_id'], 
                 $_GET['exercise_id'], "", "", true);
         $count = count($records);
         break;
     case 'getEvaluationDetailDHR':
-         //@TODO replace this for a more efficient function (not retrieving the whole data)
         $records = Tracking::getExerciseProgressSession(
                 $_GET['session_id'], $_GET['course_id'], 
                 $_GET['exercise_id'], "", "", true);
