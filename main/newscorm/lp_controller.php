@@ -860,14 +860,14 @@ switch ($action) {
             }
 
             $extraFieldValue = new ExtraFieldValue('lp');
-            $params = array(
-                'lp_id' => $_SESSION['oLP']->id
-            );
+            if (!empty($_SESSION['oLP']->id)) {
+                $_REQUEST['lp_id'] = $_SESSION['oLP']->id;
+            }
             $extraFieldValue->save_field_values($_REQUEST);
 
-            if ($_FILES['lp_preview_image']['size'] > 0)
+            if ($_FILES['lp_preview_image']['size'] > 0) {
                 $_SESSION['oLP']->upload_image($_FILES['lp_preview_image']);
-
+            }
             if (api_get_setting('search_enabled') === 'true') {
                 require_once api_get_path(LIBRARY_PATH).'specific_fields_manager.lib.php';
                 $specific_fields = get_specific_field_list();
