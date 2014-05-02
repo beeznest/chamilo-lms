@@ -58,12 +58,22 @@ if (api_is_drh()) {
             }
         }
     } else {
-        // If the drh has *not* been configured to be allowed to see all session content, then check if he has also been given access to the corresponding courses
-        $coursesFollowedList = CourseManager::get_courses_followed_by_drh(api_get_user_id());
-        $coursesFollowedList = array_keys($coursesFollowedList);
-        if (!in_array(api_get_course_id(), $coursesFollowedList)) {
-            api_not_allowed(true);
-            exit;
+        if (isset($_configuration['permissions_teacher_make_course_sessions_drh']) &&
+            $_configuration['permissions_teacher_make_course_sessions_drh'] &&
+            api_is_allowed_to_create_course()
+        ) {
+            // Course teacher can have access here
+            if (!api_is_allowed_to_create_course()) {
+                api_not_allowed(true);
+            }
+        } else {
+            // If the drh has *not* been configured to be allowed to see all session content, then check if he has also been given access to the corresponding courses
+            $coursesFollowedList = CourseManager::get_courses_followed_by_drh(api_get_user_id());
+            $coursesFollowedList = array_keys($coursesFollowedList);
+            if (!in_array(api_get_course_id(), $coursesFollowedList)) {
+                api_not_allowed(true);
+                exit;
+            }
         }
     }
 }
@@ -374,6 +384,24 @@ if (count($a_students) > 0) {
 
 } else {
     echo Display::display_warning_message(get_lang('NoUsersInCourse'));
+}
+
+global $_configuration;
+if (isset($_configuration['permissions_teacher_make_course_sessions_drh']) &&
+    $_configuration['permissions_teacher_make_course_sessions_drh']
+) {
+    $sessionList = SessionManager::get_session_by_course($course_info['code']);
+    if (!empty($sessionList)) {
+        echo Display::page_subheader2(get_lang('SessionList'));
+        $table = new HTML_Table(array('class' => 'data_table'));
+        foreach ($sessionList as $session) {
+            $url = api_get_path(WEB_CODE_PATH).'mySpace/course.php?id_session='.$session['id'].'&cidReq='.$course_info['code'];
+            $table->addRow(array(
+                Display::url($session['name'], $url))
+            );
+        }
+        $table->display();
+    }
 }
 
 // Send the csv file if asked.

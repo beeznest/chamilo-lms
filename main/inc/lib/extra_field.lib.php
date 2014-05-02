@@ -160,7 +160,10 @@ class ExtraField extends Model
         return $options;
     }
 
-
+    /**
+     * @param string $field_variable
+     * @return array|bool
+     */
     public function get_handler_field_info_by_field_variable($field_variable)
     {
         $field_variable = Database::escape_string($field_variable);
