@@ -18,6 +18,7 @@ class ExtraFieldValue extends Model
     /** @var string session_id, course_code, user_id, question id */
     public $handler_id = null;
     public $entityName;
+    public $extraFields = array();
 
     /**
      * Formats the necessary elements for the given datatype
@@ -30,6 +31,7 @@ class ExtraFieldValue extends Model
         $this->type = $type;
         $extra_field = new ExtraField($this->type);
         $this->handler_id = $extra_field->handler_id;
+        $this->extraFields = array();
 
         switch ($this->type) {
             case 'course':
@@ -60,6 +62,8 @@ class ExtraFieldValue extends Model
                 $this->table = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
                 $this->table_handler_field = Database::get_main_table(TABLE_MAIN_LP_FIELD);
                 $this->author_id = 'lp_id';
+                $this->extraFields['c_id'] = api_get_course_int_id();
+                array_push($this->columns, 'c_id');
                 //$this->entityName = 'ChamiloLMS\Entity\QuestionFieldValues';
                 break;
             default:
@@ -92,11 +96,9 @@ class ExtraFieldValue extends Model
     public function save_field_values($params)
     {
         $extra_field = new ExtraField($this->type);
-
         if (empty($params[$this->handler_id])) {
             return false;
         }
-
         foreach ($params as $key => $value) {
             $found = strpos($key, '__persist__');
             if ($found) {
@@ -120,8 +122,7 @@ class ExtraFieldValue extends Model
                     $comment = isset($params[$commentVariable]) ? $params[$commentVariable] : null;
 
                     switch ($extra_field_info['field_type']) {
-                        case ExtraField::FIELD_TYPE_TAG :
-
+                        case ExtraField::FIELD_TYPE_TAG:
                             $old = self::getAllValuesByItemAndField(
                                 $extra_field_info['id'],
                                 $params[$this->handler_id]
@@ -145,7 +146,6 @@ class ExtraFieldValue extends Model
                                 );
                                 self::save($new_params);
                             }
-
                             if (!empty($deleteItems)) {
                                 foreach ($deleteItems as $deleteFieldValue) {
                                     self::deleteValuesByHandlerAndFieldAndValue(
@@ -191,9 +191,16 @@ class ExtraFieldValue extends Model
             $value_to_insert = Database::escape_string($value);
         }
 
+        if (!empty($this->extraFields)) {
+            foreach ($this->extraFields as $extraField => $extraValue) {
+                $params[$extraField] = Database::escape_string($extraValue);
+            }
+        }
+        $show_query = true;
+
         $params['field_value'] = $value_to_insert;
 
-        //If field id exists
+        // If field id exists
         $extra_field_info = $extra_field->get($params['field_id']);
 
         if ($extra_field_info) {
@@ -431,6 +438,7 @@ class ExtraFieldValue extends Model
      */
     public function searchValuesByField($tag, $field_id, $limit = 10)
     {
+        $extraConditions = $this->getExtraFieldSqlConditions();
         $field_id = intval($field_id);
         $limit = intval($limit);
         $tag = Database::escape_string($tag);
@@ -440,6 +448,7 @@ class ExtraFieldValue extends Model
                 WHERE
                     field_id = '".$field_id."' AND
                     field_value LIKE '%$tag%'
+                    $extraConditions
                 ORDER BY field_value
                 LIMIT 0, $limit
                 ";
@@ -463,6 +472,7 @@ class ExtraFieldValue extends Model
     {
         $item_id = Database::escape_string($item_id);
         $field_variable = Database::escape_string($field_variable);
+        $extraConditions = $this->getExtraFieldSqlConditions();
 
         $sql = "SELECT s.*, field_type FROM {$this->table} s
                 INNER JOIN {$this->table_handler_field} sf
@@ -470,6 +480,7 @@ class ExtraFieldValue extends Model
                 WHERE
                     {$this->handler_id} = '$item_id'  AND
                     field_variable = '".$field_variable."'
+                    $extraConditions
                 ORDER BY id";
         $result = Database::query($sql);
         if (Database::num_rows($result)) {
@@ -496,6 +507,23 @@ class ExtraFieldValue extends Model
     }
 
     /**
+     * @return string
+     */
+    private function getExtraFieldSqlConditions()
+    {
+        $extraConditions = null;
+        if (!empty($this->extraFields)) {
+            foreach ($this->extraFields as $key => $value) {
+                $key = Database::escape_string($key);
+                $value = Database::escape_string($value);
+                $extraConditions .= " AND $key = '$value'";
+            }
+        }
+
+        return $extraConditions;
+    }
+
+    /**
      * Gets the ID from the item (course, session, etc) for which
      * the given field is defined with the given value
      * @param string Field (type of data) we want to check
@@ -505,6 +533,7 @@ class ExtraFieldValue extends Model
      */
     public function get_item_id_from_field_variable_and_field_value($field_variable, $field_value, $transform = false)
     {
+        $extraConditions = $this->getExtraFieldSqlConditions();
         $field_value = Database::escape_string($field_value);
         $field_variable = Database::escape_string($field_variable);
 
@@ -514,6 +543,7 @@ class ExtraFieldValue extends Model
                 WHERE
                     field_value  = '$field_value' AND
                     field_variable = '".$field_variable."'
+                    $extraConditions
                 ";
 
         $result = Database::query($sql);
@@ -527,17 +557,21 @@ class ExtraFieldValue extends Model
 
     /**
      * Get all values for a specific field id
-     * @param int Field ID
+     * @param int $field_id
      * @return mixed Array of values on success, false on failure or not found
      * @assert (-1) === false
      */
     public function get_values_by_field_id($field_id)
     {
+        $extraConditions = $this->getExtraFieldSqlConditions();
         $field_id = intval($field_id);
         $sql = "SELECT s.*, field_type FROM {$this->table} s
                 INNER JOIN {$this->table_handler_field} sf
                 ON (s.field_id = sf.id)
-                WHERE field_id = '".$field_id."' ORDER BY id";
+                WHERE
+                    field_id = '".$field_id."'
+                    $extraConditions
+                ORDER BY id";
         $result = Database::query($sql);
         if (Database::num_rows($result)) {
             return Database::store_result($result, 'ASSOC');
@@ -554,13 +588,17 @@ class ExtraFieldValue extends Model
     {
         $fieldId = intval($fieldId);
         $itemId = intval($itemId);
+        $extraConditions = $this->getExtraFieldSqlConditions();
+
         $sql = "SELECT s.* FROM {$this->table} s
                 INNER JOIN {$this->table_handler_field} sf
                 ON (s.field_id = sf.id)
                 WHERE
                     field_id = '".$fieldId."' AND
                     {$this->handler_id} = '$itemId'
+                    $extraConditions
                 ORDER BY field_value";
+
         $result = Database::query($sql);
         if (Database::num_rows($result)) {
             return Database::store_result($result, 'ASSOC');
@@ -579,6 +617,7 @@ class ExtraFieldValue extends Model
         $fieldId = intval($fieldId);
         $itemId = intval($itemId);
         $fieldValue = Database::escape_string($fieldValue);
+        $extraConditions = $this->getExtraFieldSqlConditions();
         $sql = "SELECT s.* FROM {$this->table} s
                 INNER JOIN {$this->table_handler_field} sf
                 ON (s.field_id = sf.id)
@@ -586,6 +625,7 @@ class ExtraFieldValue extends Model
                     field_id = '".$fieldId."' AND
                     {$this->handler_id} = '$itemId' AND
                     field_value = $fieldValue
+                    $extraConditions
                 ORDER BY field_value";
 
         $result = Database::query($sql);
@@ -603,8 +643,9 @@ class ExtraFieldValue extends Model
      */
     public function delete_all_values_by_field_id($field_id)
     {
+        $extraConditions = $this->getExtraFieldSqlConditions();
         $field_id = intval($field_id);
-        $sql = "DELETE FROM  {$this->table} WHERE field_id = $field_id";
+        $sql = "DELETE FROM {$this->table} WHERE field_id = $field_id $extraConditions";
         Database::query($sql);
     }
 
@@ -617,9 +658,13 @@ class ExtraFieldValue extends Model
      */
     public function delete_values_by_handler_and_field_id($item_id, $field_id)
     {
+        $extraConditions = $this->getExtraFieldSqlConditions();
         $field_id = intval($field_id);
         $item_id = Database::escape_string($item_id);
-        $sql = "DELETE FROM {$this->table} WHERE {$this->handler_id} = '$item_id' AND field_id = '".$field_id."' ";
+        $sql = "DELETE FROM {$this->table}
+                WHERE
+                    {$this->handler_id} = '$item_id' AND
+                    field_id = '".$field_id."'  $extraConditions ";
         Database::query($sql);
     }
 
@@ -630,6 +675,7 @@ class ExtraFieldValue extends Model
      */
     public function deleteValuesByHandlerAndFieldAndValue($itemId, $fieldId, $fieldValue)
     {
+        $extraConditions = $this->getExtraFieldSqlConditions();
         $itemId = intval($itemId);
         $fieldId = intval($fieldId);
         $fieldValue = Database::escape_string($fieldValue);
@@ -638,7 +684,9 @@ class ExtraFieldValue extends Model
                 WHERE
                     {$this->handler_id} = '$itemId' AND
                     field_id = '".$fieldId."' AND
-                    field_value = '$fieldValue'";
+                    field_value = '$fieldValue'
+                    $extraConditions
+                ";
         Database::query($sql);
     }
 
