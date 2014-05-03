@@ -433,7 +433,7 @@ class MySpace {
             get_lang('Section'),
             get_lang('Type'),
             get_lang('ExerciseName'),
-            get_lang('Username'),
+            get_lang('Code'),
             get_lang('LastName'),
             get_lang('FirstName'),
             get_lang('Time'),
@@ -450,21 +450,21 @@ class MySpace {
          * Column config
          */
         $column_model   = array(
-            array('name'=>'code', 'index'=>'code', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
-            array('name'=>'session', 'index'=>'session', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
-            array('name'=>'type', 'index'=>'type', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
-            array('name'=>'quiz_title', 'index'=>'quiz_title', 'align'=>'left', 'search' => 'true'),
-            array('name'=>'username', 'index'=>'username', 'align'=>'left', 'search' => 'true'),
-            array('name'=>'lastname', 'index'=>'lastname', 'align'=>'left', 'search' => 'true'),
-            array('name'=>'firstname', 'index'=>'firstname', 'align'=>'left', 'search' => 'true'),
-            array('name'=>'time', 'index'=>'time', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'code', 'index'=>'code', 'align'=>'left', 'search' => 'true', 'width' => '50', 'wrap_cell' => "true"),
+            array('name'=>'session', 'index'=>'session', 'align'=>'left', 'search' => 'true', 'width' => '50', 'wrap_cell' => "true"),
+            array('name'=>'type', 'index'=>'type', 'align'=>'left', 'search' => 'true', 'width' => '50', 'wrap_cell' => "true"),
+            array('name'=>'quiz_title', 'index'=>'quiz_title', 'align'=>'left', 'width' => '55', 'search' => 'true'),
+            array('name'=>'username', 'index'=>'username', 'align'=>'left', 'width' => '50', 'search' => 'true'),
+            array('name'=>'lastname', 'index'=>'lastname', 'align'=>'left', 'width' => '50', 'search' => 'true'),
+            array('name'=>'firstname', 'index'=>'firstname', 'align'=>'left', 'width' => '50', 'search' => 'true'),
+            array('name'=>'time', 'index'=>'time', 'align'=>'left', 'search' => 'true', 'width' => '80', 'wrap_cell' => "true"),
            // array('name'=>'attemps', 'index'=>'attemps', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
-            array('name'=>'question_id', 'index'=>'question_id', 'align'=>'left', 'search' => 'true'),
-            array('name'=>'question', 'index'=>'question', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
-            array('name'=>'description', 'index'=>'description', 'align'=>'left', 'width' => '550', 'search' => 'true', 'wrap_cell' => "true"),
-            array('name'=>'answer', 'index'=>'answer', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
-            array('name'=>'correct', 'index'=>'correct', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
-            array('name'=>'grade', 'index'=>'grade', 'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'question_id', 'index'=>'question_id', 'align'=>'left', 'width' => '30', 'search' => 'true'),
+            array('name'=>'question', 'index'=>'question', 'align'=>'left', 'search' => 'true', 'width' => '120', 'wrap_cell' => "true"),
+            array('name'=>'description', 'index'=>'description', 'align'=>'left', 'width' => '300', 'search' => 'true', 'wrap_cell' => "true"),
+            array('name'=>'answer', 'index'=>'answer', 'align'=>'left', 'search' => 'true', 'width' => '100', 'wrap_cell' => "true"),
+            array('name'=>'correct', 'index'=>'correct', 'align'=>'left', 'search' => 'true', 'width' => '50', 'wrap_cell' => "true"),
+            array('name'=>'grade', 'index'=>'grade', 'align'=>'left', 'search' => 'true', 'width' => '70', 'wrap_cell' => "true"),
         );
         //get dynamic column names
 
@@ -2662,7 +2662,7 @@ class MySpace {
         // jqgrid will use this URL to do the selects
         $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displaySessionProgressSummary&course_id=' . $courseId . '&session_id=' . $sessionId;
 
-        $tableId = 'sessc_prgss_rprt';
+        $tableId = 'sessc_prgss';
         $extra_params['autowidth'] = 'true';
         $extra_params['sortname'] = 'u.lastname';
         $extra_params['height'] = 'auto';
@@ -2726,9 +2726,9 @@ class MySpace {
      * @param int $courseId
      * @return string
      */
-    static function displayStudentProgressReport($sessionId = 0, $courseId = 0)
+    static function displayStudentProgressReport($sessionId = 0, $courseId = 0, $tableId = 'sess_prt')
     {
-        
+        $tableId .= "_sess_t";
         /**
          * Column name
          * The order is important you need to check the $column variable in the model.ajax.php file
@@ -2778,7 +2778,6 @@ class MySpace {
         $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressReport&session_id=' . $sessionId . '&course_id=' . $courseId;
         $urlDetail = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressDetail';
 
-        $tableId = 'sess_prgss_det_rprt';
         $extra_params['autowidth'] = 'true';
         $extra_params['sortname'] = 'u.lastname';
         $extra_params['height'] = 'auto';
@@ -2805,7 +2804,7 @@ class MySpace {
         );
 
         $extra_params['subGridRowExpanded'] = "**function(subgrid_id, row_id) {
-            var subgrid_table_id, pager_id, user_data; 
+       var subgrid_table_id, pager_id, user_data; 
             subgrid_table_id = subgrid_id+'_t';
             pager_id = 'p_'+subgrid_table_id;
             user_data = $('#" . $tableId . "').jqGrid('getRowData', row_id);
@@ -2831,7 +2830,6 @@ class MySpace {
                 pager: pager_id,
                 sortname: 'u.lastname',
                 sortorder: 'asc', height: '100%' });
-                
             $('#'+subgrid_table_id).jqGrid('navGrid','#'+pager_id,{edit:false,add:false,del:false});
 
             $('#'+subgrid_table_id).jqGrid('setGroupHeaders', {
@@ -2849,6 +2847,7 @@ class MySpace {
                      },
                 ]
             });
+
         }**";
 
         $table = Display::grid_js($tableId, $url, $columns, $column_model, $extra_params, array(), $action_links, true);

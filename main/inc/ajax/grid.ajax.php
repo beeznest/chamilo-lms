@@ -7,14 +7,15 @@ $language_file = array('admin', 'exercice', 'gradebook', 'tracking');
 
 require_once '../global.inc.php';
 
-$gridId = !empty($_REQUEST['gridId']) ? $_REQUEST['gridId'] : "";
+$gridId = !empty($_REQUEST['gridId']) ? Database::escape_string($_REQUEST['gridId']) : "";
 $sessionId = !empty($_REQUEST['sessionId']) ? intval($_REQUEST['sessionId']) : 0;
 $courseId = !empty($_REQUEST['courseId']) ? intval($_REQUEST['courseId']) : 0;
+$subgrid =  !empty($_REQUEST['subgrid']) ? Database::escape_string($_REQUEST['subgrid']) : "";
 
 switch ($gridId) {
     case 'studentProgress':
-        echo MySpace::displayStudentProgressReport($sessionId, $courseId);
-    break;
+        echo MySpace::displayStudentProgressReport($sessionId, $courseId, $subgrid);
+        break;
     case 'sessionProgress':
         echo MySpace::displaySessionProgressSummaryByCourse($courseId, $sessionId);
         break;

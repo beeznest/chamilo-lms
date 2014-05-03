@@ -3576,7 +3576,7 @@ class Tracking
             $sessionId = 0, $courseId = 0, $exerciseId = 0, 
             $date_from, $date_to, $options = array(), $type = false)
     {
-        if (api_is_teacher() || api_is_student()) {
+        if (api_is_student()) {
             $sessionId = api_get_session_id();
             $courseData = SessionManager::get_course_list_by_session_id($sessionId);
             $courseId = key($courseData);

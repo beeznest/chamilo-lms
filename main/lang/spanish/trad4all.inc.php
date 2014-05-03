@@ -1497,4 +1497,13 @@ $HideColumn = "Ocultar columna";
 $DisplayColumn = "Mostrar columna";
 $LegalAgreementAccepted = "Condiciones legales aceptadas";
 $ChooseEvaluation = "Seleccione la Evaluación";
+$Performance = "Rendimiento";
+$Lesson = "Lección";
+$Laboratory = "Laboratorio";
+$SelfLearning = "Autoaprendizaje";
+$StudentProgressReport = "Reporte de Progreso del Alumno";
+$EvaluationDetailReport = "Reporte de Detalle de Evaluaciones";
+$SessionProgressReport = "Reporte de Progreso de las Secciones";
+$LastDate = "Última Fecha";
+$Grade = "Nota";
 ?>
