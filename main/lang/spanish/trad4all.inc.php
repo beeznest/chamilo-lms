@@ -1506,4 +1506,5 @@ $EvaluationDetailReport = "Reporte de Detalle de Evaluaciones";
 $SessionProgressReport = "Reporte de Progreso de las Secciones";
 $LastDate = "Última Fecha";
 $Grade = "Nota";
+$ParametersNotFound = "Parámetros no encontrados";
 ?>

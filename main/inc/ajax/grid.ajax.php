@@ -1,5 +1,6 @@
 <?php
-/* 
+/* For licensing terms, see /license.txt */
+/**
  * This file contains only grids without headers or footers
  * @author Francis Gonzales <fgonzales@beeznest.com> 
  */
@@ -20,6 +21,6 @@ switch ($gridId) {
         echo MySpace::displaySessionProgressSummaryByCourse($courseId, $sessionId);
         break;
     default:
-        echo "Parameters not found";
+        echo get_lang('ParametersNotFound');
         break;
 }
