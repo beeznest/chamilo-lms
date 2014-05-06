@@ -1156,12 +1156,12 @@ class SessionManager
                 $where $order $limit";
         }
 
-        $sql_query = vsprintf($sql, $queryVariables);
+        $sqlQuery = vsprintf($sql, $queryVariables);
 
         if (self::$_debug) {
-            error_log(preg_replace('/\s+/', ' ', $sql_query));
+            error_log(preg_replace('/\s+/', ' ', $sqlQuery));
         }
-        $rs = Database::query($sql_query);
+        $rs = Database::query($sqlQuery);
         while ($user = Database::fetch_array($rs)) {
             $users[$user['user_id']] = $user;
         }
@@ -1171,11 +1171,11 @@ class SessionManager
          */
         $sql = "SELECT * FROM $tbl_course_lp
         WHERE c_id = %s ";  //AND session_id = %s
-        $sql_query = sprintf($sql, $course['real_id']);
+        $sqlQuery = sprintf($sql, $course['real_id']);
         if (self::$_debug) {
-            error_log(preg_replace('/\s+/', ' ', $sql_query));
+            error_log(preg_replace('/\s+/', ' ', $sqlQuery));
         }
-        $result = Database::query($sql_query);
+        $result = Database::query($sqlQuery);
         $arrLesson = array(array());
         while ($row = Database::fetch_array($result)) {
             if (empty($arrLesson[$row['session_id']]['lessons_total'])) {
@@ -1286,9 +1286,9 @@ class SessionManager
     public static function getCourseProgress($courseId, $options)
     {
         //tables
-        $session_course_user = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
+        $tblSessionCourseUser = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
         $user = Database::get_main_table(TABLE_MAIN_USER);
-        $tbl_course_lp = Database::get_course_table(TABLE_LP_MAIN);
+        $tblCourseLp = Database::get_course_table(TABLE_LP_MAIN);
 
         $course = api_get_course_info_by_id($courseId);
 
@@ -1314,16 +1314,16 @@ class SessionManager
         
         $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, 
                       u.email, s.course_code, s.id_session
-                      FROM $session_course_user s
+                      FROM $tblSessionCourseUser s
                       INNER JOIN $user u ON u.user_id = s.id_user
                       $where $order";
         
-        $sql_query = vsprintf($sql, $queryVariables);
+        $sqlQuery = vsprintf($sql, $queryVariables);
 
         if (self::$_debug) {
-            error_log(preg_replace('/\s+/', ' ', $sql_query));
+            error_log(preg_replace('/\s+/', ' ', $sqlQuery));
         }
-        $rs = Database::query($sql_query);
+        $rs = Database::query($sqlQuery);
         while ($user = Database::fetch_array($rs)) {
             $users[$user['user_id']] = $user;
         }
@@ -1331,13 +1331,13 @@ class SessionManager
         /**
          *  Lessons
          */
-        $sql = "SELECT * FROM $tbl_course_lp
+        $sql = "SELECT * FROM $tblCourseLp
         WHERE c_id = %s "; 
-        $sql_query = sprintf($sql, $course['real_id']);
+        $sqlQuery = sprintf($sql, $course['real_id']);
         if (self::$_debug) {
-            error_log(preg_replace('/\s+/', ' ', $sql_query));
+            error_log(preg_replace('/\s+/', ' ', $sqlQuery));
         }
-        $result = Database::query($sql_query);
+        $result = Database::query($sqlQuery);
         $arrLesson = array(array());
         while ($row = Database::fetch_array($result)) {
             if (empty($arrLesson[$row['session_id']]['lessons_total'])) {
@@ -1448,9 +1448,9 @@ class SessionManager
     public static function getSessionProgressSummary($courseId, $sessionId, $options)
     {
         //tables
-        $session_course_user = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
+        $tblSessionCourseUser = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
         $user = Database::get_main_table(TABLE_MAIN_USER);
-        $tbl_course_lp = Database::get_course_table(TABLE_LP_MAIN);
+        $tblCourseLp = Database::get_course_table(TABLE_LP_MAIN);
 
         $course = api_get_course_info_by_id($courseId);
 
@@ -1478,23 +1478,23 @@ class SessionManager
             $queryVariables[] = $sessionId;
             $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, 
                 u.email, s.course_code, s.id_session
-                FROM $session_course_user s
+                FROM $tblSessionCourseUser s
                 INNER JOIN $user u ON u.user_id = s.id_user
                 $where $order $limit";
         } else {
             $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, 
                 u.email, s.course_code, s.id_session
-                FROM $session_course_user s
+                FROM $tblSessionCourseUser s
                 INNER JOIN $user u ON u.user_id = s.id_user
                 $where $order $limit";
         }
         
-        $sql_query = vsprintf($sql, $queryVariables);
+        $sqlQuery = vsprintf($sql, $queryVariables);
 
         if (self::$_debug) {
-            error_log(preg_replace('/\s+/', ' ', $sql_query));
+            error_log(preg_replace('/\s+/', ' ', $sqlQuery));
         }
-        $rs = Database::query($sql_query);
+        $rs = Database::query($sqlQuery);
         while ($user = Database::fetch_array($rs)) {
             $users[$user['user_id']] = $user;
         }
@@ -1502,13 +1502,13 @@ class SessionManager
         /**
          *  Lessons
          */
-        $sql = "SELECT * FROM $tbl_course_lp
+        $sql = "SELECT * FROM $tblCourseLp
         WHERE c_id = %s "; 
-        $sql_query = sprintf($sql, $course['real_id']);
+        $sqlQuery = sprintf($sql, $course['real_id']);
         if (self::$_debug) {
-            error_log(preg_replace('/\s+/', ' ', $sql_query));
+            error_log(preg_replace('/\s+/', ' ', $sqlQuery));
         }
-        $result = Database::query($sql_query);
+        $result = Database::query($sqlQuery);
         $arrLesson = array(array());
         while ($row = Database::fetch_array($result)) {
             if (empty($arrLesson[$row['session_id']]['lessons_total'])) {
@@ -1517,7 +1517,7 @@ class SessionManager
                 $arrLesson[$row['session_id']]['lessons_total'] ++;
             }
         }
-        $sessSum = array();
+        $sessionSum = array();
         //process table info
         foreach ($users as $user) {
             $idSession = $user['id_session'];
@@ -1577,33 +1577,33 @@ class SessionManager
             $lessonper = $clicksLp + $timeSpent;
             $laboratoryper = $clicksLabo + $timeSpentLabo;
             $selflearningper = $clicksSelflear + $timeSpentSelflear;
-            if (empty($sessSum[$idSession]['course'])) {
-                $sess = api_get_session_info($idSession);
-                $sessSum[$idSession]['course'] = $course['code'];
-                $sessSum[$idSession]['session'] = $sess['name'];
-                $sessSum[$idSession]['sessionid'] = $idSession;
-                $sessSum[$idSession]['courseid'] = $courseId;
-                $sessSum[$idSession]['lesson'] = $lessonProgress;
-                $sessSum[$idSession]['laboratorypro'] = $laboratorioProgress;
-                $sessSum[$idSession]['selflearningpro'] = $autoaprendizajeProgress;
-                $sessSum[$idSession]['lessonper'] = $lessonper;
-                $sessSum[$idSession]['laboratoryper'] = $laboratoryper;
-                $sessSum[$idSession]['selflearningper'] = $selflearningper;
-                $sessSum[$idSession]['cont'] = 1;
+            if (empty($sessionSum[$idSession]['course'])) {
+                $session = api_get_session_info($idSession);
+                $sessionSum[$idSession]['course'] = $course['code'];
+                $sessionSum[$idSession]['session'] = $session['name'];
+                $sessionSum[$idSession]['sessionid'] = $idSession;
+                $sessionSum[$idSession]['courseid'] = $courseId;
+                $sessionSum[$idSession]['lesson'] = $lessonProgress;
+                $sessionSum[$idSession]['laboratorypro'] = $laboratorioProgress;
+                $sessionSum[$idSession]['selflearningpro'] = $autoaprendizajeProgress;
+                $sessionSum[$idSession]['lessonper'] = $lessonper;
+                $sessionSum[$idSession]['laboratoryper'] = $laboratoryper;
+                $sessionSum[$idSession]['selflearningper'] = $selflearningper;
+                $sessionSum[$idSession]['cont'] = 1;
             } else {
-                $sessSum[$idSession]['lesson'] += $lessonProgress;
-                $sessSum[$idSession]['laboratorypro'] += $laboratorioProgress;
-                $sessSum[$idSession]['selflearningpro'] += $autoaprendizajeProgress;
-                $sessSum[$idSession]['lessonper'] += $lessonper;
-                $sessSum[$idSession]['laboratoryper'] += $laboratoryper;
-                $sessSum[$idSession]['selflearningper'] += $selflearningper;
-                $sessSum[$idSession]['cont']++;
+                $sessionSum[$idSession]['lesson'] += $lessonProgress;
+                $sessionSum[$idSession]['laboratorypro'] += $laboratorioProgress;
+                $sessionSum[$idSession]['selflearningpro'] += $autoaprendizajeProgress;
+                $sessionSum[$idSession]['lessonper'] += $lessonper;
+                $sessionSum[$idSession]['laboratoryper'] += $laboratoryper;
+                $sessionSum[$idSession]['selflearningper'] += $selflearningper;
+                $sessionSum[$idSession]['cont']++;
             }
         }
         
         $gridData = array();
         
-        foreach ($sessSum as $session) {
+        foreach ($sessionSum as $session) {
             $gridData[] = array(
                 'course' => $session['course'],
                 'session' => $session['session'],
@@ -1622,7 +1622,7 @@ class SessionManager
     }
     
     /**
-     * 
+     * Gets the student progress detail
      * @param string $username
      * @param int $sessionId
      * @param int $courseId
@@ -1709,7 +1709,7 @@ class SessionManager
     }
 
     /**
-     * 
+     * Gets student progress detail by units
      * @param string $username
      * @param int $sessionId
      * @param int $courseId
@@ -1732,7 +1732,7 @@ class SessionManager
         $userId = (int)$user['user_id'];
         $list = new learnpathList($userId, $courseData['code'], $sessionId);
         $stDetail = array();
-        $lpData = $list->getUnitsList();
+        $lpData = $list->getLearnpathListTable();
 
         foreach($lpData as $lpUnit => $learnPath) {
             $lpId = $learnPath['lp_id'];
@@ -4840,7 +4840,7 @@ class SessionManager
     }
 
     /**
-     * 
+     * Gets the session progress by a course  code
      * @param string $courseCode
      * @param array $sessionIds
      * @return array
@@ -4894,7 +4894,7 @@ class SessionManager
     }
     
     /**
-     * 
+     * This function parse an string with percentage format to a number
      * @param string $percentageStr
      * @return float
      */
@@ -4909,7 +4909,7 @@ class SessionManager
     }
     
     /**
-     * 
+     * This function returns the average of two numbers
      * @param float $num
      * @param float $den
      * @param int $precision

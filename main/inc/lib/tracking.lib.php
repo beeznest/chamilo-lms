@@ -2434,7 +2434,8 @@ class Tracking
     }
 
     /**
-     * This funtion returns the total clicks in a Lp
+     * This function returns the total clicks in a Lp
+     * those clicks are based in the accesses
      * @param int $userId
      * @param int $courseId
      * @param int $sessionId
@@ -3562,7 +3563,7 @@ class Tracking
         return $html;
     }
    /**
-    * 
+    * Get the progress of an exercise
     * @param int $sessionId
     * @param int $courseId
     * @param int $exerciseId
@@ -3602,8 +3603,8 @@ class Tracking
         $tquiz_rel_question = Database::get_course_table(TABLE_QUIZ_TEST_QUESTION);
         $ttrack_exercises  = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
         $ttrack_attempt    = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_ATTEMPT);
-        $tblFieldVal = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
-        $tblFieldOpt = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
+        $tblFieldValue = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
+        $tblFieldOption = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
         $tblField = Database::get_main_table(TABLE_MAIN_LP_FIELD);
  
         require_once api_get_path(SYS_CODE_PATH).'exercice/exercise.lib.php';
@@ -3650,9 +3651,9 @@ class Tracking
         $extraField = "";
         if ($type) {
            $extraField = ", lo.option_display_text";
-           $fieldType = "INNER JOIN $tblFieldVal lv ON lv.lp_id = te.orig_lp_id
+           $fieldType = "INNER JOIN $tblFieldValue lv ON lv.lp_id = te.orig_lp_id
                                                    AND lv.c_id = q.c_id
-                         INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
+                         INNER JOIN $tblFieldOption lo ON lv.field_value = lo.id
                          INNER JOIN $tblField lf ON lf.id =  lo.field_id 
                                                 AND lf.field_variable = 'Tipo'";            
         }
@@ -3820,25 +3821,25 @@ class Tracking
     }
     
     /**
-    * 
+    * Gets the exercise progress in a session
     * @param int $sessionId
     * @param int $courseId
     * @param int $exerciseId
-    * @param string $date_from
-    * @param string $date_to
+    * @param string $dateFrom
+    * @param string $dateTo
     * @param array $options
     * @param bool $type
     * @return array
     */
     public static function getExerciseProgressSession(
             $sessionId = 0, $courseId = 0, $exerciseId = 0, 
-            $date_from, $date_to, $options = array(), $type = false)
+            $dateFrom, $dateTo, $options = array(), $type = false)
     {
         $sessionId  = intval($sessionId);
         $courseId   = intval($courseId);
         $exerciseId = intval($exerciseId);
-        $date_from  = Database::escape_string($date_from);
-        $date_to    = Database::escape_string($date_to);
+        $dateFrom  = Database::escape_string($dateFrom);
+        $dateTo    = Database::escape_string($dateTo);
         /*
          * This method gets the data by blocks, as previous attempts at one single
          * query made it take ages. The logic of query division is described below
@@ -3846,13 +3847,13 @@ class Tracking
         // Get tables names
         $tuser = Database::get_main_table(TABLE_MAIN_USER);
         $tquiz = Database::get_course_table(TABLE_QUIZ_TEST);
-        $tquiz_answer = Database::get_course_table(TABLE_QUIZ_ANSWER);
-        $tquiz_question = Database::get_course_table(TABLE_QUIZ_QUESTION);
-        $tquiz_rel_question = Database::get_course_table(TABLE_QUIZ_TEST_QUESTION);
-        $ttrack_exercises  = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
-        $ttrack_attempt    = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_ATTEMPT);
-        $tblFieldVal = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
-        $tblFieldOpt = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
+        $tquizAnswer = Database::get_course_table(TABLE_QUIZ_ANSWER);
+        $tquizQuestion = Database::get_course_table(TABLE_QUIZ_QUESTION);
+        $tquizRelQuestion = Database::get_course_table(TABLE_QUIZ_TEST_QUESTION);
+        $ttrackExercises  = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
+        $ttrackAttempt    = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_ATTEMPT);
+        $tblFieldValue = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
+        $tblFieldOption = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
         $tblField = Database::get_main_table(TABLE_MAIN_LP_FIELD);
  
         require_once api_get_path(SYS_CODE_PATH).'exercice/exercise.lib.php';
@@ -3895,13 +3896,13 @@ class Tracking
         // - if a course was defined, then we only loop through sessions
         // - if a session was defined, then we only loop through courses
         // - if a session and a course were defined, then we only loop once
-        $fieldType = "";
-        $extraField = "";
+        $fieldType = '';
+        $extraField = '';
         if ($type) {
-           $extraField = ", lo.option_display_text";
-           $fieldType = "LEFT JOIN $tblFieldVal lv ON lv.lp_id = te.orig_lp_id
+           $extraField = ', lo.option_display_text';
+           $fieldType = "LEFT JOIN $tblFieldValue lv ON lv.lp_id = te.orig_lp_id
                                                    AND lv.c_id = q.c_id
-                         LEFT JOIN $tblFieldOpt lo ON lv.field_value = lo.id
+                         LEFT JOIN $tblFieldOption lo ON lv.field_value = lo.id
                          LEFT JOIN $tblField lf ON lf.id =  lo.field_id 
                                                 AND lf.field_variable = 'Tipo'";            
         }
@@ -3940,8 +3941,8 @@ class Tracking
                 $order = " ORDER BY ".$options['order'];
             }
 
-            if (!empty($date_to) && !empty($date_from)) {
-                $where .= sprintf(" AND (te.start_date BETWEEN '%s 00:00:00' AND '%s 23:59:59')", $date_from, $date_to);
+            if (!empty($dateTo) && !empty($dateFrom)) {
+                $where .= sprintf(" AND (te.start_date BETWEEN '%s 00:00:00' AND '%s 23:59:59')", $dateFrom, $dateTo);
             }
 
             $sql = "SELECT
@@ -3959,11 +3960,11 @@ class Tracking
                 ta.marks as grade,
                 te.exe_cours_id
                 $extraField
-                FROM $ttrack_exercises te
-                INNER JOIN $ttrack_attempt ta ON ta.exe_id = te.exe_id
+                FROM $ttrackExercises te
+                INNER JOIN $ttrackAttempt ta ON ta.exe_id = te.exe_id
                 INNER JOIN $tquiz q ON q.id = te.exe_exo_id
-                INNER JOIN $tquiz_rel_question rq ON rq.exercice_id = q.id AND rq.c_id = q.c_id
-                INNER JOIN $tquiz_question qq ON qq.id = rq.question_id 
+                INNER JOIN $tquizRelQuestion rq ON rq.exercice_id = q.id AND rq.c_id = q.c_id
+                INNER JOIN $tquizQuestion qq ON qq.id = rq.question_id 
                                                 AND qq.c_id = rq.c_id 
                                                 AND qq.position = rq.question_order 
                                                 AND ta.question_id = rq.question_id
@@ -3991,7 +3992,7 @@ class Tracking
             // Now fill questions data. Query all questions and answers for this test to avoid
             $sqlQuestions = "SELECT tq.c_id, tq.id as question_id, tq.question, tqa.id_auto, 
                                     tqa.answer, tqa.correct, tq.position, tqa.id_auto as answer_id
-                               FROM $tquiz_question tq, $tquiz_answer tqa
+                               FROM $tquizQuestion tq, $tquizAnswer tqa
                                WHERE tqa.question_id =tq.id and tqa.c_id = tq.c_id
                                  AND tq.c_id = $courseIdx AND tq.id IN (".implode(',',$questionIds).")";
             $resQuestions = Database::query($sqlQuestions);
