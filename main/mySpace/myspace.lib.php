@@ -2536,6 +2536,7 @@ class MySpace {
         $columns = array(
             get_lang('CourseId'),
             get_lang('Course'),
+            get_lang('TimeInCourse'),
             get_lang('Lesson'), //Progress
             get_lang('Laboratory'), //Progress
             get_lang('SelfLearning'), //Progress
@@ -2549,6 +2550,7 @@ class MySpace {
         $column_model = array(
             array('name' => 'courseid', 'index' => 'courseid', 'align' => 'left', 'hidden' => 'true'),
             array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'timeincourse', 'index' => 'timeincourse', 'align' => 'left', 'search' => 'false'),
             array('name' => 'lessonpro', 'index' => 'lessonpro', 'align' => 'center', 'search' => 'false'),
             array('name' => 'laboratorypro', 'index' => 'laboratorypro', 'align' => 'center', 'search' => 'false'),
             array('name' => 'selflearningpro', 'index' => 'selflearningpro', 'align' => 'center', 'search' => 'false'),
@@ -2625,7 +2627,6 @@ class MySpace {
      */
     static function displaySessionProgressSummaryByCourse($courseId = 0, $sessionId = 0)
     {
-        
         /**
          * Column name
          * The order is important you need to check the $column variable in the model.ajax.php file
@@ -2633,8 +2634,9 @@ class MySpace {
         $columns = array(
             get_lang('SessionId'),
             get_lang('CourseId'),
-            get_lang('Session'),
+            get_lang('Section'),
             get_lang('Course'),
+            get_lang('TimeInCourse'),
             get_lang('Lesson'), //Progress
             get_lang('Laboratory'), //Progress
             get_lang('SelfLearning'), //Progress
@@ -2650,6 +2652,7 @@ class MySpace {
             array('name' => 'courseid', 'index' => 'courseid', 'align' => 'left', 'hidden' => 'true'),
             array('name' => 'session', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
             array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'timeincourse', 'index' => 'timeincourse', 'align' => 'left', 'search' => 'false'),
             array('name' => 'lessonpro', 'index' => 'lessonpro', 'align' => 'center', 'search' => 'false'),
             array('name' => 'laboratorypro', 'index' => 'laboratorypro', 'align' => 'center', 'search' => 'false'),
             array('name' => 'selflearningpro', 'index' => 'selflearningpro', 'align' => 'center', 'search' => 'false'),
@@ -2670,12 +2673,12 @@ class MySpace {
             'progress' => array(
                 "startColumnName" => 'lessonpro',
                 "numberOfColumns" => 3,
-                "titleText" => get_lang('Progress'),
+                "titleText" => "<center>" . get_lang('Progress') . "</center>",
             ),
             'performance' => array(
                 "startColumnName" => 'laboratoryper',
                 "numberOfColumns" => 2,
-                "titleText" => get_lang('Performance'),
+                "titleText" => "<center>" . get_lang('Performance') . "</center>",
             ),
         );
 
@@ -2786,12 +2789,12 @@ class MySpace {
             'progress' => array(
                 "startColumnName" => 'lessonpro',
                 "numberOfColumns" => 3,
-                "titleText" => get_lang('Progress'),
+                "titleText" =>  "<center>" . get_lang('Progress') . "</center>",
             ),
             'performance' => array(
                 "startColumnName" => 'laboratoryper',
                 "numberOfColumns" => 2,
-                "titleText" => get_lang('Performance'),
+                "titleText" =>  "<center>" . get_lang('Performance') . "</center>",
             ),
         );
 
@@ -2890,7 +2893,7 @@ class MySpace {
             get_lang('TeacherFirstname'),
             get_lang('NroStudents'), 
             //get_lang('Progress'),
-            get_lang('Lessons'),
+            get_lang('Lesson'),
             get_lang('Laboratory'),
             get_lang('SelfLearning'),
             get_lang('Lessons'),
@@ -2932,12 +2935,12 @@ class MySpace {
         $extra_params['subGrid'] = 'true';
         $extra_params['groupHeaders'] = array(
             'progress' => array(
-                "startColumnName" => 'lessonpro',
+                "startColumnName" => 'lessonPro',
                 "numberOfColumns" => 3,
                 "titleText" => get_lang('Progress'),
             ),
             'performance' => array(
-                "startColumnName" => 'laboratoryper',
+                "startColumnName" => 'lessonPer',
                 "numberOfColumns" => 3,
                 "titleText" => get_lang('Performance'),
             ),
@@ -2963,6 +2966,8 @@ class MySpace {
                 caption: '" . get_lang('StudentDetail') . "',
                 colNames: ['" . get_lang('SessionId') . "', 
                            '" . get_lang('CourseId') . "',
+                           '" . get_lang('Section') . "', 
+                           '" . get_lang('Course') . "',
                            '" . get_lang('Code') . "', 
                            '" . get_lang('Lastname') . "', 
                            '" . get_lang('Firstname') . "', 
@@ -2977,6 +2982,8 @@ class MySpace {
                 colModel: [ 
                             {'name': 'sessionid', 'index': 'sessionid', 'align': 'left', 'hidden': true}, 
                             {'name': 'courseid', 'index': 'courseid', 'align': 'left', 'hidden': true}, 
+                            {'name': 'session', 'index': 'sessionid', 'align': 'left', 'hidden': true}, 
+                            {'name': 'course', 'index': 'courseid', 'align': 'left', 'hidden': true}, 
                             {'name': 'username', 'index': 'username', 'align': 'left', 'width': 60}, 
                             {'name': 'lastname', 'index': 'lastname', 'align': 'left', 'width': 180}, 
                             {'name': 'firstname', 'index': 'firstname', 'align': 'left', 'width': 180}, 

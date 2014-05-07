@@ -1507,4 +1507,6 @@ $SessionProgressReport = "Reporte de Progreso de las Secciones";
 $LastDate = "Última Fecha";
 $Grade = "Nota";
 $ParametersNotFound = "Parámetros no encontrados";
+$TimeInCourse = "Tiempo en el Curso";
+$LastConnection = "Última Conexión";
 ?>
