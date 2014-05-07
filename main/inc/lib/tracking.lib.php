@@ -3606,6 +3606,7 @@ class Tracking
         $tblFieldValue = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
         $tblFieldOption = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
         $tblField = Database::get_main_table(TABLE_MAIN_LP_FIELD);
+        $tblItemView = Database::get_course_table(TABLE_LP_ITEM_VIEW);
  
         require_once api_get_path(SYS_CODE_PATH).'exercice/exercise.lib.php';
         
@@ -3650,8 +3651,14 @@ class Tracking
         $fieldType = "";
         $extraField = "";
         if ($type) {
-           $extraField = ", lo.option_display_text";
-           $fieldType = "INNER JOIN $tblFieldValue lv ON lv.lp_id = te.orig_lp_id
+           $extraField = "
+               , iv.id as itemViewId
+               , iv.start_time
+               , iv.total_time
+               , lo.option_display_text";
+           $fieldType = "INNER JOIN $tblItemView iv ON iv.c_id = q.c_id
+                                                   AND iv.id = te.orig_lp_item_view_id
+                         INNER JOIN $tblFieldValue lv ON lv.lp_id = te.orig_lp_id
                                                    AND lv.c_id = q.c_id
                          INNER JOIN $tblFieldOption lo ON lv.field_value = lo.id
                          INNER JOIN $tblField lf ON lf.id =  lo.field_id 
@@ -3799,7 +3806,14 @@ class Tracking
                 $data[$id]['grade'] = $row['grade'];
                 $data[$id]['course'] = $row['exe_cours_id'];
                 if ($type) {
+                    $data[$id]['startTime'] = gmdate('Y-m-d H:i:s', $row['start_time']);
+                    $data[$id]['finishTime'] = gmdate('Y-m-d H:i:s', ($row['start_time'] + $row['total_time']));
                     $data[$id]['type'] = $row['option_display_text'];
+                    $data[$id]['attempt'] = self::getAttemptNumber(
+                                                $row['user_id'], 
+                                                $row['itemViewId'],
+                                                $row['exe_cours_id']
+                                            );
                 }
             }
             /*
@@ -3817,9 +3831,40 @@ class Tracking
             answer,
             */
         }
+        
         return $data;
     }
     
+    /**
+     * 
+     * @param int $userId
+     * @param int $itemViewId
+     * @param string $courseCode
+     * @return int
+     */
+    public static function getAttemptNumber($userId, $itemViewId, $courseCode)
+    {
+        $userId = intval($userId);
+        $itemViewId = intval($itemViewId);
+        $courseCode = Database::escape_string($courseCode);
+        $tblTrackExercices = Database::get_main_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
+        
+        $sqlQuery = "SELECT count(*) FROM $tblTrackExercices
+                     WHERE exe_user_id = $userId 
+                     AND orig_lp_item_view_id = $itemViewId
+                     AND exe_cours_id = '$courseCode'
+                     GROUP BY exe_user_id, orig_lp_item_view_id, exe_cours_id
+                ";
+        $rs = Database::query($sqlQuery);    
+        if ($rs != false) {
+            $row = Database::fetch_row($rs);
+            return $row[0];
+        } else {
+            return 0;
+        }
+    }
+
+
     /**
     * Gets the exercise progress in a session
     * @param int $sessionId

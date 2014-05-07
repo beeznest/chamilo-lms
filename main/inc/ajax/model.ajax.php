@@ -373,7 +373,7 @@ switch ($action) {
     case 'getEvaluationDetail':
         $records = Tracking::get_exercise_progress(
                 $_GET['session_id'], $_GET['course_id'], 
-                $_GET['exercise_id'], "", "", true);
+                $_GET['exercise_id'], "", "", "", true);
         $count = count($records);
         break;
     case 'getEvaluationDetailDHR':
@@ -1306,7 +1306,9 @@ switch ($action) {
             'username',
             'lastname',
             'firstname',
-            'time',
+            'startTime',
+            'finishTime',
+            'attempt',
             'question_id',
             'question',
             'description',
@@ -1323,7 +1325,9 @@ switch ($action) {
             get_lang('Code'),
             get_lang('Lastname'),
             get_lang('Firstname'),
-            get_lang('Date'),
+            get_lang('StartTime'),
+            get_lang('FinishTime'),
+            get_lang('Attempts'),
             get_lang('Question') . " Id",
             get_lang('Question'),
             get_lang('Description'),
