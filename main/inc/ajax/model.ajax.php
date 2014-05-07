@@ -791,6 +791,7 @@ switch ($action) {
             'lesson',
             'laboratorypro',
             'selflearningpro',
+            'lessonper',
             'laboratoryper',
             'selflearningper',
             'lastconnection',
@@ -798,19 +799,20 @@ switch ($action) {
             );
         
         $column_names = array(
-            get_lang('SessionId'),
-            get_lang('CourseId'),
+            get_lang('SessionCode'),
+            get_lang('CourseCode'),
             get_lang('Course'),
             get_lang('Section'),
             get_lang('Code'),
-            get_lang('Lastname'),
-            get_lang('Firstname'),
+            get_lang('LastName'),
+            get_lang('FirstName'),
             get_lang('TimeInCourse'),
             get_lang('Lesson'),
             get_lang('Laboratory'),
-            get_lang('Selflearning'),
+            get_lang('SelfLearning'),
+            get_lang('Lesson'),
             get_lang('Laboratory'),
-            get_lang('Selflearning'),
+            get_lang('SelfLearning'),
             get_lang('LastConnection')
             );
    
@@ -835,17 +837,19 @@ switch ($action) {
             'lesson',
             'laboratorypro',
             'selflearningpro',
+            'lessonper',
             'laboratoryper',
             'selflearningper',
             );
         
         $column_names = array(
-            get_lang('CourseId'),
+            get_lang('CourseCode'),
             get_lang('Course'),
             get_lang('TimeInCourse'),
             get_lang('Lesson'),
             get_lang('Laboratory'),
             get_lang('SelfLearning'),
+            get_lang('Lesson'),
             get_lang('Laboratory'),
             get_lang('SelfLearning')
         );
@@ -866,19 +870,21 @@ switch ($action) {
             'lessonpro',
             'laboratorypro',
             'selflearningpro',
+            'lessonper',
             'laboratoryper',
             'selflearningper',
             );
         
         $column_names = array(
-            get_lang('SessionId'),
-            get_lang('CourseId'),
+            get_lang('SessionCode'),
+            get_lang('CourseCode'),
             get_lang('Section'),
             get_lang('Course'),
             get_lang('TimeInCourse'),
             get_lang('Lesson'),
             get_lang('Laboratory'),
             get_lang('SelfLearning'),
+            get_lang('Lesson'),
             get_lang('Laboratory'),
             get_lang('SelfLearning')
         );
@@ -1395,13 +1401,13 @@ switch ($action) {
         );
         
         $column_names = array(
-            get_lang('SessionId'),
-            get_lang('CourseId'),
+            get_lang('SessionCode'),
+            get_lang('CourseCode'),
             get_lang('Course'),
             get_lang('Section'),
-            get_lang('TeacherId'),
-            get_lang('Lastname'),
-            get_lang('Firstname'),
+            get_lang('TeacherCode'),
+            get_lang('LastName'),
+            get_lang('FirstName'),
             get_lang('Students'),
             get_lang('Lesson'),
             get_lang('Laboratory'),

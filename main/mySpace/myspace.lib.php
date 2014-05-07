@@ -2542,6 +2542,7 @@ class MySpace {
             get_lang('Lesson'), //Progress
             get_lang('Laboratory'), //Progress
             get_lang('SelfLearning'), //Progress
+            get_lang('Lesson'), //Performance
             get_lang('Laboratory'), //Performance
             get_lang('SelfLearning'), //Performance
         );
@@ -2556,6 +2557,7 @@ class MySpace {
             array('name' => 'lessonpro', 'index' => 'lessonpro', 'align' => 'center', 'search' => 'false'),
             array('name' => 'laboratorypro', 'index' => 'laboratorypro', 'align' => 'center', 'search' => 'false'),
             array('name' => 'selflearningpro', 'index' => 'selflearningpro', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'lessonper', 'index' => 'laboratoryper', 'align' => 'center', 'search' => 'false'),
             array('name' => 'laboratoryper', 'index' => 'laboratoryper', 'align' => 'center', 'search' => 'false'),
             array('name' => 'selflearningper', 'index' => 'selflearningper', 'align' => 'center', 'search' => 'false'),
         );
@@ -2576,8 +2578,8 @@ class MySpace {
                 "titleText" => get_lang('Progress'),
             ),
             'performance' => array(
-                "startColumnName" => 'laboratoryper',
-                "numberOfColumns" => 2,
+                "startColumnName" => 'lessonper',
+                "numberOfColumns" => 3,
                 "titleText" => get_lang('Performance'),
             ),
         );
@@ -2642,6 +2644,7 @@ class MySpace {
             get_lang('Lesson'), //Progress
             get_lang('Laboratory'), //Progress
             get_lang('SelfLearning'), //Progress
+            get_lang('Lesson'), //Performance
             get_lang('Laboratory'), //Performance
             get_lang('SelfLearning'), //Performance
         );
@@ -2658,6 +2661,7 @@ class MySpace {
             array('name' => 'lessonpro', 'index' => 'lessonpro', 'align' => 'center', 'search' => 'false'),
             array('name' => 'laboratorypro', 'index' => 'laboratorypro', 'align' => 'center', 'search' => 'false'),
             array('name' => 'selflearningpro', 'index' => 'selflearningpro', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'lessonper', 'index' => 'lessonper', 'align' => 'center', 'search' => 'false'),
             array('name' => 'laboratoryper', 'index' => 'laboratoryper', 'align' => 'center', 'search' => 'false'),
             array('name' => 'selflearningper', 'index' => 'selflearningper', 'align' => 'center', 'search' => 'false'),
         );
@@ -2678,8 +2682,8 @@ class MySpace {
                 "titleText" => "<center>" . get_lang('Progress') . "</center>",
             ),
             'performance' => array(
-                "startColumnName" => 'laboratoryper',
-                "numberOfColumns" => 2,
+                "startColumnName" => 'lessonper',
+                "numberOfColumns" => 3,
                 "titleText" => "<center>" . get_lang('Performance') . "</center>",
             ),
         );
@@ -2750,6 +2754,7 @@ class MySpace {
             get_lang('Lesson'), //Progress
             get_lang('Laboratory'), //Progress
             get_lang('SelfLearning'), //Progress
+            get_lang('Lesson'), //Performance
             get_lang('Laboratory'), //Performance
             get_lang('SelfLearning'), //Performance
             get_lang('LastConnection'),
@@ -2771,6 +2776,7 @@ class MySpace {
             array('name' => 'lessonpro', 'index' => 'lessonpro', 'align' => 'center', 'search' => 'false'),
             array('name' => 'laboratorypro', 'index' => 'laboratorypro', 'align' => 'center', 'search' => 'false'),
             array('name' => 'selflearningpro', 'index' => 'selflearningpro', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'lessonper', 'index' => 'lessonper', 'align' => 'center', 'search' => 'false'),
             array('name' => 'laboratoryper', 'index' => 'laboratoryper', 'align' => 'center', 'search' => 'false'),
             array('name' => 'selflearningper', 'index' => 'selflearningper', 'align' => 'center', 'search' => 'false'),
             array('name' => 'lastconnection', 'index' => 'lastconnection', 'align' => 'center', 'search' => 'true'),
@@ -2794,8 +2800,8 @@ class MySpace {
                 "titleText" =>  "<center>" . get_lang('Progress') . "</center>",
             ),
             'performance' => array(
-                "startColumnName" => 'laboratoryper',
-                "numberOfColumns" => 2,
+                "startColumnName" => 'lessonper',
+                "numberOfColumns" => 3,
                 "titleText" =>  "<center>" . get_lang('Performance') . "</center>",
             ),
         );
@@ -2889,16 +2895,15 @@ class MySpace {
             get_lang('SessionId'),
             get_lang('CourseId'),
             get_lang('Course'),
-            get_lang('Session'),
-            get_lang('TeacherId'),
-            get_lang('TeacherLastname'),
-            get_lang('TeacherFirstname'),
-            get_lang('NroStudents'), 
-            //get_lang('Progress'),
+            get_lang('Section'),
+            get_lang('TeacherCode'),
+            get_lang('LastName'),
+            get_lang('FirstName'),
+            get_lang('Students'), 
             get_lang('Lesson'),
             get_lang('Laboratory'),
             get_lang('SelfLearning'),
-            get_lang('Lessons'),
+            get_lang('Lesson'),
             get_lang('Laboratory'),
             get_lang('SelfLearning')
         );
@@ -2971,12 +2976,13 @@ class MySpace {
                            '" . get_lang('Section') . "', 
                            '" . get_lang('Course') . "',
                            '" . get_lang('Code') . "', 
-                           '" . get_lang('Lastname') . "', 
-                           '" . get_lang('Firstname') . "', 
+                           '" . get_lang('LastName') . "', 
+                           '" . get_lang('FirstName') . "', 
                            '" . get_lang('TimeInCourse') . "',
                            '" . get_lang('Lesson') . "', 
                            '" . get_lang('Laboratory') . "',
                            '" . get_lang('SelfLearning') . "',
+                           '" . get_lang('Lesson') . "', 
                            '" . get_lang('Laboratory') . "',
                            '" . get_lang('SelfLearning') . "',
                            '" . get_lang('LastConnection') . "',
@@ -2993,6 +2999,7 @@ class MySpace {
                             {'name': 'lessonpro', 'index': 'lessonpro', 'align': 'center', 'width': 60}, 
                             {'name': 'laboratorypro', 'index': 'laboratorypro', 'align': 'center', 'width': 60}, 
                             {'name': 'selflearningpro', 'index': 'selflearningpro', 'align': 'center', 'width': 60}, 
+                            {'name': 'lessonper', 'index': 'lessonper', 'align': 'center', 'width': 60}, 
                             {'name': 'laboratoryper', 'index': 'laboratoryper', 'align': 'center', 'width': 60}, 
                             {'name': 'selflearningper', 'index': 'selflearningper', 'align': 'center', 'width': 60}, 
                             {'name': 'lastconnection', 'index': 'lastconnection', 'align': 'center', 'width': 120},
@@ -3016,7 +3023,7 @@ class MySpace {
                      },
                      {
                         startColumnName:'lessonper',
-                        numberOfColumns:2,
+                        numberOfColumns:3,
                         titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Performance') . "</div>'
                      },
                 ]
