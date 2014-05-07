@@ -1509,4 +1509,5 @@ $Grade = "Nota";
 $ParametersNotFound = "Parámetros no encontrados";
 $TimeInCourse = "Tiempo en el Curso";
 $LastConnection = "Última Conexión";
+$FinishTime = "Hora de Fin";
 ?>
