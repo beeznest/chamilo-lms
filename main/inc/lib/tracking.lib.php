@@ -4232,12 +4232,13 @@ class Tracking
         $gridData = array();
         
         foreach ($sessionSum as $session) {
+            $secondsProm = self::avg($session['timeSpentCourse'], $session['cont']);
             $gridData[] = array(
                 'course' => $session['course'],
                 'session' => $session['session'],
                 'sessionid' => $session['sessionid'],
                 'courseid' => $session['courseid'],
-                'timeincourse' => timestampToHoursMinutesSeconds($session['timeSpentCourse']),
+                'timeincourse' => timestampToHoursMinutesSeconds($secondsProm),
                 'lessonpro' => self::avg($session['lessonpro'], $session['cont']) . " %",
                 'laboratorypro' => self::avg($session['laboratorypro'], $session['cont']) . " %",
                 'selflearningpro' => self::avg($session['selflearningpro'], $session['cont']) . " %",

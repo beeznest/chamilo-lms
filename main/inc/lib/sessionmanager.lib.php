@@ -1437,11 +1437,12 @@ class SessionManager
         }
         
         $gridData = array();
+        $secondsProm = Tracking::avg($timeInCourse, $cont, 2);
         // TODO add the graph
         $gridData[] = array(
                     'course' => $course['code'],
                     'courseid' => $courseId,
-                    'timeincourse' => timestampToHoursMinutesSeconds($timeInCourse),
+                    'timeincourse' => timestampToHoursMinutesSeconds($secondsProm),
                     'lesson' => Tracking::avg($lessonPg, $cont, 2) . " %",
                     'laboratorypro' => Tracking::avg($laboraPg, $cont, 2) . " %",
                     'selflearningpro' => Tracking::avg($autoapPg, $cont, 2) . " %",
