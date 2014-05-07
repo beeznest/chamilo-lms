@@ -6,7 +6,6 @@
  * File containing the declaration of the learnpathList class.
  * @package	chamilo.learnpath
  * @author	Yannick Warnier <ywarnier@beeznest.org>
- * @
  */
 
 /**
