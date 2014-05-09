@@ -783,3 +783,18 @@ function bracketsToArray($array)
 {
     return preg_split('/[\[\]]+/', $array, -1, PREG_SPLIT_NO_EMPTY);
 }
+
+/**
+ * This function allows convert seconds to a hour format (H:i:s)
+ * @param type $timeInSencods
+ * @return string
+ */
+function timestampToHoursMinutesSeconds($timeInSencods) 
+{
+    $init = $timeInSencods;
+    $hours = floor($init / 3600);
+    $minutes = substr("0" . floor(($init / 60) % 60), -2);
+    $seconds = substr("0" . ($init % 60), -2);
+    
+    return $hours . ":" . $minutes . ":" . $seconds;
+}

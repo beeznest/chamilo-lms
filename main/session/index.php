@@ -480,6 +480,7 @@ $(function() {
     //Generate tabs with jquery-ui
     $('#tabs').tabs();
     $( "#sub_tab" ).tabs();
+    $( "#rep_tab" ).tabs();
 });
 </script>
 
@@ -493,14 +494,35 @@ if (empty($my_reporting)) {
 }
 
 // Main headers
-$headers        = array(get_lang('Courses'), get_lang('LearningPaths'), get_lang('MyQCM'), get_lang('MyStatistics'));
+$headers = array(
+    get_lang('Courses'),
+    get_lang('LearningPaths'),
+    get_lang('MyQCM'),
+    get_lang('MyStatistics'),
+    get_lang('Reports')
+);
 // Subheaders
 $sub_header     = array(get_lang('AllLearningPaths'), get_lang('PerWeek'), get_lang('ByCourse'));
 
 // Sub headers data
 $lp_tabs           =  Display::tabs($sub_header, array(Display::grid_html('list_default'), Display::grid_html('list_week'), Display::grid_html('list_course')), 'sub_tab');
 $courses_tab       =  Display::grid_html('courses');
+
+// Sub headers Informes
+$sub_headers = array(get_lang('StudentProgressReport'), get_lang('EvaluationDetailReport'));
+$courseId = $course_info['real_id'];
+$courseProgress = MySpace::displayCourseProgressSummary(intval($courseId), intval($session_id));
+$evalDetail = MySpace::displayTrackingEvaluation(intval($session_id), intval($courseId));
+$reports_tab = Display::tabs($sub_headers, array($courseProgress, $evalDetail), 'rep_tab');
+
 // Main headers data
-echo Display::tabs($headers, array($courses_tab, $lp_tabs, Display::grid_html('exercises'), $my_reporting));
+$data = array(  
+            $courses_tab, 
+            $lp_tabs, 
+            Display::grid_html('exercises'), 
+            $my_reporting,
+            $reports_tab
+        );
+echo Display::tabs($headers, $data);
 
 Display::display_footer();
