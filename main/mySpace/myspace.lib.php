@@ -2528,7 +2528,7 @@ class MySpace {
      * @param int $courseId
      * @return string
      */
-    static function displayCourseProgressSummary($courseId = 0, $sessionId = 0)
+    public static function displayCourseProgressSummary($courseId = 0, $sessionId = 0)
     {
         
         /**
@@ -2553,13 +2553,13 @@ class MySpace {
         $column_model = array(
             array('name' => 'courseid', 'index' => 'courseid', 'align' => 'left', 'hidden' => 'true'),
             array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'timeincourse', 'index' => 'timeincourse', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'lessonpro', 'index' => 'lessonpro', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'laboratorypro', 'index' => 'laboratorypro', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'selflearningpro', 'index' => 'selflearningpro', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'lessonper', 'index' => 'laboratoryper', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'laboratoryper', 'index' => 'laboratoryper', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'selflearningper', 'index' => 'selflearningper', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'time_in_course', 'index' => 'time_in_course', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'lesson_progress', 'index' => 'lesson_progress', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'self_learning_progress', 'index' => 'self_learning_progress', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'lesson_performance', 'index' => 'lesson_performance', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'laboratory_performance', 'index' => 'laboratory_performance', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'self_learning_perfomance', 'index' => 'self_learning_perfomance', 'align' => 'center', 'search' => 'false'),
         );
 
         $action_links = '';
@@ -2567,18 +2567,18 @@ class MySpace {
         // jqgrid will use this URL to do the selects
         $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayCourseProgressSummary&course_id=' . $courseId;
 
-        $tableId = 'crs_prgss_rprt';
+        $tableId = 'course_progress_report';
         $extra_params['autowidth'] = 'true';
         $extra_params['sortname'] = 'u.lastname';
         $extra_params['height'] = 'auto';
         $extra_params['groupHeaders'] = array(
             'progress' => array(
-                "startColumnName" => 'lessonpro',
+                "startColumnName" => 'lesson_progress',
                 "numberOfColumns" => 3,
                 "titleText" => get_lang('Progress'),
             ),
             'performance' => array(
-                "startColumnName" => 'lessonper',
+                "startColumnName" => 'lesson_performance',
                 "numberOfColumns" => 3,
                 "titleText" => get_lang('Performance'),
             ),
@@ -2657,13 +2657,13 @@ class MySpace {
             array('name' => 'courseid', 'index' => 'courseid', 'align' => 'left', 'hidden' => 'true'),
             array('name' => 'session', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
             array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'timeincourse', 'index' => 'timeincourse', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'lessonpro', 'index' => 'lessonpro', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'laboratorypro', 'index' => 'laboratorypro', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'selflearningpro', 'index' => 'selflearningpro', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'lessonper', 'index' => 'lessonper', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'laboratoryper', 'index' => 'laboratoryper', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'selflearningper', 'index' => 'selflearningper', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'time_in_course', 'index' => 'time_in_course', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'lesson_progress', 'index' => 'lesson_progress', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'self_learning_progress', 'index' => 'self_learning_progress', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'lesson_performance', 'index' => 'lesson_performance', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'laboratory_performance', 'index' => 'laboratory_performance', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'self_learning_performance', 'index' => 'self_learning_performance', 'align' => 'center', 'search' => 'false'),
         );
 
         $action_links = '';
@@ -2677,12 +2677,12 @@ class MySpace {
         $extra_params['height'] = 'auto';
         $extra_params['groupHeaders'] = array(
             'progress' => array(
-                "startColumnName" => 'lessonpro',
+                "startColumnName" => 'lesson_progress',
                 "numberOfColumns" => 3,
                 "titleText" => "<center>" . get_lang('Progress') . "</center>",
             ),
             'performance' => array(
-                "startColumnName" => 'lessonper',
+                "startColumnName" => 'lesson_performance',
                 "numberOfColumns" => 3,
                 "titleText" => "<center>" . get_lang('Performance') . "</center>",
             ),
@@ -2772,14 +2772,14 @@ class MySpace {
             array('name' => 'username', 'index' => 'username', 'align' => 'left', 'search' => 'true', 'wrap_cell' => "true"),
             array('name' => 'firstname', 'index' => 'firstname', 'align' => 'left', 'search' => 'true'),
             array('name' => 'lastname', 'index' => 'lastname', 'align' => 'left', 'search' => 'true'),
-            array('name' => 'timeincourse', 'index' => 'timeincourse', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'lessonpro', 'index' => 'lessonpro', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'laboratorypro', 'index' => 'laboratorypro', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'selflearningpro', 'index' => 'selflearningpro', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'lessonper', 'index' => 'lessonper', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'laboratoryper', 'index' => 'laboratoryper', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'selflearningper', 'index' => 'selflearningper', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'lastconnection', 'index' => 'lastconnection', 'align' => 'center', 'search' => 'true'),
+            array('name' => 'time_in_course', 'index' => 'time_in_course', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'lesson_progress', 'index' => 'lesson_progress', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'self_learning_progress', 'index' => 'self_learning_progress', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'lesson_performance', 'index' => 'lesson_performance', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'laboratory_performance', 'index' => 'laboratory_performance', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'self_learning_performance', 'index' => 'self_learning_performance', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'last_connection', 'index' => 'last_connection', 'align' => 'center', 'search' => 'true'),
             array('name' => 'detail', 'index' => 'detail', 'align' => 'center', 'search' => 'false'),
         );
 
@@ -2795,12 +2795,12 @@ class MySpace {
         $extra_params['subGrid'] = 'true';
         $extra_params['groupHeaders'] = array(
             'progress' => array(
-                "startColumnName" => 'lessonpro',
+                "startColumnName" => 'lesson_progress',
                 "numberOfColumns" => 3,
                 "titleText" =>  "<center>" . get_lang('Progress') . "</center>",
             ),
             'performance' => array(
-                "startColumnName" => 'lessonper',
+                "startColumnName" => 'lesson_performance',
                 "numberOfColumns" => 3,
                 "titleText" =>  "<center>" . get_lang('Performance') . "</center>",
             ),
@@ -2829,13 +2829,13 @@ class MySpace {
                            '" . get_lang('Laboratory') . "', '" . get_lang('SelfLearning') . "',
                            '" . get_lang('LastDate') . "'],
                 colModel: [ 
-                            {name:'lessonname', index:'lessonname', width:450, key:true},
-                            {name:'lessonpro', index:'lessonpro', width:70, align:'center'},
-                            {name:'labpro', index:'labpro', width:70, align:'center'},
-                            {name:'autoaprpro', index:'autoaprpro', width:70, align:'center'},
-                            {name:'lessonper', index:'lessonper', width:70, align:'center'},
-                            {name:'labper', index:'labper', width:70, align:'center'},
-                            {name:'autoaprper', index:'autoaprper', width:150, align:'center'}
+                            {name:'lesson_name', index:'lesson_name', width:450, key:true},
+                            {name:'lesson_progress', index:'lesson_progress', width:70, align:'center'},
+                            {name:'laboratory_progress', index:'laboratory_progress', width:70, align:'center'},
+                            {name:'self_learning_progress', index:'self_learning_progress', width:70, align:'center'},
+                            {name:'lesson_performance', index:'lesson_performance', width:70, align:'center'},
+                            {name:'laboratory_performance', index:'laboratory_performance', width:70, align:'center'},
+                            {name:'self_learning_performance', index:'self_learning_performance', width:150, align:'center'}
                           ], 
                 rowNum:20,
                 pager: pager_id,
@@ -2847,12 +2847,12 @@ class MySpace {
                 useColSpanStyle: false,                    
                 groupHeaders: [
                     {
-                        startColumnName:'lessonpro',
+                        startColumnName:'lesson_progress',
                         numberOfColumns:3,
                         titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Progress') . "</div>'
                      },
                      {
-                        startColumnName:'lessonper',
+                        startColumnName:'lesson_performance',
                         numberOfColumns:2,
                         titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Performance') . "</div>'
                      },

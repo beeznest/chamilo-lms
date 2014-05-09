@@ -171,12 +171,16 @@ echo '<a href="javascript: void(0);" onclick="javascript: window.print()">'.
 echo '</span>';
 
 $options = array(
-                'accessoverview', 'lpprogressoverview',
-                'progressoverview', 'exerciseprogress', 
-                'surveyoverview', 'lpgradereport',
-                'studentprogressreport', 'evaluationdetailreport',
-                'sessionprogressreport'
-            );
+    'accessoverview',
+    'lpprogressoverview',
+    'progressoverview',
+    'exerciseprogress',
+    'surveyoverview',
+    'lpgradereport',
+    'studentprogressreport',
+    'evaluationdetailreport',
+    'sessionprogressreport'
+);
 if (!empty($session_id) && !in_array($display, $options)) {
     echo '<a href="index.php">'.Display::return_icon('back.png', get_lang('Back'),'',ICON_SIZE_MEDIUM).'</a>';
     if (!api_is_platform_admin()) {
@@ -627,17 +631,17 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
     echo '<br /><br />';
 
     $listToDisplay = array(
-                        'accessoverview',
-                        'lpprogressoverview', 
-                        'progressoverview', 
-                        'exerciseprogress', 
-                        'surveyoverview', 
-                        'lpgradereport',
-                        'studentprogressreport',
-                        'evaluationdetailreport',
-                        'sessionprogressreport'
-                    );
-    
+        'accessoverview',
+        'lpprogressoverview',
+        'progressoverview',
+        'exerciseprogress',
+        'surveyoverview',
+        'lpgradereport',
+        'studentprogressreport',
+        'evaluationdetailreport',
+        'sessionprogressreport'
+    );
+
     if ($is_platform_admin && $view == 'admin' && in_array($display, $listToDisplay)) {
         //selft script
         $self       = api_get_self();
@@ -833,14 +837,14 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
         }
 
         $opts = array(
-                'surveyoverview', 
-                'progressoverview', 
-                'exerciseprogress', 
-                'lpgradereport', 
-                'studentprogressreport',
-                'sessionprogressreport'
-            );
-        
+            'surveyoverview',
+            'progressoverview',
+            'exerciseprogress',
+            'lpgradereport',
+            'studentprogressreport',
+            'sessionprogressreport'
+        );
+
         //date filter
         if (!in_array($display, $opts)) {
             $sessionFilter->addElement('text', 'from', get_lang('From'), array('id' => 'date_from', 'value' => (!empty($_GET['date_from']) ? $_GET['date_from'] : ''), 'style' => 'width:75px' ));

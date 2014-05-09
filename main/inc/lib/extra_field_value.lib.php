@@ -392,12 +392,12 @@ class ExtraFieldValue extends Model
 
     /**
      * Returns the id of the values tables
-     * @param array $whereCond
+     * @param array $whereConditions
      * @return int id
      */
-    public function getItemIdByFields($whereCond)
+    public function getItemIdByFields($whereConditions)
     {
-        $data = Database::select('id', $this->table, $whereCond);
+        $data = Database::select('id', $this->table, $whereConditions);
         $id = key($data);
         return $id;
     }
