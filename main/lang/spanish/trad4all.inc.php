@@ -1497,4 +1497,7 @@ $HideColumn = "Ocultar columna";
 $DisplayColumn = "Mostrar columna";
 $LegalAgreementAccepted = "Condiciones legales aceptadas";
 $ChooseEvaluation = "Seleccione la Evaluación";
+$Unit = "Unidad";
+$Units = "Unidades";
+$WithoutUnits = "Sin Unidades";
 ?>

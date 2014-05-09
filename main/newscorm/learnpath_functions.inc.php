@@ -2213,3 +2213,35 @@ function rcopy($source, $dest) {
         }
     }
 }
+
+/**
+ * This function returns 
+ * the Unidad value in the extra fields for LPs
+ * @param int $lpId
+ * @param string $courseCode
+ * 
+ * @return int Unit
+ */
+function getLearningPathUnit($lpId, $courseCode) 
+{
+    $tblField = Database::get_main_table(TABLE_MAIN_LP_FIELD);
+    $tblFieldOpt = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
+    $tblFieldVal = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
+    $tblCourse = Database::get_main_table(TABLE_MAIN_COURSE);
+    
+    $sql = "SELECT lo.option_value
+                    FROM $tblFieldVal lv
+                    INNER JOIN $tblField lf ON lf.id =  lv.field_id
+                                               AND lf.field_variable = 'Unidad'
+                    INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
+                                               AND lf.id = lo.field_id
+                    INNER JOIN $tblCourse c ON c.id = lv.c_id
+                    WHERE lv.lp_id = $lpId
+                    AND c.code = '$courseCode'
+                    GROUP BY lo.option_value";
+    
+    $res = Database::query($sql);
+    $row = Database::fetch_array($res);
+    
+    return $row['option_value'];
+}

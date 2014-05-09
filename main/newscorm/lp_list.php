@@ -24,6 +24,7 @@ $baseWordDir = $courseDir;
 require_once 'learnpathList.class.php';
 require_once 'learnpath.class.php';
 require_once 'learnpathItem.class.php';
+require_once 'learnpath_functions.inc.php';
 
 /**
  * Display initialisation and security checks
@@ -104,18 +105,43 @@ $token = Security::get_token();
 /* DISPLAY SCORM LIST */
 $list = new LearnpathList(api_get_user_id());
 $flat_list = $list->get_flat_list();
-
+$course_info = api_get_course_info();
 if (!empty($flat_list)) {
-    echo '<table class="data_table">';
+    //Re order array
+    $tmpList = array();
+    foreach ($flat_list as $lpId => $flat) {
+        $unit = getLearningPathUnit($lpId, $course_info['code']);        
+        if (empty($unit)) {
+            $unit = 99999;
+        }
+        $tmpList[$unit][$lpId] = $flat;
+    }
+    
+    ksort($tmpList);
+    unset($flat_list);
+    
+    foreach ($tmpList as $unit => $list) {
+        $countLessons = count($tmpList[$unit]);
+        foreach ($list as $lpId => $flat) {
+            $flat_list[$lpId] = $flat;
+            $flat_list[$lpId]['unit'] = $unit;
+            $flat_list[$lpId]['countLp'] = $countLessons;
+        }
+    }
+    //End of Re order
+    
+    echo '<table class="table table-bordered">';
     echo '<tr>';
 
     if ($is_allowed_to_edit) {
+        echo '<th>'.get_lang('Unit').'</th>';
         echo '<th width="50%">'.get_lang('Title').'</th>';
         echo '<th>'.get_lang('PublicationDate').'</th>';
         echo '<th>'.get_lang('ExpirationDate').'</th>';
         echo '<th>'.get_lang('Progress')."</th>";
         echo '<th width="240px">'.get_lang('AuthoringOptions')."</th>";
     } else {
+        echo '<th>'.get_lang('Unit').'</th>';
         echo '<th width="50%">'.get_lang('Title').'</th>';
         echo '<th>'.get_lang('Progress')."</th>";
         echo '<th>'.get_lang('Actions')."</th>";
@@ -127,6 +153,7 @@ if (!empty($flat_list)) {
     $counter = 0;
     $current = 0;
     $autolunch_exists = false;
+    $unitTmp = -1;
     foreach ($flat_list as $id => $details) {
 
         // Validacion when belongs to a session
@@ -183,11 +210,7 @@ if (!empty($flat_list)) {
         }
 
         $counter++;
-        if (($counter % 2) == 0) {
-            $oddclass = 'row_odd';
-        } else {
-            $oddclass = 'row_even';
-        }
+        $oddclass = 'row_even';
 
         $url_start_lp = 'lp_controller.php?'.api_get_cidreq().'&action=view&lp_id='.$id;
         $name = Security::remove_XSS($details['lp_name']);
@@ -201,9 +224,23 @@ if (!empty($flat_list)) {
         if ($details['lp_visibility'] == 0) {
             $my_title = Display::tag('font', $name, array('style' => 'color:grey'));
         }
-
-        $dsp_line = '<tr align="center" class="'.$oddclass.'">'.
-            '<td align="left" valign="top">'.Display::return_icon('learnpath.png', get_lang('LPName'), '', ICON_SIZE_SMALL).'
+        
+        $unitColumn = "";
+        if ($details['unit'] != $unitTmp) {
+            
+            if ($details['unit'] == 99999) {
+                $description = get_lang("WithoutUnits");
+            } else {
+                $description = get_lang("Unit") . " " . $details['unit'];
+            }
+            $unitColumn = "<td class='hasRowSpanNoBg' valign='center' align='left' rowspan='{$details['countLp']}'>
+                               {$description}
+                           </td>";
+            $unitTmp = $details['unit'];
+        }
+        
+        $dsp_line = '<tr align="center" class="'.$oddclass.'">'. $unitColumn .
+                    '<td align="left" valign="top">'.Display::return_icon('learnpath.png', get_lang('LPName'), '', ICON_SIZE_SMALL).'
                      <a href="'.$url_start_lp.'">'.$my_title.'</a>'.$session_img.$extra."</td>";
 
         $dsp_desc = '';
@@ -435,7 +472,7 @@ if (!empty($flat_list)) {
         echo '</div>';
     }
 }
-$course_info = api_get_course_info();
+
 learnpath::generate_learning_path_folder($course_info);
 
 //Deleting the objects
