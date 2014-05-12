@@ -165,7 +165,8 @@ class ExtraFieldOption extends Model
                     ExtraField::FIELD_TYPE_RADIO,
                     ExtraField::FIELD_TYPE_SELECT,
                     ExtraField::FIELD_TYPE_SELECT_MULTIPLE,
-                    ExtraField::FIELD_TYPE_DOUBLE_SELECT
+                    ExtraField::FIELD_TYPE_DOUBLE_SELECT,
+                    ExtraField::FIELD_TYPE_TAG
                 )
             )
         ) {
@@ -176,7 +177,7 @@ class ExtraFieldOption extends Model
                 );
 
                 if (!empty($options_parsed)) {
-                    foreach ($options_parsed as $key => $option) {
+                    foreach ($options_parsed as $option) {
                         $sub_options = $option['options'];
 
                         $new_params = array(
@@ -229,6 +230,7 @@ class ExtraFieldOption extends Model
                 $list = array();
             } else {
                 $list = explode(';', $params['field_options']);
+                $list = array_filter($list, 'trim');
             }
 
             if (!empty($list)) {

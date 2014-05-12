@@ -912,6 +912,7 @@ class Autoload
         $result['UniqueAnswerNoOption'] = '/main/exercice/unique_answer_no_option.class.php';
         $result['Uri'] = '/main/inc/lib/uri.class.php';
         $result['UrlManager'] = '/main/inc/lib/urlmanager.lib.php';
+        $result['URLify'] = '/vendor/jbroadway/urlify/URLify.php';
         $result['UserApiKeyManager'] = '/main/inc/lib/user_api_key_manager.class.php';
         $result['UserDataGenerator'] = '/main/gradebook/lib/user_data_generator.class.php';
         $result['UserForm'] = '/main/gradebook/lib/fe/userform.class.php';
