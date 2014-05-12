@@ -1103,17 +1103,9 @@ class SessionManager
             $getAllSessions = true;
         }
         //tables
-        $session_course_user = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
+        $tblSessionCourseUser = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
         $user = Database::get_main_table(TABLE_MAIN_USER);
-        $course_rel_user = Database::get_main_table(TABLE_MAIN_COURSE_USER);
-        $workTable = Database::get_course_table(TABLE_STUDENT_PUBLICATION);
-        $workTableAssignment = Database::get_course_table(TABLE_STUDENT_PUBLICATION_ASSIGNMENT);
-        $forum = Database::get_course_table(TABLE_FORUM);
-        $forum_post = Database::get_course_table(TABLE_FORUM_POST);
-        $tbl_course_lp = Database::get_course_table(TABLE_LP_MAIN);
-        $wiki = Database::get_course_table(TABLE_WIKI);
-        $table_stats_default = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_DEFAULT);
-        $table_stats_access = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_ACCESS);
+        $tblCourseLp = Database::get_course_table(TABLE_LP_MAIN);
 
         $course = api_get_course_info_by_id($courseId);
 
@@ -1148,13 +1140,13 @@ class SessionManager
             $queryVariables[] = $sessionId;
             $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, 
                 u.email, s.course_code, s.id_session
-                FROM $session_course_user s
+                FROM $tblSessionCourseUser s
                 INNER JOIN $user u ON u.user_id = s.id_user
                 $where $order $limit";
         } else {
             $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, 
                 u.email, s.course_code, s.id_session
-                FROM $session_course_user s
+                FROM $tblSessionCourseUser s
                 INNER JOIN $user u ON u.user_id = s.id_user
                 $where $order $limit";
         }
@@ -1169,7 +1161,7 @@ class SessionManager
         /**
          *  Lessons
          */
-        $sql = "SELECT * FROM $tbl_course_lp
+        $sql = "SELECT * FROM $tblCourseLp
         WHERE c_id = %s ";  //AND session_id = %s
         $sqlQuery = sprintf($sql, $course['real_id']);
 
@@ -1346,7 +1338,6 @@ class SessionManager
             $order = " ORDER BY " . Database::escape_string($options['order']);
         }
 
-        
         $queryVariables = array($course['code']);
         
         $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, 
@@ -2910,7 +2901,7 @@ class SessionManager
 
         $limitCondition = null;
         if (!empty($start) && !empty($limit)) {
-            $limitCondition = " LIMIT " . Database::escape_string($start) . ", " . intval($limit);
+            $limitCondition = " LIMIT " . intval($start) . ", " . intval($limit);
         }
 
         if (api_is_multiple_url_enabled()) {
@@ -4576,6 +4567,7 @@ class SessionManager
                 );
             }
         }
+        
         return $result;
     }
 }

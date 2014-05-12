@@ -423,7 +423,8 @@ class MySpace {
      * @param   int $exerciseId The quiz ID
      * @return  string  HTML array of results formatted for gridJS
      */
-    static function displayTrackingEvaluation($sessionId = 0, $courseId = 0, $exerciseId = 0) {
+    public static function displayTrackingEvaluation($sessionId = 0, $courseId = 0, $exerciseId = 0) 
+    {
         /**
          * Column names
          * The column order is important. Check $column variable in the main/inc/ajax/model.ajax.php file
@@ -493,6 +494,7 @@ class MySpace {
                 });
             });</script>';
         $return .= Display::grid_html($tableId);
+        
         return $return;
     }
     
@@ -504,7 +506,8 @@ class MySpace {
      * @param   int $exerciseId The quiz ID
      * @return  string  HTML array of results formatted for gridJS
      */
-    static function displayTrackingEvaluationSupervisor($sessionId = 0, $courseId = 0, $exerciseId = 0) {
+    public static function displayTrackingEvaluationSupervisor($sessionId = 0, $courseId = 0, $exerciseId = 0) 
+    {
         /**
          * Column names
          * The column order is important. Check $column variable in the main/inc/ajax/model.ajax.php file
@@ -559,6 +562,7 @@ class MySpace {
                 });
             });</script>';
         $return .= Display::grid_html($tableId);
+        
         return $return;
     }
 
@@ -2524,8 +2528,8 @@ class MySpace {
     /**
      * Display a sortable table that contains the course progress report
      * with a detail
-     * @param int $sessionId
      * @param int $courseId
+     * @param int $sessionId
      * @return string
      */
     public static function displayCourseProgressSummary($courseId = 0, $sessionId = 0)
@@ -2622,14 +2626,14 @@ class MySpace {
         return $return;
     }
 
-      /**
+    /**
      * Display a sortable table that contains the session progress report
      * with a detail by Course
-     * @param int $sessionId
      * @param int $courseId
+     * @param int $sessionId
      * @return string
      */
-    static function displaySessionProgressSummaryByCourse($courseId = 0, $sessionId = 0)
+    public static function displaySessionProgressSummaryByCourse($courseId = 0, $sessionId = 0)
     {
         /**
          * Column name
@@ -2733,11 +2737,12 @@ class MySpace {
      * with a detail
      * @param int $sessionId
      * @param int $courseId
+     * @param string $tableId
      * @return string
      */
-    static function displayStudentProgressReport($sessionId = 0, $courseId = 0, $tableId = 'sess_prt')
+    public static function displayStudentProgressReport($sessionId = 0, $courseId = 0, $tableId = 'session_report')
     {
-        $tableId .= "_sess_t";
+        $tableId .= "_session_table";
         /**
          * Column name
          * The order is important you need to check the $column variable in the model.ajax.php file
@@ -2880,12 +2885,12 @@ class MySpace {
     }
 
     /**
-     * 
+     * Display a grid that shows the session progress
      * @param int $sessionId
      * @param int $courseId
      * @return string
      */
-    static function displaySessionProgressReport($sessionId, $courseId)
+    public static function displaySessionProgressReport($sessionId, $courseId)
     {
         /**
          * Column name

@@ -485,12 +485,12 @@ $(function() {
 </script>
 
 <?php
-$my_reporting = Tracking::show_user_progress(api_get_user_id(), $session_id, '#tabs-4', false);
-if (!empty($my_reporting))  {
-    $my_reporting  .= '<br />'.Tracking::show_course_detail(api_get_user_id(), $_GET['course'], $session_id);
+$myReporting = Tracking::show_user_progress(api_get_user_id(), $session_id, '#tabs-4', false);
+if (!empty($myReporting))  {
+    $myReporting .= '<br />'.Tracking::show_course_detail(api_get_user_id(), $_GET['course'], $session_id);
 }
-if (empty($my_reporting)) {
-    $my_reporting  = Display::return_message(get_lang('NoDataAvailable'), 'warning');
+if (empty($myReporting)) {
+    $myReporting  = Display::return_message(get_lang('NoDataAvailable'), 'warning');
 }
 
 // Main headers
@@ -509,19 +509,19 @@ $lp_tabs           =  Display::tabs($sub_header, array(Display::grid_html('list_
 $courses_tab       =  Display::grid_html('courses');
 
 // Sub headers Informes
-$sub_headers = array(get_lang('StudentProgressReport'), get_lang('EvaluationDetailReport'));
+$subHeaders = array(get_lang('StudentProgressReport'), get_lang('EvaluationDetailReport'));
 $courseId = $course_info['real_id'];
 $courseProgress = MySpace::displayCourseProgressSummary(intval($courseId), intval($session_id));
 $evalDetail = MySpace::displayTrackingEvaluation(intval($session_id), intval($courseId));
-$reports_tab = Display::tabs($sub_headers, array($courseProgress, $evalDetail), 'rep_tab');
+$reportsTab = Display::tabs($subHeaders, array($courseProgress, $evalDetail), 'rep_tab');
 
 // Main headers data
 $data = array(  
             $courses_tab, 
             $lp_tabs, 
             Display::grid_html('exercises'), 
-            $my_reporting,
-            $reports_tab
+            $myReporting,
+            $reportsTab
         );
 echo Display::tabs($headers, $data);
 

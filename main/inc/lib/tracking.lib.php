@@ -4153,7 +4153,6 @@ class Tracking
             $order = " ORDER BY " . Database::escape_string($options['order']);
         }
 
-        
         $queryVariables = array($course['code']);
         if (!empty($sessionId)) {
             $where .= ' AND id_session = %s';
@@ -4387,13 +4386,13 @@ class Tracking
             $lastLpConnectionFormat = !empty($lastLpConnection) ? gmdate("Y-m-d H:i:s", $lastLpConnection) : "";
             
             $stDetail[] = array(
-                'lesson' => $learnPath['lp_name'],
-                'lessonpro' => $lessonProgress . " %",
-                'labpro' => $laboratoryProgress . " %",
-                'autoaprpro' => $selfLearningProgress . " %",
-                'labper' => $laboratoryPerformance,
-                'autoaprper' => $selfLearningPerf,
-                'lastdate' => $lastLpConnectionFormat
+                'name' => $learnPath['lp_name'],
+                'lesson_progress' => $lessonProgress . " %",
+                'laboratory_progress' => $laboratoryProgress . " %",
+                'self_learning_progress' => $selfLearningProgress . " %",
+                'laboratory_performance' => $laboratoryPerformance,
+                'self_learning_performance' => $selfLearningPerf,
+                'last_date' => $lastLpConnectionFormat
             );
         }
         
@@ -4414,8 +4413,8 @@ class Tracking
         $user = api_get_user_info_from_username($username);        
         
         if (api_is_student()) {
-            $session_id = api_get_session_id();
-            $courses = SessionManager::get_course_list_by_session_id($session_id);
+            $sessionId = api_get_session_id();
+            $courses = SessionManager::get_course_list_by_session_id($sessionId);
             $courseData = current($courses);
             $courseId = $courseData['id'];
             $user = api_get_user_info();
@@ -4527,9 +4526,9 @@ class Tracking
             }
         }
         
-        $rtrnData = array();
+        $dataTable = array();
         foreach ($stDetail as $unit => $detail) {
-            $rtrnData[] = array(
+            $dataTable[] = array(
                 'lesson_name' => get_lang("Unit") . " " . $unit,
                 'lesson_progress' => self::avg($detail['lessonProgress'], $detail['count']) . ' %',
                 'laboratory_progress' => self::avg($detail['laboratoryProgress'], $detail['count']) . ' %',
@@ -4540,7 +4539,7 @@ class Tracking
             );
         }
 
-        return $rtrnData;
+        return $dataTable;
     }
     
     /**
