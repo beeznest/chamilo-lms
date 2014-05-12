@@ -1370,11 +1370,11 @@ switch ($action) {
         );
         
         $option = array(
-                  'where' => $where_condition,
-                  'order' => "$sidx $sord",
-                  'limit'=> "$start , $limit"
-                 );
-        
+            'where' => $where_condition,
+            'order' => "$sidx $sord",
+            'limit' => "$start , $limit"
+        );
+
         $result = Tracking::get_exercise_progress(
             $sessionId, 
             $courseId,
@@ -1404,11 +1404,11 @@ switch ($action) {
         );
 
         $option = array(
-                  'where' => $where_condition,
-                  'order' => "$sidx $sord",
-                  'limit'=> "$start , $limit"
-                 );
-        
+            'where' => $where_condition,
+            'order' => "$sidx $sord",
+            'limit' => "$start , $limit"
+        );
+
         $result = Tracking::getExerciseProgressSession(
             $sessionId,     
             $courseId, 

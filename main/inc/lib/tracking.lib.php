@@ -3895,9 +3895,14 @@ class Tracking
     * @return array
     */
     public static function getExerciseProgressSession(
-            $sessionId = 0, $courseId = 0, $exerciseId = 0, 
-            $dateFrom, $dateTo, $options = array(), $type = false)
-    {
+        $sessionId = 0, 
+        $courseId = 0, 
+        $exerciseId = 0, 
+        $dateFrom, 
+        $dateTo, 
+        $options = array(), 
+        $type = false
+    ){
         $sessionId  = intval($sessionId);
         $courseId   = intval($courseId);
         $exerciseId = intval($exerciseId);
@@ -4295,7 +4300,6 @@ class Tracking
      */
     public function getStudentProgressDetail($username, $sessionId, $courseId, $options = array())
     {
-        
         $courseData = api_get_course_info_by_id($courseId);
         $user = api_get_user_info_from_username($username);
         $userId = (int)$user['user_id'];
@@ -4454,7 +4458,7 @@ class Tracking
             );
             
             //Time Spent in the LP Lab
-            $timeSpentLabo = Tracking::get_time_spent_in_lp(
+            $timeSpentLaboratory = Tracking::get_time_spent_in_lp(
                 $user['user_id'], 
                 $courseData['code'], 
                 array($lpId),
@@ -4463,7 +4467,7 @@ class Tracking
             );
             
             //Time Spent in the LP Selflear
-            $timeSpentSelflear = Tracking::get_time_spent_in_lp(
+            $timeSpentSelfLearning = Tracking::get_time_spent_in_lp(
                 $user['user_id'], 
                 $courseData['code'], 
                 array($lpId),
@@ -4472,7 +4476,7 @@ class Tracking
             );
             
             //Clicks in Laboratory
-            $clicksLabo = Tracking::getTotalClicksLp(
+            $clicksLaboratory = Tracking::getTotalClicksLp(
                 $user['user_id'], 
                 $courseId, 
                 $sessionId, 
@@ -4481,7 +4485,7 @@ class Tracking
             );
             
             //Clicks in SelfLearning
-            $clicksSelflear = Tracking::getTotalClicksLp(
+            $clicksSelfLearning = Tracking::getTotalClicksLp(
                 $user['user_id'], 
                 $courseId,
                 $sessionId, 
@@ -4497,8 +4501,8 @@ class Tracking
                 $sessionId
             );
             
-            $laboratoryPerformance = $timeSpentLabo + $clicksLabo;
-            $selfLearningPerf = $timeSpentSelflear + $clicksSelflear;
+            $laboratoryPerformance = $timeSpentLaboratory + $clicksLaboratory;
+            $selfLearningPerf = $timeSpentSelfLearning + $clicksSelfLearning;
             
             $lastConnectionFormat = !empty($lastLpConnection) ? gmdate("Y-m-d H:i:s", $lastLpConnection) : "";
             

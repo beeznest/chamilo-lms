@@ -372,34 +372,11 @@ class ExtraFieldValue extends Model
                         }
                     }
                 } else {
-//                    if ($this->type == 'lp') {
-//                        $whCond = array('where' => array(
-//                                    'lp_id = ? AND 
-//                                     field_id = ? AND
-//                                     c_id = ?' => array(
-//                                    $params['lp_id'],
-//                                    $params['field_id'],
-//                                    $params['c_id']
-//                        )));
-//                        $field_values['id'] = $this->getItemIdByFields($whCond);
-//                    }
                     $params['id'] = $field_values['id'];
                     return parent::update($params, $show_query);
                 }
             }
         }
-    }
-
-    /**
-     * Returns the id of the values tables
-     * @param array $whereConditions
-     * @return int id
-     */
-    public function getItemIdByFields($whereConditions)
-    {
-        $data = Database::select('id', $this->table, $whereConditions);
-        $id = key($data);
-        return $id;
     }
     
     /**

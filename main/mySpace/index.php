@@ -177,9 +177,9 @@ $options = array(
     'exerciseprogress',
     'surveyoverview',
     'lpgradereport',
-    'studentprogressreport',
-    'evaluationdetailreport',
-    'sessionprogressreport'
+    'student_progress_report',
+    'evaluation_detail_report',
+    'session_progress_report'
 );
 if (!empty($session_id) && !in_array($display, $options)) {
     echo '<a href="index.php">'.Display::return_icon('back.png', get_lang('Back'),'',ICON_SIZE_MEDIUM).'</a>';
@@ -625,9 +625,9 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
     echo ' | <a href="' . api_get_path(WEB_CODE_PATH) . 'tracking/question_course_report.php?view=admin">' . get_lang('LPQuestionListResults') . '</a>';
     echo ' | <a href="' . api_get_path(WEB_CODE_PATH) . 'tracking/course_session_report.php?view=admin">' . get_lang('LPExerciseResultsBySession') . '</a>';
     echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=lpgradereport">' . get_lang('LpGradeReport') . '</a>';
-    echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=studentprogressreport">' . get_lang('StudentProgressReport') . '</a>';
-    echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=evaluationdetailreport">' . get_lang('EvaluationDetailReport') . '</a>';
-    echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=sessionprogressreport">' . get_lang('SessionProgressReport') . '</a>';
+    echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=student_progress_report">' . get_lang('StudentProgressReport') . '</a>';
+    echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=evaluation_detail_report">' . get_lang('EvaluationDetailReport') . '</a>';
+    echo ' | <a href="' . api_get_self() . '?view=admin&amp;display=session_progress_report">' . get_lang('SessionProgressReport') . '</a>';
     echo '<br /><br />';
 
     $listToDisplay = array(
@@ -637,9 +637,9 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
         'exerciseprogress',
         'surveyoverview',
         'lpgradereport',
-        'studentprogressreport',
-        'evaluationdetailreport',
-        'sessionprogressreport'
+        'student_progress_report',
+        'evaluation_detail_report',
+        'session_progress_report'
     );
 
     if ($is_platform_admin && $view == 'admin' && in_array($display, $listToDisplay)) {
@@ -688,13 +688,13 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             case 'lpgradereport':
                $tool_name = get_lang('DisplayGradeOverview');
                 break;
-            case 'studentprogressreport':
+            case 'student_progress_report':
                $tool_name = get_lang('StudentProgressReport');
                 break;
-            case 'evaluationdetailreport':
+            case 'evaluation_detail_report':
                 $tool_name = get_lang('EvaluationDetailReport');
                 break;
-            case 'sessionprogressreport':
+            case 'session_progress_report':
                 $tool_name = get_lang('SessionProgressReport');
                 break;
         }
@@ -746,7 +746,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             $sessionFilter->addElement('select_ajax', 'session_name', get_lang('Search') . " " . get_lang('Section'), null, array('url' => $url, 'defaults' => $sessionList, 'width' => '400px', 'minimumInputLength' => $minimumInputLength));
         }
         //Exercise filter    
-        if (in_array($display, array('exerciseprogress', 'evaluationdetailreport'))) {
+        if (in_array($display, array('exerciseprogress', 'evaluation_detail_report'))) {
 
             $url = $ajax_path .'course.ajax.php?a=search_exercise_by_course&session_id=' . $sessionId . '&course_id=' . $courseId;
             $exerciseList = array();
@@ -841,8 +841,8 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             'progressoverview',
             'exerciseprogress',
             'lpgradereport',
-            'studentprogressreport',
-            'sessionprogressreport'
+            'student_progress_report',
+            'session_progress_report'
         );
 
         //date filter
@@ -953,7 +953,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 } else {
                     select2("#session_name", "' .  $ajax_path . 'session.ajax.php?a=search_session_by_course&course_id=" + courseId);
                 }
-                if (display == "accessoverview" || display == "exerciseprogress" || display == "evaluationdetailreport") {
+                if (display == "accessoverview" || display == "exerciseprogress" || display == "evaluation_detail_report") {
                     window.location = "'.$self.'?view=admin&display='.$display.'&session_id="+sessionId+"&course_id="+courseId;
                 }
                 if (typeof $("#survey_name") == "object") {
@@ -1099,7 +1099,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 Display::display_warning_message(get_lang('ChooseCourse'));
             }
             break;
-        case 'evaluationdetailreport':
+        case 'evaluation_detail_report':
             if (!empty($_GET['course_id'])) {
                 if (!empty($_GET['exercise_id'])) {
                     echo MySpace::displayTrackingEvaluation(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']), $_GET['date_from'], $_GET['date_to']);
@@ -1140,7 +1140,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 Display::display_warning_message(get_lang('ChooseCourse'));
             }
             break;
-        case 'studentprogressreport':
+        case 'student_progress_report':
             if (!empty($_GET['course_id'])) {
                 echo MySpace::displayCourseProgressSummary(intval($_GET['course_id']), intval($_GET['session_id']));
                 //echo MySpace::displayStudentProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
@@ -1148,7 +1148,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 Display::display_warning_message(get_lang('ChooseCourse'));
             }
             break;
-        case 'sessionprogressreport':
+        case 'session_progress_report':
             if (!empty($_GET['course_id'])) {
                 echo MySpace::displaySessionProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
             } else {

@@ -1194,7 +1194,7 @@ class SessionManager
                 false, 
                 'Leccion'
             );
-            //Laboratorio
+            //Laboratory
             $laboratoryProgress = Tracking::get_avg_student_progress(
                 $user['user_id'], 
                 $course['code'], array(), 
@@ -1202,7 +1202,7 @@ class SessionManager
                 false, 
                 'Laboratorio'
             );
-            //AutoAprendizaje
+            //Self Learning
             $selfLearningProgress = Tracking::get_avg_student_progress(
                 $user['user_id'], 
                 $course['code'], 
@@ -1247,7 +1247,7 @@ class SessionManager
                 'Autoaprendizaje'
             );
 
-            //Clicks in Leccion
+            //Clicks in Lesson
             $clicksLp = Tracking::getTotalClicksLp(
                 $user['user_id'], 
                 $courseId, 
@@ -1256,7 +1256,7 @@ class SessionManager
                 'Leccion'
             );
 
-            //Clicks in Laboratorio
+            //Clicks in Laboratory
             $clicksInLaboratory = Tracking::getTotalClicksLp(
                 $user['user_id'], 
                 $courseId, 
@@ -1400,7 +1400,7 @@ class SessionManager
                 false, 
                 'Leccion'
             );
-            //Laboratorio
+            //Laboratory
             $laboratoryProgress = Tracking::get_avg_student_progress(
                 $user['user_id'], 
                 $course['code'], 
@@ -1409,7 +1409,7 @@ class SessionManager
                 false, 
                 'Laboratorio'
             );
-            //AutoAprendizaje
+            //Self Learning
             $selfLearningProgress = Tracking::get_avg_student_progress(
                 $user['user_id'], 
                 $course['code'], 
@@ -1453,7 +1453,7 @@ class SessionManager
                 'Autoaprendizaje'
             );
             
-            //Clicks in Leccion
+            //Clicks in Lesson
             $clicksLp = Tracking::getTotalClicksLp(
                 $user['user_id'], 
                 $courseId, 
