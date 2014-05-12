@@ -471,7 +471,7 @@ class MySpace {
         //get dynamic column names
 
         // jqgrid will use this URL to do the selects
-        $url = api_get_path(WEB_AJAX_PATH).'model.ajax.php?a=getEvaluationDetail&session_id=' . $sessionId . '&course_id=' . $courseId  . '&exercise_id=' . $exerciseId;
+        $url = api_get_path(WEB_AJAX_PATH).'model.ajax.php?a=get_evaluation_detail&session_id=' . $sessionId . '&course_id=' . $courseId  . '&exercise_id=' . $exerciseId;
 
         //Autowidth
         $extra_params['autowidth'] = 'true';
@@ -2565,7 +2565,7 @@ class MySpace {
         $action_links = '';
 
         // jqgrid will use this URL to do the selects
-        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayCourseProgressSummary&course_id=' . $courseId;
+        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=display_course_progress_summary&course_id=' . $courseId;
 
         $tableId = 'course_progress_report';
         $extra_params['autowidth'] = 'true';
@@ -2597,7 +2597,7 @@ class MySpace {
             var data = {
                 subgrid: subgridid,
                 rowid: id,
-                gridId: 'sessionProgress',
+                gridId: 'session_progress',
                 courseId: '" . $courseId . "',
                 sessionId: '" . $sessionId . "'
             };
@@ -2669,7 +2669,7 @@ class MySpace {
         $action_links = '';
 
         // jqgrid will use this URL to do the selects
-        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displaySessionProgressSummary&course_id=' . $courseId . '&session_id=' . $sessionId;
+        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=display_session_progress_summary&course_id=' . $courseId . '&session_id=' . $sessionId;
 
         $tableId = 'sessc_prgss';
         $extra_params['autowidth'] = 'true';
@@ -2703,7 +2703,7 @@ class MySpace {
             var data = {
                 subgrid: subgridid,
                 rowid: id,
-                gridId: 'studentProgress',
+                gridId: 'student_progress',
                 courseId: '" . $courseId . "',
                 sessionId: rowData.sessionid
             };
@@ -2786,8 +2786,8 @@ class MySpace {
         $action_links = '';
 
         // jqgrid will use this URL to do the selects
-        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressReport&session_id=' . $sessionId . '&course_id=' . $courseId;
-        $urlDetail = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressDetail';
+        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=display_student_progress_report&session_id=' . $sessionId . '&course_id=' . $courseId;
+        $urlDetail = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=display_student_progress_detail';
 
         $extra_params['autowidth'] = 'true';
         $extra_params['sortname'] = 'u.lastname';
@@ -2931,8 +2931,8 @@ class MySpace {
         $action_links = '';
 
         // jqgrid will use this URL to do the selects
-        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displaySessionProgressReport&session_id=' . $sessionId . '&course_id=' . $courseId;
-        $urlDetail = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=displayStudentProgressReport';
+        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=display_session_progress_report&session_id=' . $sessionId . '&course_id=' . $courseId;
+        $urlDetail = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=display_student_progress_report';
 
         $tableId = 'session_progress';
         $extra_params['autowidth'] = 'true';

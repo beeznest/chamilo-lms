@@ -14,10 +14,10 @@ $courseId = !empty($_REQUEST['courseId']) ? intval($_REQUEST['courseId']) : 0;
 $subgrid =  !empty($_REQUEST['subgrid']) ? Database::escape_string($_REQUEST['subgrid']) : "";
 
 switch ($gridId) {
-    case 'studentProgress':
+    case 'student_progress':
         echo MySpace::displayStudentProgressReport($sessionId, $courseId, $subgrid);
         break;
-    case 'sessionProgress':
+    case 'session_progress':
         echo MySpace::displaySessionProgressSummaryByCourse($courseId, $sessionId);
         break;
     default:

@@ -48,11 +48,11 @@ if (!in_array(
         'get_user_course_report_resumed',
         'get_user_course_report',
         'get_sessions_tracking',
-        'getEvaluationDetail',
-        'displayStudentProgressReport',
-        'displayCourseProgressSummary',
-        'displaySessionProgressSummary',
-        'displayStudentProgressDetail'
+        'get_evaluation_detail',
+        'display_student_progress_report',
+        'display_course_progress_summary',
+        'display_session_progress_summary',
+        'display_student_progress_detail'
     )
 )) {
     api_protect_admin_script(true);
@@ -270,7 +270,7 @@ switch ($action) {
         break;
     case 'get_session_lp_progress':
     case 'get_session_progress':
-    case 'displayStudentProgressReport':
+    case 'display_student_progress_report':
         //@TODO replace this for a more efficient function (not retrieving the whole data)
         $course = api_get_course_info_by_id($_GET['course_id']);
         $users = CourseManager::get_student_list_from_course_code($course['code'], true, $_GET['session_id'], $_GET['date_from'], $_GET['date_to']);
@@ -355,7 +355,7 @@ switch ($action) {
             $count = $obj->get_count();
         }
         break;
-    case 'displayStudentProgressDetail':
+    case 'display_student_progress_detail':
         $courseId = intval($_REQUEST['course_id']);
         $username = Database::escape_string($_REQUEST['username']);
         $courseData = api_get_course_info_by_id($courseId);
@@ -365,7 +365,7 @@ switch ($action) {
         $lpData = $list->get_flat_list();
         $count = count($lpData);
         break;
-    case 'displaySessionProgressReport':
+    case 'display_session_progress_report':
         $sessionId = intval($_REQUEST['session_id']);
         $courseId = intval($_REQUEST['course_id']);
         $course = api_get_course_info_by_id($courseId);
@@ -376,7 +376,7 @@ switch ($action) {
         }
         $count = count($session);
         break;
-    case 'getEvaluationDetail':
+    case 'get_evaluation_detail':
         $records = Tracking::get_exercise_progress(
             $_GET['session_id'], 
             $_GET['course_id'], 
@@ -388,7 +388,7 @@ switch ($action) {
         );
         $count = count($records);
         break;
-    case 'getEvaluationDetailDHR':
+    case 'get_evaluation_detail_DHR':
         $records = Tracking::getExerciseProgressSession(
             $_GET['session_id'], 
             $_GET['course_id'], 
@@ -399,10 +399,10 @@ switch ($action) {
         );
         $count = count($records);
         break;
-    case 'displayCourseProgressSummary':
+    case 'display_course_progress_summary':
         $count = 1;
         break;
-    case 'displaySessionProgressSummary':
+    case 'display_session_progress_summary':
         $sessionId = intval($_REQUEST['session_id']);
         $courseId = intval($_REQUEST['course_id']);
         $options['getCount'] = true;
@@ -796,7 +796,7 @@ switch ($action) {
             )
         );
         break;
-    case 'displayStudentProgressReport':
+    case 'display_student_progress_report':
         $columns = array(
             'sessionid',
             'courseid',
@@ -849,7 +849,7 @@ switch ($action) {
             )
         );
         break;
-    case 'displayCourseProgressSummary':
+    case 'display_course_progress_summary':
         $columns = array(
             'courseid',
             'course',
@@ -880,7 +880,7 @@ switch ($action) {
       
         $result = SessionManager::getCourseProgress($courseId);
         break;
-    case 'displaySessionProgressSummary':
+    case 'display_session_progress_summary':
         $columns = array(
             'sessionid',
             'courseid',
@@ -921,7 +921,7 @@ switch ($action) {
 
         $result = Tracking::getSessionProgressSummary($courseId, $sessionId, $option);
         break;
-    case 'displayStudentProgressDetail':
+    case 'display_student_progress_detail':
         $columns = array(
             'lesson_name',
             'lesson_progress',
@@ -1324,7 +1324,7 @@ switch ($action) {
         //Multidimensional sort
         $result = msort($result, $sidx, $sord);
         break;
-    case 'getEvaluationDetail':
+    case 'get_evaluation_detail':
         $sessionId  = intval($_GET['session_id']);
         $courseId   = intval($_GET['course_id']);
         $exerciseId = intval($_GET['exercise_id']);
@@ -1385,7 +1385,7 @@ switch ($action) {
             true
         );
         break;
-    case 'getEvaluationDetailDHR':
+    case 'get_evaluation_detail_DHR':
         $sessionId  = intval($_GET['session_id']);
         $courseId   = intval($_GET['course_id']);
         $exerciseId = intval($_GET['exercise_id']);
@@ -1419,7 +1419,7 @@ switch ($action) {
             true
         );
         break;
-    case 'displaySessionProgressReport':
+    case 'display_session_progress_report':
         $columns = array(
             'sessionid',
             'courseid',
@@ -1497,13 +1497,13 @@ $allowed_actions = array(
     'get_user_course_report',
     'get_user_course_report_resumed',
     'get_exercise_grade',
-    'displayStudentProgressReport',
-    'displayStudentProgressDetail',
-    'displaySessionProgressReport',
-    'getEvaluationDetail',
-    'displayCourseProgressSummary',
-    'displaySessionProgressSummary',
-    'getEvaluationDetailDHR'
+    'display_student_progress_report',
+    'display_student_progress_detail',
+    'display_session_progress_report',
+    'get_evaluation_detail',
+    'display_course_progress_summary',
+    'display_session_progress_summary',
+    'get_evaluation_detail_DHR'
 );
 
 //5. Creating an obj to return a json

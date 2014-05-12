@@ -4550,12 +4550,12 @@ class SessionManager
                 $selflearningPercentage = 0;
                 
                 foreach ($students as $student) {
-                    $lessonProgress += Tracking::formatPercentageString($student['lesson']);
-                    $laboratoryProgress += Tracking::formatPercentageString($student['laboratorypro']);
-                    $selflearningProgress += Tracking::formatPercentageString($student['selflearningpro']);
-                    $lessonPercentage += Tracking::formatPercentageString($student['lessonper']);
-                    $laboratoryPercentage += Tracking::formatPercentageString($student['laboratoryper']);
-                    $selflearningPercentage += Tracking::formatPercentageString($student['selflearningper']);
+                    $lessonProgress += Tracking::formatPercentageString($student['lesson_progress']);
+                    $laboratoryProgress += Tracking::formatPercentageString($student['lesson_progress']);
+                    $selflearningProgress += Tracking::formatPercentageString($student['self_learning_progress']);
+                    $lessonPercentage += Tracking::formatPercentageString($student['lesson_performance']);
+                    $laboratoryPercentage += Tracking::formatPercentageString($student['laboratory_performance']);
+                    $selflearningPercentage += Tracking::formatPercentageString($student['self_learning_performance']);
                 }
               
                 $result[] = array(
