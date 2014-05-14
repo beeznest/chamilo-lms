@@ -175,7 +175,7 @@ class Model
 
     /**
      * Updates the obj in the database. The $params['id'] must exist in order to update a record
-     * @param array $values
+     * @param array $params
      * @return bool
      *
      */
