@@ -480,27 +480,49 @@ $(function() {
     //Generate tabs with jquery-ui
     $('#tabs').tabs();
     $( "#sub_tab" ).tabs();
+    $( "#rep_tab" ).tabs();
 });
 </script>
 
 <?php
-$my_reporting = Tracking::show_user_progress(api_get_user_id(), $session_id, '#tabs-4', false);
-if (!empty($my_reporting))  {
-    $my_reporting  .= '<br />'.Tracking::show_course_detail(api_get_user_id(), $_GET['course'], $session_id);
+$myReporting = Tracking::show_user_progress(api_get_user_id(), $session_id, '#tabs-4', false);
+if (!empty($myReporting))  {
+    $myReporting .= '<br />'.Tracking::show_course_detail(api_get_user_id(), $_GET['course'], $session_id);
 }
-if (empty($my_reporting)) {
-    $my_reporting  = Display::return_message(get_lang('NoDataAvailable'), 'warning');
+if (empty($myReporting)) {
+    $myReporting  = Display::return_message(get_lang('NoDataAvailable'), 'warning');
 }
 
 // Main headers
-$headers        = array(get_lang('Courses'), get_lang('LearningPaths'), get_lang('MyQCM'), get_lang('MyStatistics'));
+$headers = array(
+    get_lang('Courses'),
+    get_lang('LearningPaths'),
+    get_lang('MyQCM'),
+    get_lang('MyStatistics'),
+    get_lang('Reports')
+);
 // Subheaders
 $sub_header     = array(get_lang('AllLearningPaths'), get_lang('PerWeek'), get_lang('ByCourse'));
 
 // Sub headers data
 $lp_tabs           =  Display::tabs($sub_header, array(Display::grid_html('list_default'), Display::grid_html('list_week'), Display::grid_html('list_course')), 'sub_tab');
 $courses_tab       =  Display::grid_html('courses');
+
+// Sub headers Informes
+$subHeaders = array(get_lang('StudentProgressReport'), get_lang('EvaluationDetailReport'));
+$courseId = $course_info['real_id'];
+$courseProgress = MySpace::displayCourseProgressSummary(intval($courseId), intval($session_id));
+$evalDetail = MySpace::displayTrackingEvaluation(intval($session_id), intval($courseId));
+$reportsTab = Display::tabs($subHeaders, array($courseProgress, $evalDetail), 'rep_tab');
+
 // Main headers data
-echo Display::tabs($headers, array($courses_tab, $lp_tabs, Display::grid_html('exercises'), $my_reporting));
+$data = array(  
+            $courses_tab, 
+            $lp_tabs, 
+            Display::grid_html('exercises'), 
+            $myReporting,
+            $reportsTab
+        );
+echo Display::tabs($headers, $data);
 
 Display::display_footer();

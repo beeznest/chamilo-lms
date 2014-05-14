@@ -190,7 +190,7 @@ class ExtraFieldValue extends Model
         } else {
             $value_to_insert = Database::escape_string($value);
         }
-
+        
         if (!empty($this->extraFields)) {
             foreach ($this->extraFields as $extraField => $extraValue) {
                 $params[$extraField] = Database::escape_string($extraValue);
@@ -202,7 +202,7 @@ class ExtraFieldValue extends Model
 
         // If field id exists
         $extra_field_info = $extra_field->get($params['field_id']);
-
+        
         if ($extra_field_info) {
             switch ($extra_field_info['field_type']) {
                 case ExtraField::FIELD_TYPE_RADIO:
@@ -259,7 +259,10 @@ class ExtraFieldValue extends Model
 
             $params['field_value'] = $value_to_insert;
             $params['tms'] = api_get_utc_datetime();
-            $params[$this->author_id] = api_get_user_id();
+            
+            if ($this->author_id != 'lp_id') {
+                $params[$this->author_id] = api_get_user_id();
+            }
 
             // Insert
             if (empty($field_values)) {
@@ -375,7 +378,7 @@ class ExtraFieldValue extends Model
             }
         }
     }
-
+    
     /**
      * Returns the value of the given extra field on the given resource
      * @param int Item ID (It could be a session_id, course_id or user_id)
