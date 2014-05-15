@@ -286,7 +286,7 @@ function getWorkList($id, $my_folder_data, $add_in_where_query)
 
     $course_id          = api_get_course_int_id();
     $session_id         = api_get_session_id();
-    $condition_session  = api_get_session_condition($session_id);
+    $condition_session  = api_get_session_condition($session_id, true, true);
     $group_id           = api_get_group_id();
     $is_allowed_to_edit = api_is_allowed_to_edit(null, true);
 
@@ -395,10 +395,11 @@ function getUniqueStudentAttempts($workId, $groupId, $course_id, $sessionId, $us
 
     $sql_document = "SELECT count(*) FROM (
                         SELECT count(*)
-                        FROM $work_table w INNER JOIN $user_table u ON w.user_id = u.user_id
+                        FROM $work_table w
+                        INNER JOIN $user_table u ON w.user_id = u.user_id
                         WHERE   w.c_id = $course_id AND
-                                w.session_id = $sessionId AND
                                 w.parent_id = ".$workId." AND
+                                w.session_id = $sessionId AND
                                 w.post_group_id = ".$groupId." AND
                                 w.active IN (0, 1) $studentCondition
                         ";
@@ -1514,7 +1515,7 @@ function getWorkListStudent($start, $limit, $column, $direction, $where_conditio
 
     $course_id          = api_get_course_int_id();
     $session_id         = api_get_session_id();
-    $condition_session  = api_get_session_condition($session_id);
+    $condition_session  = api_get_session_condition($session_id, true, true);
     $group_id           = api_get_group_id();
 
     if (!in_array($direction, array('asc','desc'))) {
@@ -1603,7 +1604,7 @@ function getWorkListTeacher($start, $limit, $column, $direction, $where_conditio
 
     $course_id          = api_get_course_int_id();
     $session_id         = api_get_session_id();
-    $condition_session  = api_get_session_condition($session_id);
+    $condition_session  = api_get_session_condition($session_id, true, true);
     $group_id           = api_get_group_id();
     $is_allowed_to_edit = api_is_allowed_to_edit(null, true);
 

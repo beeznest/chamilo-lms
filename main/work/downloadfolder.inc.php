@@ -51,6 +51,9 @@ $prop_table              = Database::get_course_table(TABLE_ITEM_PROPERTY);
 //admins are allowed to download invisible files
 $files = array();
 $course_id = api_get_course_int_id();
+$sessionId = api_get_session_id();
+
+$sessionCondition = api_get_session_condition($sessionId, true, false, 'id_session');
 
 $filenameCondition = null;
 if (array_key_exists('filename', $work_data)) {
@@ -66,12 +69,13 @@ if (api_is_allowed_to_edit()) {
                     work.c_id = $course_id AND
                     work.id = props.ref
                   )
- 			WHERE   props.tool='work' AND
+ 			WHERE  props.tool='work' AND
  			        work.parent_id = $work_id AND
  			        work.filetype = 'file' AND
  			        props.visibility<>'2' AND
  			        work.active = 1 AND
  			        work.post_group_id = $groupId
+ 			        $sessionCondition
             ";
 
 } else {
@@ -104,6 +108,7 @@ if (api_is_allowed_to_edit()) {
                     props.visibility = '1' AND
                     work.post_group_id = $groupId
                     $userCondition
+                    $sessionCondition
             ";
 }
 $query = Database::query($sql);
