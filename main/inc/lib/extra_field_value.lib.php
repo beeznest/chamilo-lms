@@ -99,6 +99,8 @@ class ExtraFieldValue extends Model
         if (empty($params[$this->handler_id])) {
             return false;
         }
+
+        // Make sure that the extra_* is always set!
         foreach ($params as $key => $value) {
             $found = strpos($key, '__persist__');
             if ($found) {
@@ -106,7 +108,6 @@ class ExtraFieldValue extends Model
                 if (!isset($params[$tempKey])) {
                     $params[$tempKey] = array();
                 }
-                break;
             }
         }
 
@@ -123,9 +124,10 @@ class ExtraFieldValue extends Model
 
                     switch ($extra_field_info['field_type']) {
                         case ExtraField::FIELD_TYPE_TAG:
+
                             $old = self::getAllValuesByItemAndField(
-                                $extra_field_info['id'],
-                                $params[$this->handler_id]
+                                $params[$this->handler_id],
+                                $extra_field_info['id']
                             );
 
                             $deleteItems = array();
@@ -149,8 +151,8 @@ class ExtraFieldValue extends Model
                             if (!empty($deleteItems)) {
                                 foreach ($deleteItems as $deleteFieldValue) {
                                     self::deleteValuesByHandlerAndFieldAndValue(
-                                        $extra_field_info['id'],
                                         $params[$this->handler_id],
+                                        $extra_field_info['id'],
                                         $deleteFieldValue
                                     );
                                 }
@@ -190,7 +192,7 @@ class ExtraFieldValue extends Model
         } else {
             $value_to_insert = Database::escape_string($value);
         }
-        
+
         if (!empty($this->extraFields)) {
             foreach ($this->extraFields as $extraField => $extraValue) {
                 $params[$extraField] = Database::escape_string($extraValue);
@@ -202,7 +204,7 @@ class ExtraFieldValue extends Model
 
         // If field id exists
         $extra_field_info = $extra_field->get($params['field_id']);
-        
+
         if ($extra_field_info) {
             switch ($extra_field_info['field_type']) {
                 case ExtraField::FIELD_TYPE_RADIO:
@@ -259,7 +261,7 @@ class ExtraFieldValue extends Model
 
             $params['field_value'] = $value_to_insert;
             $params['tms'] = api_get_utc_datetime();
-            
+
             if ($this->author_id != 'lp_id') {
                 $params[$this->author_id] = api_get_user_id();
             }
@@ -378,7 +380,7 @@ class ExtraFieldValue extends Model
             }
         }
     }
-    
+
     /**
      * Returns the value of the given extra field on the given resource
      * @param int Item ID (It could be a session_id, course_id or user_id)
