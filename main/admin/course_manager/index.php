@@ -54,7 +54,7 @@ $blocks['courses']['search_form'] = $search_form;
 
 $items = array();
 $items[] = array('url'=>'course_list.php', 	'label' => get_lang('CourseList'));
-$items[] = array('url'=>'course_add.php', 	'label' => get_lang('AddCourse'));
+//$items[] = array('url'=>'course_add.php', 	'label' => get_lang('AddCourse'));
 /*$items[] = array('url'=>'course_export.php', 			'label' => get_lang('ExportCourses'));
 $items[] = array('url'=>'course_import.php', 			'label' => get_lang('ImportCourses'));
 $items[] = array('url'=>'course_category.php', 			'label' => get_lang('AdminCategories'));
