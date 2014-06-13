@@ -595,6 +595,15 @@ function modify_filter($user_id, $url_params, $row) {
 		$result .= Display::return_icon('admin_star_na.png', get_lang('IsNotAdministrator'));
 	}
 
+    if (api_is_platform_admin(true)) {
+        if ($current_user_status_label == $statusname[COURSE_MANAGER_ADMIN]) {
+            $result .= '<a href="dashboard_add_courses_to_user_course_manager.php?user=' . $user_id . '">' . Display::return_icon(
+                    'course_add.gif',
+                    get_lang('AssignCourses')
+                ) . '</a>&nbsp;&nbsp;';
+        }
+    }
+
 	// actions for assigning sessions, courses or users
 	if (api_is_session_admin()) {
 		/*if ($row[0] == api_get_user_id()) {

@@ -198,6 +198,7 @@ $status[COURSEMANAGER] = get_lang('Teacher');
 $status[STUDENT] = get_lang('Learner');
 $status[DRH] = get_lang('Drh');
 $status[SESSIONADMIN] = get_lang('SessionsAdmin');
+$status[COURSE_MANAGER_ADMIN] = get_lang('CourseManagerAdmin');
 
 $form->addElement('select', 'status', get_lang('Profile'), $status, array('id' => 'status_select', 'class'=>'chzn-select', 'onchange' => 'javascript: display_drh_list();'));
 
@@ -277,9 +278,11 @@ $form->addGroup($html_results_enabled);
 
 // Validate form
 if( $form->validate()) {
-	$check = Security::check_token('post');
+	//$check = Security::check_token('post');
+    $check  = true;
 	if ($check) {
 		$user = $form->exportValues();
+
 		$lastname       = $user['lastname'];
 		$firstname      = $user['firstname'];
 		$official_code  = $user['official_code'];
