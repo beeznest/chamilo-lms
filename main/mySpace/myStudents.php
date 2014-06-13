@@ -217,7 +217,6 @@ if (api_is_drh() || api_is_platform_admin()) {
 }
 
 $courses = CourseManager::get_course_list_of_user_as_course_admin(api_get_user_id());
-
 $courses_in_session_by_coach = array();
 $sessions_coached_by_user = Tracking::get_sessions_coached_by_user(api_get_user_id());
 
@@ -234,6 +233,19 @@ if (api_is_session_admin() || api_is_drh()) {
 	}
 }
 
+if (api_is_course_manager_admin()) {
+    $courses_in_session_by_coach = array();
+    $courses = array_flip(array_keys(CourseManager::get_courses_followed_by_course_admin_manager(api_get_user_id())));
+
+    foreach ($courses as $courseCode => $value) {
+        $sessionList = SessionManager::get_session_by_course($courseCode);
+        foreach ($sessionList as $sessionInfo) {
+            $courses_in_session_by_coach[$sessionInfo['id']] = $courseCode;
+        }
+    }
+}
+
+
 // Teacher or admin
 if (!empty($sessions_coached_by_user)) {
 	foreach ($sessions_coached_by_user as $session_coached_by_user) {
@@ -243,10 +255,11 @@ if (!empty($sessions_coached_by_user)) {
 	}
 }
 
+
 $sql = "SELECT course_code FROM $tbl_course_user
         WHERE relation_type <> ".COURSE_RELATION_TYPE_RRHH." AND user_id = ".intval($user_info['user_id']);
-$rs = Database::query($sql);
 
+$rs = Database::query($sql);
 while ($row = Database :: fetch_array($rs)) {
     if ($drh_can_access_all_courses) {
         $courses_in_session[0][] = $row['course_code'];
