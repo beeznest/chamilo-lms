@@ -891,17 +891,17 @@ class IndexManager {
 
 		// My account section
 		$my_account_content = '<ul class="nav nav-list">';
-
-		if ($show_create_link) {
-			$my_account_content .= '<li><a href="main/create_course/add_course.php" class="add course">';
-            if (api_get_setting('course_validation') == 'true' && !api_is_platform_admin()) {
-                $my_account_content .= get_lang('CreateCourseRequest');
+        if (!api_is_course_manager_admin()) {
+            if ($show_create_link) {
+                $my_account_content .= '<li><a href="main/create_course/add_course.php" class="add course">';
+                if (api_get_setting('course_validation') == 'true' && !api_is_platform_admin()) {
+                    $my_account_content .= get_lang('CreateCourseRequest');
+                } else {
+                    $my_account_content .= get_lang('CourseCreate');
+                }
+                $my_account_content .= '</a></li>';
             }
-            else {
-                $my_account_content .= get_lang('CourseCreate');
-            }
-            $my_account_content .= '</a></li>';
-		}
+        }
 
         //Sort courses
         $url = api_get_path(WEB_CODE_PATH).'auth/courses.php?action=sortmycourses';

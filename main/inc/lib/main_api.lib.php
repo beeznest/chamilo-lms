@@ -22,12 +22,13 @@ define('REQUIRED_MIN_POST_MAX_SIZE',        '10');
 
 use \ChamiloSession as Session;
 
-
 // USER STATUS CONSTANTS
 /** global status of a user: student */
 define('STUDENT', 5);
 /** global status of a user: course manager */
 define('COURSEMANAGER', 1);
+define('TEACHER', 1);
+
 /** global status of a user: session admin */
 define('SESSIONADMIN', 3);
 /** global status of a user: human ressource manager */
@@ -45,7 +46,7 @@ define('SESSION_GENERAL_COACH', 13);
 define('COURSE_STUDENT', 14);   //student subscribed in a course
 define('SESSION_STUDENT', 15);  //student subscribed in a session course
 define('COURSE_TUTOR', 16); // student is tutor of a course (NOT in session)
-
+define('COURSE_MANAGER_ADMIN', 17); // Weird course manager ?!
 
 // Table of status
 $_status_list[COURSEMANAGER]    = 'teacher';        // 1
@@ -290,6 +291,7 @@ define('PCLZIP_TEMPORARY_DIR', api_get_path(SYS_ARCHIVE_PATH));
 
 // Relations type with Human resources manager
 define('COURSE_RELATION_TYPE_RRHH', 1);
+define('COURSE_RELATION_TYPE_COURSE_ADMIN', 2);
 define('SESSION_RELATION_TYPE_RRHH', 1);
 
 //User image sizes
@@ -2758,6 +2760,20 @@ function api_is_allowed_to_edit($tutor = false, $coach = false, $session_coach =
         $is_courseAdmin = $is_courseAdmin || api_is_coach();
     }
 
+    $courseCode = api_get_course_id();
+
+    if (!empty($courseCode)) {
+        $isSubscribed = CourseManager::is_course_manager_subscribed_to_course(
+            api_get_user_id(),
+            $courseCode
+        );
+
+        if ($isSubscribed) {
+            $is_courseAdmin = true;
+        }
+    }
+
+
     // Check if the student_view is enabled, and if so, if it is activated.
     if (api_get_setting('student_view_enabled') == 'true') {
         if (!empty($my_session_id)) {
@@ -4380,7 +4396,8 @@ function api_get_status_langvars() {
         SESSIONADMIN    => get_lang('SessionsAdmin', ''),
         DRH             => get_lang('Drh', ''),
         STUDENT         => get_lang('Student', ''),
-        ANONYMOUS       => get_lang('Anonymous', '')
+        ANONYMOUS       => get_lang('Anonymous', ''),
+        COURSE_MANAGER_ADMIN => get_lang('CourseManagerAdmin', '')
     );
 }
 
@@ -6951,4 +6968,26 @@ function exist_firstpage_parameter() {
  */
 function api_get_firstpage_parameter() {
     return $_COOKIE['GotoCourse'];
+}
+
+/**
+ * Course manager admin
+ * @return bool
+ */
+function api_is_course_manager_admin()
+{
+    $_user = api_get_user_info();
+    return isset($_user['status']) && $_user['status'] == COURSE_MANAGER_ADMIN;
+}
+
+
+/**
+ * @param string $courseCode
+ */
+function api_protect_course_admin_manager($courseCode)
+{
+    $isSubscribed = CourseManager::is_course_manager_subscribed_to_course(api_get_user_id(), $courseCode);
+    if (!$isSubscribed) {
+        api_not_allowed(true);
+    }
 }
