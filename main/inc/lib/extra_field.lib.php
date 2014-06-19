@@ -114,12 +114,25 @@ class ExtraField extends Model
                 $this->handlerEntityId = 'lpId';
                 $this->primaryKey = 'id';
                 break;
+            case 'exercise':
+                $this->table_field_options = Database::get_main_table(TABLE_MAIN_EXERCISE_FIELD_OPTIONS);
+                $this->table_field_values  = Database::get_main_table(TABLE_MAIN_EXERCISE_FIELD_VALUES);
+
+                // Used for the model
+                $this->table = Database::get_main_table(TABLE_MAIN_EXERCISE_FIELD);
+                $this->handler_id = 'exercise_id';
+                $this->handlerEntityId = 'exerciseId';
+                $this->primaryKey = 'id';
+                break;
         }
         $this->pageUrl  = 'extra_fields.php?type='.$this->type;
         // Example QuestionFields
         $this->pageName = get_lang(ucwords($this->type).'Fields');
     }
 
+    /**
+     * @return array
+     */
     static function getValidExtraFieldTypes()
     {
         return array(
@@ -127,7 +140,8 @@ class ExtraField extends Model
             'course',
             'session',
             'question',
-            'lp'
+            'lp',
+            'exercise'
         );
     }
 
@@ -1253,7 +1267,6 @@ EOF;
         $group[] = $form->createElement('radio', 'field_loggeable', null, get_lang('Yes'), 1);
         $group[] = $form->createElement('radio', 'field_loggeable', null, get_lang('No'), 0);
         $form->addGroup($group, '', get_lang('FieldLoggeable'), '', false);
-
 
         $form->addElement('text', 'field_order', get_lang('FieldOrder'), array('class' => 'span1'));
 

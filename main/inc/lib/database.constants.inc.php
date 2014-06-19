@@ -66,6 +66,10 @@ define('TABLE_MAIN_LP_FIELD',         'lp_field');
 define('TABLE_MAIN_LP_FIELD_OPTIONS', 'lp_field_options');
 define('TABLE_MAIN_LP_FIELD_VALUES',  'lp_field_values');
 
+define('TABLE_MAIN_EXERCISE_FIELD',         'exercise_field');
+define('TABLE_MAIN_EXERCISE_FIELD_OPTIONS', 'exercise_field_options');
+define('TABLE_MAIN_EXERCISE_FIELD_VALUES',  'exercise_field_values');
+
 //User tags
 define('TABLE_MAIN_TAG',                'tag');
 define('TABLE_MAIN_USER_REL_TAG',       'user_rel_tag');
