@@ -4273,17 +4273,31 @@ class Tracking
         foreach ($sessionSum as $session) {
             $secondsProm = self::avg($session['timeSpentCourse'], $session['cont']);
             $gridData[] = array(
+                'session_id' => $session['sessionid'],
+                'course_id' => $session['courseid'],
+                'category' => $course['categoryCode'],
                 'course' => $session['course'],
-                'session' => $session['session'],
-                'sessionid' => $session['sessionid'],
-                'courseid' => $session['courseid'],
-                'time_in_course' => timestampToHoursMinutesSeconds($secondsProm),
-                'lesson_progress' => self::avg($session['lessonProgress'], $session['cont']) . " %",
-                'laboratory_progress' => self::avg($session['laboratoryProgress'], $session['cont']) . " %",
-                'self_learning_progress' => self::avg($session['selflearningProgress'], $session['cont']) . " %",
-                'lesson_performance' => self::avg($session['lessonPerformance'], $session['cont']),
-                'laboratory_performance' => self::avg($session['laboratoryPerformance'], $session['cont']),
-                'self_learning_performance' => self::avg($session['selflearningPerformance'], $session['cont'])
+                'section' => $session['session'],
+                'teacher_id' => 7898,
+                'last_name' => 0,
+                'first_name' => 0,
+                'students' => 0,
+                'time_in_course' =>timestampToHoursMinutesSeconds($secondsProm),
+
+                'general_progress' => 0,
+                'theory_progress' => 0,
+                'laboratory_progress' => 0,
+                'general_evaluation_progress' => 0,
+                'self_evaluation_progress' => 0,
+                'continuous_evaluation_progress' => 0,
+                'laboratory_evaluation_progress' => 0,
+                'final_evaluation_progress' => 0,
+
+                'general_evaluation_performance' => 0,
+                'self_evaluation_performance' => 0,
+                'continuous_evaluation_performance' => 0,
+                'laboratory_evaluation_performance' => 0,
+                'final_evaluation_performance' => 0,
             ); 
         }
         
