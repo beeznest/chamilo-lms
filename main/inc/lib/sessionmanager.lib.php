@@ -4005,23 +4005,16 @@ class SessionManager
 
         if (!empty($lastConnectionDate)) {
             $loginTable = Database::get_main_table(TABLE_STATISTIC_TRACK_E_LOGIN);
-            $sql .= " INNER JOIN $loginTable l ON (l.login_user_id = u.user_id) ";
+            $sql .= " INNER JOIN (SELECT l.login_user_id FROM $loginTable AS l
+                GROUP BY l.login_user_id
+                HAVING MAX(l.login_date) <= '$lastConnectionDate') l
+                ON (l.login_user_id = u.user_id) ";
         }
 
         $where = " WHERE access_url_id = $urlId
                       $statusConditions
                       $activeCondition
                     ";
-
-        if (!empty($lastConnectionDate)) {
-            $lastConnectionDate = Database::escape_string($lastConnectionDate);
-            $where .= " AND l.login_date = (
-                            SELECT MAX(a.login_date)
-                            FROM $loginTable as a
-                            WHERE a.login_user_id = u.user_id
-                         )";
-            $where .= " AND l.login_date <= '$lastConnectionDate' ";
-        }
 
         $sql .= $where;
 
@@ -4276,7 +4269,10 @@ class SessionManager
 
             if (!empty($lastConnectionDate)) {
                 $tableLogin = Database::get_main_table(TABLE_STATISTIC_TRACK_E_LOGIN);
-                $sql .= " INNER JOIN $tableLogin l ON (l.login_user_id = u.user_id) ";
+                $sql .= " INNER JOIN (SELECT l.login_user_id FROM $tableLogin AS l
+                GROUP BY l.login_user_id
+                HAVING MAX(l.login_date) <= '$lastConnectionDate') l
+                ON (l.login_user_id = u.user_id) ";
             }
             $active = intval($active);
             $teacherListId = array();
@@ -4286,16 +4282,6 @@ class SessionManager
 
             $teacherListId = implode("','", $teacherListId);
             $where = " WHERE u.active = $active  AND u.user_id IN ('$teacherListId') ";
-
-            if (!empty($lastConnectionDate)) {
-                $lastConnectionDate = Database::escape_string($lastConnectionDate);
-                $where .= " AND l.login_date = (
-                                SELECT MAX(a.login_date)
-                                FROM $tableLogin as a
-                                WHERE a.login_user_id = u.user_id
-                            ) AND ";
-                $where .= "  l.login_date <= '$lastConnectionDate' ";
-            }
 
             $sql .= $where;
             $result = Database::query($sql);
