@@ -163,7 +163,8 @@ class CourseManager
         $alsoSearchCode = false
     ) {
 
-        $sql = "SELECT course.* FROM ".Database::get_main_table(TABLE_MAIN_COURSE)." course ";
+        $sql = "SELECT course.*, course.id as real_id
+                FROM ".Database::get_main_table(TABLE_MAIN_COURSE)." course ";
 
         if (!empty($urlId)) {
             $table = Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_COURSE);

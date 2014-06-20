@@ -415,7 +415,7 @@ class MySpace {
         $return .= Display::grid_html($tableId);
         return $return;
     }
-    
+
     /**
      * Display a sortable table that contains an overview off all the progress of the user in a session
      * @param   int $sessionId  The session ID
@@ -423,7 +423,7 @@ class MySpace {
      * @param   int $exerciseId The quiz ID
      * @return  string  HTML array of results formatted for gridJS
      */
-    public static function displayTrackingEvaluation($sessionId = 0, $courseId = 0, $exerciseId = 0) 
+    public static function displayTrackingEvaluation($sessionId = 0, $courseId = 0, $exerciseId = 0)
     {
         /**
          * Column names
@@ -494,11 +494,11 @@ class MySpace {
                 });
             });</script>';
         $return .= Display::grid_html($tableId);
-        
+
         return $return;
     }
-    
-    
+
+
     /**
      * Display a sortable table that contains an overview off all the progress of the session
      * @param   int $sessionId  The session ID
@@ -506,13 +506,13 @@ class MySpace {
      * @param   int $exerciseId The quiz ID
      * @return  string  HTML array of results formatted for gridJS
      */
-    public static function displayTrackingEvaluationSupervisor($sessionId = 0, $courseId = 0, $exerciseId = 0) 
+    public static function displayTrackingEvaluationSupervisor($sessionId = 0, $courseId = 0, $exerciseId = 0)
     {
         /**
          * Column names
          * The column order is important. Check $column variable in the main/inc/ajax/model.ajax.php file
          */
-        
+
         $columns = array(
             get_lang('CourseCode'),
             get_lang('Section'),
@@ -562,7 +562,7 @@ class MySpace {
                 });
             });</script>';
         $return .= Display::grid_html($tableId);
-        
+
         return $return;
     }
 
@@ -639,7 +639,7 @@ class MySpace {
                     if (!empty($exercises[$cnt - 4]['title'])) {
                         $title = ucwords(strtolower(trim($exercises[$cnt - 4]['title'])));
                     }
-                    
+
                     $column[] = $title;
                     $column_model[] = array(
                         'name' => 'exer' . $i,
@@ -2524,7 +2524,7 @@ class MySpace {
 		xml_parser_free($parser);
 		return $users;
 	}
-    
+
     /**
      * Display a sortable table that contains the course progress report
      * with a detail
@@ -2534,7 +2534,9 @@ class MySpace {
      */
     public static function displayCourseProgressSummary($courseId = 0, $sessionId = 0)
     {
-        
+        $courseId = intval($courseId);
+        $sessionId = intval($sessionId);
+
         /**
          * Column name
          * The order is important you need to check the $column variable in the model.ajax.php file
@@ -2561,6 +2563,7 @@ class MySpace {
             get_lang('ContinuousEvaluation'), //Performance
             get_lang('LaboratoryEvaluation'), //Performance
             get_lang('FinalEvaluation'), //Performance
+            'course_int'
         );
 
         /**
@@ -2575,7 +2578,6 @@ class MySpace {
             array('name' => 'first_name', 'index' => 'first_name', 'align' => 'left', 'search' => 'false'),
             array('name' => 'students', 'index' => 'students', 'align' => 'left', 'search' => 'false'),
             array('name' => 'time_in_course', 'index' => 'time_in_course', 'align' => 'left', 'search' => 'false'),
-
             array('name' => 'general_progress', 'index' => 'general_progress', 'align' => 'left', 'search' => 'false'),
             array('name' => 'theory_progress', 'index' => 'theory_progress', 'align' => 'left', 'search' => 'false'),
             array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'left', 'search' => 'false'),
@@ -2584,12 +2586,12 @@ class MySpace {
             array('name' => 'continuous_evaluation_progress', 'index' => 'continuous_evaluation_progress', 'align' => 'left', 'search' => 'false'),
             array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'left', 'search' => 'false'),
             array('name' => 'final_evaluation_progress', 'index' => 'final_evaluation_progress', 'align' => 'left', 'search' => 'false'),
-
             array('name' => 'general_performance', 'index' => 'general_performance', 'align' => 'left', 'search' => 'false'),
             array('name' => 'self_learning_performance', 'index' => 'self_learning_performance', 'align' => 'center', 'search' => 'false'),
             array('name' => 'continuous_evaluation_performance', 'index' => 'continuous_evaluation_performance', 'align' => 'left', 'search' => 'false'),
             array('name' => 'laboratory_evaluation_performance', 'index' => 'laboratory_evaluation_performance', 'align' => 'left', 'search' => 'false'),
             array('name' => 'final_evaluation_performance', 'index' => 'final_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'course_int_id', 'index' => 'course_int_id', 'align' => 'left', 'hidden' => 'true'),
         );
 
         $action_links = '';
@@ -2599,7 +2601,7 @@ class MySpace {
 
         $tableId = 'course_progress_report';
         $extra_params['autowidth'] = 'true';
-        $extra_params['sortname'] = 'course';
+        $extra_params['sortname'] = 'course_code';
         $extra_params['height'] = 'auto';
         $extra_params['groupHeaders'] = array(
             'progress' => array(
@@ -2623,13 +2625,14 @@ class MySpace {
         );
 
         $extra_params['subGrid'] = 'true';
+        $extra_params['rowNum'] = '20';
         $extra_params['subGridRowExpanded'] = "**function(subgridid, id) {
             var row_data = $('#" . $tableId . "').jqGrid('getRowData', id);
             var data = {
                 subgrid: subgridid,
                 rowid: id,
                 gridId: 'session_progress',
-                courseId: row_data.course_id,
+                courseId: row_data.course_int_id,
                 sessionId: '" . $sessionId . "'
             };
             $('#'+ subgridid).load('" .  api_get_path(WEB_AJAX_PATH) . "grid.ajax.php', data);
@@ -2670,8 +2673,8 @@ class MySpace {
             get_lang('SessionId'),
             get_lang('CourseId'),
             get_lang('Category'),
-            get_lang('Course'),
             get_lang('Section'),
+            get_lang('Course'),
             get_lang('TeacherCode'),
             get_lang('LastName'),
             get_lang('FirstName'),
@@ -2701,8 +2704,8 @@ class MySpace {
             array('name' => 'session_id', 'index' => 'session_id', 'align' => 'left', 'hidden' => 'true'),
             array('name' => 'course_id', 'index' => 'course_id', 'align' => 'left', 'hidden' => 'true'),
             array('name' => 'category', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
             array('name' => 'section', 'index' => 'section', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
             array('name' => 'teacher_id', 'index' => 'teacher_id', 'align' => 'left', 'search' => 'false'),
             array('name' => 'last_name', 'index' => 'last_name', 'align' => 'left', 'search' => 'false'),
             array('name' => 'first_name', 'index' => 'first_name', 'align' => 'left', 'search' => 'false'),
@@ -2774,7 +2777,7 @@ class MySpace {
 
         $return = '<script>$(function() {' . $table .
                 'jQuery("#' . $tableId . '").jqGrid("navGrid","#' . $tableId . '_pager",{view:false, edit:false, add:false, del:false, search:false, excel:true});
-                jQuery("#' . $tableId . '").jqGrid("navButtonAdd","#' . $tableId . '_pager",{
+                 jQuery("#' . $tableId . '").jqGrid("navButtonAdd","#' . $tableId . '_pager",{
                        caption:"",
                        title:"' . get_lang('ExportExcel') . '",
                        onClickButton : function () {
@@ -2829,13 +2832,10 @@ class MySpace {
         );
 
         $column_model_expanded = "{name:'lesson_name', index:'lesson_name', width:200, key:true},";
-
         $column_name_expanded = "'" . get_lang('LearningPath') . "'";
 
         $extra_params_headers = array();
-
         $extra_params_headers_expanded = '';
-
         $gridHeaders = array(
             'progress',
             'performance',
@@ -2844,24 +2844,22 @@ class MySpace {
         $objectEF = new ExtraField('lp');
         $objectEFO = new ExtraFieldOption('lp');
         $extra_field = $objectEF->get_handler_field_info_by_field_variable('Tipo');
+
         if ($extra_field !== false) {
             $extra_options = $objectEFO->get_field_options_by_field($extra_field['id']);
             $numColumns = count($extra_options) + 1;
             foreach ($gridHeaders as $header) {
-
                 $header = strtolower($header);
-
                 $columns[] = get_lang('General');
-
                 $column_model[] = array(
                     'name' => 'general_'.$header,
                     'index' => 'general_'.$header,
                     'align' => 'center',
                     'search' => 'false',
                 );
-
-                $column_model_expanded .= "{name:'general_$header', index:'general_$header', width:200, key:true},";
-
+                /*$column_model_expanded .= "{name:'general_$header', index:'general_$header', width:200, key:true},";
+                //$column_name_expanded .= ", '" . get_lang('General') . "'";
+                */
                 $extra_params_headers[$header] = array(
                     "startColumnName" => 'general_'.$header,
                     "numberOfColumns" => $numColumns,
@@ -2873,28 +2871,23 @@ class MySpace {
                     numberOfColumns:$numColumns,
                     titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang(ucfirst($header)) . "</div>'
                 },";
-                foreach ($extra_options as $option) {
 
+                foreach ($extra_options as $option) {
                     $option_value = $option['option_value'];
                     $option_display_text = $option['option_display_text'];
-
                     $columns[] = get_lang($option_display_text);
-
                     $column_model[] = array(
                         'name' => $option_value.'_'.$header,
                         'index' => $option_value.'_'.$header,
                         'align' => 'center',
                         'search' => 'false',
                     );
-
                     $column_model_expanded .= "{name:'{$option_value}_{$header}', index:'{$option_value}_{$header}', width:70, align:'center'},";
-
                     $column_name_expanded .= ", '" . get_lang($option_display_text) . "'";
                 }
             }
 
         } else {
-
             $columns[] = get_lang('Lesson'); //Progress
             $columns[] = get_lang('Laboratory'); //Progress
             $columns[] = get_lang('SelfLearning'); //Progress
@@ -2949,9 +2942,6 @@ class MySpace {
                     titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Performance') . "</div>'
                 },";
         }
-
-
-
         $action_links = '';
 
         // jqgrid will use this URL to do the selects
@@ -2973,7 +2963,7 @@ class MySpace {
         );
 
         $extra_params['subGridRowExpanded'] = "**function(subgrid_id, row_id) {
-       var subgrid_table_id, pager_id, user_data; 
+            var subgrid_table_id, pager_id, user_data;
             subgrid_table_id = subgrid_id+'_t';
             pager_id = 'p_'+subgrid_table_id;
             user_data = $('#" . $tableId . "').jqGrid('getRowData', row_id);
@@ -2991,12 +2981,11 @@ class MySpace {
             $('#'+subgrid_table_id).jqGrid('navGrid','#'+pager_id,{edit:false,add:false,del:false});
 
             $('#'+subgrid_table_id).jqGrid('setGroupHeaders', {
-                useColSpanStyle: false,                    
+                useColSpanStyle: false,
                 groupHeaders: [$extra_params_headers_expanded]
             });
 
         }**";
-
         $table = Display::grid_js($tableId, $url, $columns, $column_model, $extra_params, array(), $action_links, true);
 
         $return = '<script>$(function() {' . $table .
@@ -3023,6 +3012,8 @@ class MySpace {
      */
     public static function displaySessionProgressReport($sessionId, $courseId)
     {
+        $sessionId = intval($sessionId);
+        $courseId = intval($courseId);
         /**
          * Column name
          * The order is important you need to check the $column variable in the model.ajax.php file
@@ -3030,12 +3021,13 @@ class MySpace {
         $columns = array(
             get_lang('SessionId'),
             get_lang('CourseId'),
+            get_lang('Category'),
             get_lang('Course'),
             get_lang('Section'),
             get_lang('TeacherCode'),
             get_lang('LastName'),
             get_lang('FirstName'),
-            get_lang('Students'), 
+            get_lang('Students'),
             get_lang('Lesson'),
             get_lang('Laboratory'),
             get_lang('SelfLearning'),
@@ -3050,6 +3042,7 @@ class MySpace {
         $column_model = array(
             array('name' => 'sessionid', 'index' => 'sessionid', 'align' => 'left', 'hidden' => "true"),
             array('name' => 'courseid', 'index' => 'courseid', 'align' => 'left', 'hidden' => "true"),
+            array('name' => 'category', 'index' => 'course', 'align' => 'left', 'search' => 'true', 'wrap_cell' => "true"),
             array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'true', 'wrap_cell' => "true"),
             array('name' => 'session', 'index' => 'session', 'align' => 'left', 'search' => 'true'),
             array('name' => 'teacherId', 'index' => 'teacherId', 'align' => 'left', 'search' => 'true'),
@@ -3088,7 +3081,7 @@ class MySpace {
                 "titleText" => get_lang('Performance'),
             ),
         );
-        
+
         $extra_params['subGridOptions'] = array(
             'plusicon' => 'ui-icon-triangle-1-e',
             'minusicon' => 'ui-icon-triangle-1-s',
@@ -3098,59 +3091,59 @@ class MySpace {
         );
 
         $extra_params['subGridRowExpanded'] = "**function(subgrid_id, row_id) {
-            var subgrid_table_id, pager_id, grid_data; 
+            var subgrid_table_id, pager_id, grid_data;
             subgrid_table_id = subgrid_id+'_t';
             pager_id = 'p_'+subgrid_table_id;
             grid_data = $('#" . $tableId . "').jqGrid('getRowData', row_id);
             $('#'+subgrid_id).html('<table id='+subgrid_table_id+' class=\"scroll\"></table><div id='+pager_id+' class=\"scroll\"></div>');
+
             $('#'+subgrid_table_id).jqGrid({
                 url: '" . $urlDetail . "&session_id=' + grid_data.sessionid + '&course_id=' + grid_data.courseid,
                 datatype: 'json',
                 caption: '" . get_lang('StudentDetail') . "',
-                colNames: ['" . get_lang('SessionId') . "', 
+                colNames: ['" . get_lang('SessionId') . "',
                            '" . get_lang('CourseId') . "',
-                           '" . get_lang('Section') . "', 
+                           '" . get_lang('Section') . "',
                            '" . get_lang('Course') . "',
-                           '" . get_lang('Code') . "', 
-                           '" . get_lang('LastName') . "', 
-                           '" . get_lang('FirstName') . "', 
+                           '" . get_lang('Code') . "',
+                           '" . get_lang('LastName') . "',
+                           '" . get_lang('FirstName') . "',
                            '" . get_lang('TimeInCourse') . "',
-                           '" . get_lang('Lesson') . "', 
+                           '" . get_lang('Lesson') . "',
                            '" . get_lang('Laboratory') . "',
                            '" . get_lang('SelfLearning') . "',
-                           '" . get_lang('Lesson') . "', 
+                           '" . get_lang('Lesson') . "',
                            '" . get_lang('Laboratory') . "',
                            '" . get_lang('SelfLearning') . "',
                            '" . get_lang('LastConnection') . "',
                            '" . get_lang('Detail') . "'],
-                colModel: [ 
-                            {'name': 'sessionid', 'index': 'sessionid', 'align': 'left', 'hidden': true}, 
-                            {'name': 'courseid', 'index': 'courseid', 'align': 'left', 'hidden': true}, 
-                            {'name': 'session', 'index': 'sessionid', 'align': 'left', 'hidden': true}, 
-                            {'name': 'course', 'index': 'courseid', 'align': 'left', 'hidden': true}, 
-                            {'name': 'username', 'index': 'username', 'align': 'left', 'width': 60}, 
-                            {'name': 'lastname', 'index': 'lastname', 'align': 'left', 'width': 180}, 
-                            {'name': 'firstname', 'index': 'firstname', 'align': 'left', 'width': 180}, 
-                            {'name': 'timeincourse', 'index': 'timeincourse', 'align': 'center', 'width': 80}, 
-                            {'name': 'lessonpro', 'index': 'lessonpro', 'align': 'center', 'width': 60}, 
-                            {'name': 'laboratorypro', 'index': 'laboratorypro', 'align': 'center', 'width': 60}, 
-                            {'name': 'selflearningpro', 'index': 'selflearningpro', 'align': 'center', 'width': 60}, 
-                            {'name': 'lessonper', 'index': 'lessonper', 'align': 'center', 'width': 60}, 
-                            {'name': 'laboratoryper', 'index': 'laboratoryper', 'align': 'center', 'width': 60}, 
-                            {'name': 'selflearningper', 'index': 'selflearningper', 'align': 'center', 'width': 60}, 
+                colModel: [
+                            {'name': 'sessionid', 'index': 'sessionid', 'align': 'left', 'hidden': true},
+                            {'name': 'courseid', 'index': 'courseid', 'align': 'left', 'hidden': true},
+                            {'name': 'session', 'index': 'sessionid', 'align': 'left', 'hidden': true},
+                            {'name': 'course', 'index': 'courseid', 'align': 'left', 'hidden': true},
+                            {'name': 'username', 'index': 'username', 'align': 'left', 'width': 60},
+                            {'name': 'lastname', 'index': 'lastname', 'align': 'left', 'width': 180},
+                            {'name': 'firstname', 'index': 'firstname', 'align': 'left', 'width': 180},
+                            {'name': 'timeincourse', 'index': 'timeincourse', 'align': 'center', 'width': 80},
+                            {'name': 'lessonpro', 'index': 'lessonpro', 'align': 'center', 'width': 60},
+                            {'name': 'laboratorypro', 'index': 'laboratorypro', 'align': 'center', 'width': 60},
+                            {'name': 'selflearningpro', 'index': 'selflearningpro', 'align': 'center', 'width': 60},
+                            {'name': 'lessonper', 'index': 'lessonper', 'align': 'center', 'width': 60},
+                            {'name': 'laboratoryper', 'index': 'laboratoryper', 'align': 'center', 'width': 60},
+                            {'name': 'selflearningper', 'index': 'selflearningper', 'align': 'center', 'width': 60},
                             {'name': 'lastconnection', 'index': 'lastconnection', 'align': 'center', 'width': 120},
                             {'name': 'detail', 'index': 'detail', 'align': 'center', 'width': 60}
-                          ], 
+                          ],
                 rowNum: 20,
                 pager: pager_id,
                 sortname: 'u.lastname',
                 sortorder: 'asc',
                 height: '100%'});
-                
-            $('#'+subgrid_table_id).jqGrid('navGrid','#'+pager_id,{edit:false,add:false,del:false});
 
+            $('#'+subgrid_table_id).jqGrid('navGrid','#'+pager_id,{edit:false,add:false,del:false});
             $('#'+subgrid_table_id).jqGrid('setGroupHeaders', {
-                useColSpanStyle: false,                    
+                useColSpanStyle: false,
                 groupHeaders: [
                     {
                         startColumnName:'lessonpro',
@@ -3165,7 +3158,7 @@ class MySpace {
                 ]
             });
         }**";
-        
+
         $table = Display::grid_js($tableId, $url, $columns, $column_model, $extra_params, array(), $action_links, true);
 
         $return = '<script>$(function() {' . $table .
@@ -3183,7 +3176,7 @@ class MySpace {
 
         return $return;
     }
-    
+
 }
 
 function get_stats($user_id, $course_code, $start_date = null, $end_date = null) {
@@ -3192,14 +3185,14 @@ function get_stats($user_id, $course_code, $start_date = null, $end_date = null)
     $tbl_main           = Database :: get_main_table(TABLE_MAIN_COURSE);
 
     $course_info = api_get_course_info($course_code);
-    if (!empty($course_info)) {        
+    if (!empty($course_info)) {
         $strg_sd    = "";
-        $strg_ed    = "";        
+        $strg_ed    = "";
         if ($start_date != null && $end_date != null){
             $end_date = add_day_to( $end_date );
             $strg_sd = "AND login_course_date BETWEEN '$start_date' AND '$end_date'";
             $strg_ed = "AND logout_course_date BETWEEN '$start_date' AND '$end_date'";
-        }    
+        }
         $sql = 'SELECT SEC_TO_TIME(avg(time_to_sec(timediff(logout_course_date,login_course_date)))) as avrg,
             SEC_TO_TIME(sum(time_to_sec(timediff(logout_course_date,login_course_date)))) as total,
             count(user_id) as times
@@ -3207,11 +3200,11 @@ function get_stats($user_id, $course_code, $start_date = null, $end_date = null)
             WHERE user_id = ' . intval($user_id) . '
             AND course_code = "' . Database::escape_string($course_code) . '" '.$strg_sd.' '.$strg_ed.' '.'
             ORDER BY login_course_date ASC';
-    
+
         $rs = Database::query($sql);
         $result = array();
-    
-        if ($row = Database::fetch_array($rs)) {    
+
+        if ($row = Database::fetch_array($rs)) {
             $foo_avg    = $row['avrg'];
             $foo_total  = $row['total'];
             $foo_times  = $row['times'];
@@ -3243,25 +3236,25 @@ function get_connections_to_course_by_date($user_id, $course_code, $start_date, 
     // Database table definitions
     $tbl_track_course   = Database :: get_statistic_table(TABLE_STATISTIC_TRACK_E_COURSE_ACCESS);
     $tbl_main           = Database :: get_main_table(TABLE_MAIN_COURSE);
-    
+
     $course_info = api_get_course_info($course_code);
     $user_id = intval($user_id);
     if (!empty($course_info)) {
         $end_date = add_day_to($end_date);
-        $sql = "SELECT login_course_date, logout_course_date FROM $tbl_track_course 
+        $sql = "SELECT login_course_date, logout_course_date FROM $tbl_track_course
             WHERE user_id = $user_id
-            AND course_code = '$course_code' 
+            AND course_code = '$course_code'
             AND login_course_date BETWEEN '$start_date' AND '$end_date'
             AND logout_course_date BETWEEN '$start_date' AND '$end_date'
-            ORDER BY login_course_date ASC";    
+            ORDER BY login_course_date ASC";
         $rs = Database::query($sql);
         $connections = array();
-    
-        while ($row = Database::fetch_array($rs)) {    
+
+        while ($row = Database::fetch_array($rs)) {
             $login_date = $row['login_course_date'];
-            $logout_date = $row['logout_course_date'];    
+            $logout_date = $row['logout_course_date'];
             $timestamp_login_date = strtotime($login_date);
-            $timestamp_logout_date = strtotime($logout_date);    
+            $timestamp_logout_date = strtotime($logout_date);
             $connections[] = array('login' => $timestamp_login_date, 'logout' => $timestamp_logout_date);
         }
     }
@@ -3269,9 +3262,9 @@ function get_connections_to_course_by_date($user_id, $course_code, $start_date, 
 }
 
 /**
- * 
  *
- * @param array     
+ *
+ * @param array
  * @author Jorge Frisancho Jibaja
  * @version OCT-22- 2010
  * @return array
@@ -3423,7 +3416,7 @@ function grapher($sql_result, $start_date, $end_date, $type = "") {
 
             // Finish the graph
             $test->setFontProperties(api_get_path(LIBRARY_PATH).'pchart/fonts/tahoma.ttf', 8);
-            $test->setFontProperties(api_get_path(LIBRARY_PATH).'pchart/fonts/tahoma.ttf', 10);            
+            $test->setFontProperties(api_get_path(LIBRARY_PATH).'pchart/fonts/tahoma.ttf', 10);
             $test->drawTitle(60, 22, get_lang('AccessDetails'), 50, 50, 50, 585);
 
             //------------------
