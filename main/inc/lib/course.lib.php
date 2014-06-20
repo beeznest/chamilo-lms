@@ -4489,10 +4489,14 @@ class CourseManager
     }
 
     /**
+     * @param $courseId
      * @param int $sessionId
+     * @return mixedss
      */
-    public function getLearningPathProgressAverage($courseId, $sessionId = 0)
+    public static function getLearningPathProgressAverage($courseId, $sessionId = 0)
     {
+        $courseId = intval($courseId);
+        $sessionId = intval($sessionId);
         $tableLpView = Database :: get_course_table(TABLE_LP_VIEW);
 
         if ($sessionId === 0) {
@@ -4515,8 +4519,12 @@ class CourseManager
         }
 
         $data = Database::select('AVG(progress) as average', $tableLpView, $whereCondition);
-        $averageData = current($data);
+        $average = 0;
+        if (!empty($data)) {
+            $averageData = current($data);
+            $average = round($averageData['average'], 2);
+        }
 
-        return $averageData['average'];
+        return $average;
     }
 }

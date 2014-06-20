@@ -1344,14 +1344,38 @@ class SessionManager
             $courses = api_get_course_info_by_id($courseId);
         }
 
+        $gridData = array();
         foreach ($courses as $course) {
-            CourseManager::
-            $objLearningPath = new learnpath($course['id'], '', '');
-            $courseProgressAverage = $objLearningPath->getProgressAverage();
-            var_dump($courseProgressAverage);Exit;
+            $courseId = $course['id'];
+            $courseProgressAverage = CourseManager::getLearningPathProgressAverage($courseId);
+            $gridData[$course['id']] = array(
+                'course_id'  => $course['id'],
+                'category' => $course['category_code'],
+                'course' => $course['code'],
+                'teacher_id' => 0,
+                'last_name' => 0,
+                'first_name' => 0,
+                'students' => 25,
+                'time_in_course' => 1528,
+
+                'general_progress' => $courseProgressAverage,
+                'theory_progress' => 0,
+                'laboratory_progress' => 0,
+                'general_evaluation_progress' => 0,
+                'self_learning_progress' => 0,
+                'continuous_evaluation_progress' => 0,
+                'laboratory_progress' => 0,
+                'final_evaluation_progress' => 0,
+
+                'general_performance' => 0,
+                'self_learning_performance' => 0,
+                'continuous_evaluation_performance' => 0,
+                'laboratory_evaluation_performance' => 0,
+                'final_evaluation_performance' => 0,
+            );
         }
 
-        //return $gridData;
+        return $gridData;
     }
 
     function get_number_of_tracking_access_overview()
