@@ -279,7 +279,7 @@ switch ($action) {
             $content .= showTeacherWorkGrid();
             $content .= '</div>';
             $content .= '<div class="span3">';
-            $content .= showStudentList($userList, $work_parents, $group_id, $course_id, $session_id);
+            $content .= showStudentList($work_id);
             $content .= '</div>';
         } else {
             $content .= showStudentWorkGrid();

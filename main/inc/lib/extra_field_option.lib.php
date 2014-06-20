@@ -35,6 +35,9 @@ class ExtraFieldOption extends Model
             case 'lp':
                 $this->table = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
                 break;
+            case 'exercise':
+                $this->table = Database::get_main_table(TABLE_MAIN_EXERCISE_FIELD_OPTIONS);
+                break;
         }
     }
 
@@ -119,7 +122,10 @@ class ExtraFieldOption extends Model
      */
     public function saveOptions($params, $show_query = false)
     {
-        $optionInfo = self::get_field_option_by_field_and_option($params['field_id'], $params['option_value']);
+        $optionInfo = self::get_field_option_by_field_and_option(
+            $params['field_id'],
+            $params['option_value']
+        );
 
         // Use URLify only for new items
         //$optionValue = URLify::filter($params['option_value']);
@@ -139,6 +145,38 @@ class ExtraFieldOption extends Model
         }
 
         return false;
+    }
+
+    /**
+     * @param $params
+     * @param bool $show_query
+     * @return bool
+     */
+    public function saveOptionsAndGetIdOfFirstItem($params, $show_query = false)
+    {
+        $optionInfo = self::get_field_option_by_field_and_option(
+            $params['field_id'],
+            $params['option_value']
+        );
+
+        // Use URLify only for new items
+        //$optionValue = URLify::filter($params['option_value']);
+        $optionValue = replace_dangerous_char($params['option_value']);
+        $option = $params['option_value'];
+
+        if ($optionInfo == false) {
+            $order = self::get_max_order($params['field_id']);
+            $new_params = array(
+                'field_id'            => $params['field_id'],
+                'option_value'        => trim($optionValue),
+                'option_display_text' => trim($option),
+                'option_order'        => $order,
+                'tms'                 => api_get_utc_datetime(),
+            );
+            return parent::save($new_params, $show_query);
+        } else {
+            return $optionInfo[0]['id'];
+        }
     }
 
     /**

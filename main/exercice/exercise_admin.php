@@ -146,6 +146,9 @@ $(document).ready(function () {
 window.onload=advanced_parameters;
 </script>';
 
+$htmlHeadXtra[] = '<script src="'.api_get_path(WEB_LIBRARY_PATH).'javascript/tag/jquery.fcbkcomplete.js" type="text/javascript" language="javascript"></script>';
+$htmlHeadXtra[] = '<link  href="'.api_get_path(WEB_LIBRARY_PATH).'javascript/tag/style.css" rel="stylesheet" type="text/css" />';
+
 // INIT EXERCISE
 
 $objExercise = new Exercise();

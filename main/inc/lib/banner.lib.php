@@ -306,6 +306,11 @@ function return_navigation_array() {
             }
         }
 
+        if (api_is_course_manager_admin()) {
+            $navigation['platform_admin']['url'] = api_get_path(WEB_CODE_PATH).'admin/course_manager/';
+            $navigation['platform_admin']['title'] = get_lang('PlatformAdmin');
+        }
+
 		// Reports
         if (!empty($possible_tabs['reports'])) {
             if (api_get_setting('show_tabs', 'reports') == 'true') {
@@ -418,7 +423,7 @@ function return_menu() {
             if (api_get_user_id() && !api_is_anonymous()) {
                 $lis .= $open_mtloggedin;
             } else {
-                $lis .= $open;    
+                $lis .= $open;
             }
         }
     }
