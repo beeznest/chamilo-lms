@@ -846,14 +846,6 @@ switch ($action) {
             'lastname',
             'firstname',
             'time_in_course',
-            'lesson_progress',
-            'laboratory_progress',
-            'self_learning_progress',
-            'lesson_performance',
-            'laboratory_performance',
-            'self_learning_performance',
-            'last_connection',
-            'graph'
         );
 
         $column_names = array(
@@ -865,14 +857,49 @@ switch ($action) {
             get_lang('LastName'),
             get_lang('FirstName'),
             get_lang('TimeInCourse'),
-            get_lang('Lesson'),
-            get_lang('Laboratory'),
-            get_lang('SelfLearning'),
-            get_lang('Lesson'),
-            get_lang('Laboratory'),
-            get_lang('SelfLearning'),
-            get_lang('LastConnection')
         );
+
+        $objectEF = new ExtraField('lp');
+        $objectEFO = new ExtraFieldOption('lp');
+        $extra_field = $objectEF->get_handler_field_info_by_field_variable('Tipo');
+        if ($extra_field !== false) {
+            $extra_options = $objectEFO->get_field_options_by_field($extra_field['id']);
+            foreach ($gridHeaders as $header) {
+
+                $header = strtolower($header);
+
+                $column_names[] = get_lang('General');
+
+                $columns[] = 'general_'.$header;
+
+                foreach ($extra_options as $option) {
+
+                    $option_value = $option['option_value'];
+                    $option_display_text = $option['option_display_text'];
+
+                    $column_names[] = get_lang($option_display_text);
+
+                    $columns[] = $option_value.'_'.$header;
+                }
+            }
+        } else {
+            $columns[] = 'lesson_progress';
+            $columns[] = 'laboratory_progress';
+            $columns[] = 'self_learning_progress';
+            $columns[] = 'lesson_performance';
+            $columns[] = 'laboratory_performance';
+            $columns[] = 'self_learning_performance';
+            $columns[] = 'last_connection';
+            $columns[] = 'graph';
+
+            $column_names[] = get_lang('Lesson');
+            $column_names[] = get_lang('Laboratory');
+            $column_names[] = get_lang('SelfLearning');
+            $column_names[] = get_lang('Lesson');
+            $column_names[] = get_lang('Laboratory');
+            $column_names[] = get_lang('SelfLearning');
+            $column_names[] = get_lang('LastConnection');
+        }
 
         $sessionId = 0;
         if (!empty($_GET['course_id'])) {
@@ -1027,13 +1054,34 @@ switch ($action) {
     case 'display_student_progress_detail':
         $columns = array(
             'lesson_name',
-            'lesson_progress',
-            'laboratory_progress',
-            'self_learning_progress',
-            'laboratory_performance',
-            'self_learning_performance',
-            'last_date'
         );
+        $objectEF = new ExtraField('lp');
+        $objectEFO = new ExtraFieldOption('lp');
+        $extra_field = $objectEF->get_handler_field_info_by_field_variable('Tipo');
+        if ($extra_field !== false) {
+            $extra_options = $objectEFO->get_field_options_by_field($extra_field['id']);
+            foreach ($gridHeaders as $header) {
+
+                $header = strtolower($header);
+
+                $columns[] = 'general_'.$header;
+
+                foreach ($extra_options as $option) {
+
+                    $option_value = $option['option_value'];
+                    $option_display_text = $option['option_display_text'];
+
+                    $columns[] = $option_value.'_'.$header;
+                }
+            }
+        } else {
+            $columns[] = 'lesson_progress';
+            $columns[] = 'laboratory_progress';
+            $columns[] = 'self_learning_progress';
+            $columns[] = 'laboratory_performance';
+            $columns[] = 'self_learning_performance';
+            $columns[] = 'last_date';
+        }
 
         $sessionId = 0;
         if (!empty($_GET['course_id'])) {
