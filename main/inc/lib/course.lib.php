@@ -4488,5 +4488,35 @@ class CourseManager
         return $assigned_courses_to_hrm;
     }
 
+    /**
+     * @param int $sessionId
+     */
+    public function getLearningPathProgressAverage($courseId, $sessionId = 0)
+    {
+        $tableLpView = Database :: get_course_table(TABLE_LP_VIEW);
 
+        if ($sessionId === 0) {
+            $whereCondition = array(
+                'where' => array(
+                    'c_id = ?' => array(
+                        $courseId
+                    )
+                )
+            );
+        } else {
+            $whereCondition = array(
+                'where' => array(
+                    'c_id = ? and session_id = ?' => array(
+                        $courseId,
+                        $sessionId
+                    )
+                )
+            );
+        }
+
+        $data = Database::select('AVG(progress) as average', $tableLpView, $whereCondition);
+        $averageData = current($data);
+
+        return $averageData['average'];
+    }
 }

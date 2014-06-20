@@ -2798,7 +2798,7 @@ class MySpace {
      */
     public static function displayStudentProgressReport($sessionId = 0, $courseId = 0, $tableId = 'session_report')
     {
-        $tableId .= "_session_table";
+        $tableId .= '_session_table' . $sessionId . '-' . $courseId;
         /**
          * Column name
          * The order is important you need to check the $column variable in the model.ajax.php file
@@ -2806,31 +2806,61 @@ class MySpace {
         $columns = array(
             get_lang('SessionId'),
             get_lang('CourseId'),
+            get_lang('StudentId'),
+            get_lang('Category'),
             get_lang('Course'),
             get_lang('Section'),
-            get_lang('Code'),
+            get_lang('StudentCode'),
             get_lang('LastName'),
             get_lang('FirstName'),
             get_lang('TimeInCourse'),
+            //Progress
+            get_lang('General'),
+            get_lang('Theory'),
+            get_lang('Laboratory'),
+            get_lang('GeneralEvaluation'),
+            get_lang('SelfEvaluation'),
+            get_lang('ContinuousEvaluation'),
+            get_lang('LaboratoryEvaluation'),
+            get_lang('FinalEvaluation'),
+            //Performance
+            get_lang('GeneralEvaluation'),
+            get_lang('SelfEvaluation'),
+            get_lang('ContinuousEvaluation'),
+            get_lang('LaboratoryEvaluation'),
+            get_lang('FinalEvaluation'),
         );
 
         /**
          * Column config
          */
         $column_model = array(
-            array('name' => 'sessionid', 'index' => 'sessionid', 'align' => 'left', 'hidden' => 'true'),
-            array('name' => 'courseid', 'index' => 'courseid', 'align' => 'left', 'hidden' => 'true'),
+            array('name' => 'session_id', 'index' => 'session_id', 'align' => 'left', 'hidden' => 'true'),
+            array('name' => 'course_id', 'index' => 'course_id', 'align' => 'left', 'hidden' => 'true'),
+            array('name' => 'student_id', 'index' => 'student_id', 'align' => 'left', 'hidden' => 'true'),
+            array('name' => 'category', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
             array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'session', 'index' => 'session', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'username', 'index' => 'username', 'align' => 'left', 'search' => 'true', 'wrap_cell' => "true"),
-            array('name' => 'firstname', 'index' => 'firstname', 'align' => 'left', 'search' => 'true'),
-            array('name' => 'lastname', 'index' => 'lastname', 'align' => 'left', 'search' => 'true'),
-            array('name' => 'time_in_course', 'index' => 'time_in_course', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'section', 'index' => 'section', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'student_id', 'index' => 'student_id', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'last_name', 'index' => 'last_name', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'first_name', 'index' => 'first_name', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'time_in_course', 'index' => 'time_in_course', 'align' => 'left', 'search' => 'false'),
+
+            array('name' => 'general_progress', 'index' => 'general_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'theory_progress', 'index' => 'theory_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'general_evaluation_progress', 'index' => 'general_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'self_evaluation_progress', 'index' => 'self_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'continuous_evaluation_progress', 'index' => 'course', 'continuous_evaluation_progress' => 'left', 'search' => 'false'),
+            array('name' => 'laboratory_evaluation_progress', 'index' => 'laboratory_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'final_evaluation_progress', 'index' => 'final_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+
+            array('name' => 'general_evaluation_performance', 'index' => 'general_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'self_evaluation_performance', 'index' => 'self_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'continuous_evaluation_performance', 'index' => 'continuous_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'laboratory_evaluation_performance', 'index' => 'laboratory_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'final_evaluation_performance', 'index' => 'final_evaluation_performance', 'align' => 'left', 'search' => 'false'),
         );
-
-        $column_model_expanded = "{name:'lesson_name', index:'lesson_name', width:200, key:true},";
-
-        $column_name_expanded = "'" . get_lang('LearningPath') . "'";
 
         $extra_params_headers = array();
 
@@ -2841,116 +2871,64 @@ class MySpace {
             'performance',
         );
 
-        $objectEF = new ExtraField('lp');
-        $objectEFO = new ExtraFieldOption('lp');
-        $extra_field = $objectEF->get_handler_field_info_by_field_variable('Tipo');
-        if ($extra_field !== false) {
-            $extra_options = $objectEFO->get_field_options_by_field($extra_field['id']);
-            $numColumns = count($extra_options) + 1;
-            foreach ($gridHeaders as $header) {
+        $column_model_expanded .= "{name:'lesson', index:'lesson', width:70, align:'center'},
+                        {name:'general_progress', index:'general_progress', width:70, align:'center'},
+                        {name:'theory_progress', index:'theory_progress', width:70, align:'center'},
+                        {name:'laboratory_progress', index:'laboratory_progress', width:70, align:'center'},
 
-                $header = strtolower($header);
+                        {name:'general_evaluation_progress', index:'general_evaluation_progress', width:70, align:'center'},
+                        {name:'self_evaluation_progress', index:'self_evaluation_progress', width:70, align:'center'},
+                        {name:'continuous_evaluation_progress', index:'continuous_evaluation_progress', width:70, align:'center'},
+                        {name:'laboratory_progress', index:'laboratory_progress', width:70, align:'center'},
+                        {name:'final_evaluation_progress', index:'final_evaluation_progress', width:70, align:'center'},
 
-                $columns[] = get_lang('General');
+                        {name:'general_evaluation_performance', index:'general_evaluation_performance', width:70, align:'center'},
+                        {name:'self_evaluation_performance', index:'self_evaluation_performance', width:70, align:'center'},
+                        {name:'continuous_evaluation_performance', index:'continuous_evaluation_performance', width:70, align:'center'},
+                        {name:'laboratory_performance', index:'laboratory_performance', width:70, align:'center'},
+                        {name:'final_evaluation_performance', index:'final_evaluation_performance', width:70, align:'center'}
+                        ";
 
-                $column_model[] = array(
-                    'name' => 'general_'.$header,
-                    'index' => 'general_'.$header,
-                    'align' => 'center',
-                    'search' => 'false',
-                );
+        $column_name_expanded = "'" . get_lang('Lesson') . "'," .
+            //Progress
+            "'" . get_lang('General') . "'," .
+            "'" . get_lang('Theory') . "'," .
+            "'" . get_lang('Laboratory') . "'," .
+            "'" . get_lang('GeneralEvaluation') . "'," .
+            "'" . get_lang('SelfEvaluation') . "'," .
+            "'" . get_lang('ContinuousEvaluation') . "'," .
+            "'" . get_lang('LaboratoryEvaluation') . "'," .
+            "'" . get_lang('FinalEvaluation') . "'," .
+            //Performance
+            "'" . get_lang('GeneralEvaluation') . "'," .
+            "'" . get_lang('SelfEvaluation') . "'," .
+            "'" . get_lang('ContinuousEvaluation') . "'," .
+            "'" . get_lang('LaboratoryEvaluation') . "'," .
+            "'" . get_lang('FinalEvaluation') . "'";
 
-                $column_model_expanded .= "{name:'general_$header', index:'general_$header', width:200, key:true},";
+        $extra_params_headers = array(
+            'progress' => array(
+                "startColumnName" => 'general_progress',
+                "numberOfColumns" => 8,
+                "titleText" =>  "<center>" . get_lang('Progress') . "</center>",
+            ),
+            'performance' => array(
+                "startColumnName" => 'general_evaluation_performance',
+                "numberOfColumns" => 5,
+                "titleText" =>  "<center>" . get_lang('Performance') . "</center>",
+            ),
+        );
 
-                $extra_params_headers[$header] = array(
-                    "startColumnName" => 'general_'.$header,
-                    "numberOfColumns" => $numColumns,
-                    "titleText" =>  "<center>" . get_lang(ucfirst($header)) . "</center>",
-                );
-
-                $extra_params_headers_expanded .= "{
-                    startColumnName:'general_$header',
-                    numberOfColumns:$numColumns,
-                    titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang(ucfirst($header)) . "</div>'
-                },";
-                foreach ($extra_options as $option) {
-
-                    $option_value = $option['option_value'];
-                    $option_display_text = $option['option_display_text'];
-
-                    $columns[] = get_lang($option_display_text);
-
-                    $column_model[] = array(
-                        'name' => $option_value.'_'.$header,
-                        'index' => $option_value.'_'.$header,
-                        'align' => 'center',
-                        'search' => 'false',
-                    );
-
-                    $column_model_expanded .= "{name:'{$option_value}_{$header}', index:'{$option_value}_{$header}', width:70, align:'center'},";
-
-                    $column_name_expanded .= ", '" . get_lang($option_display_text) . "'";
-                }
-            }
-
-        } else {
-
-            $columns[] = get_lang('Lesson'); //Progress
-            $columns[] = get_lang('Laboratory'); //Progress
-            $columns[] = get_lang('SelfLearning'); //Progress
-            $columns[] = get_lang('Lesson'); //Performance
-            $columns[] = get_lang('Laboratory'); //Performance
-            $columns[] = get_lang('SelfLearning'); //Performance
-            $columns[] = get_lang('LastConnection');
-            $columns[] = get_lang('Graph');
-
-            $column_model[] = array('name' => 'lesson_progress', 'index' => 'lesson_progress', 'align' => 'center', 'search' => 'false');
-            $column_model[] = array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'center', 'search' => 'false');
-            $column_model[] = array('name' => 'self_learning_progress', 'index' => 'self_learning_progress', 'align' => 'center', 'search' => 'false');
-            $column_model[] = array('name' => 'lesson_performance', 'index' => 'lesson_performance', 'align' => 'center', 'search' => 'false');
-            $column_model[] = array('name' => 'laboratory_performance', 'index' => 'laboratory_performance', 'align' => 'center', 'search' => 'false');
-            $column_model[] = array('name' => 'self_learning_performance', 'index' => 'self_learning_performance', 'align' => 'center', 'search' => 'false');
-            $column_model[] = array('name' => 'last_connection', 'index' => 'last_connection', 'align' => 'center', 'search' => 'true');
-            $column_model[] = array('name' => 'detail', 'index' => 'detail', 'align' => 'center', 'search' => 'false');
-
-            $column_model_expanded .= "{name:'lesson_progress', index:'lesson_progress', width:70, align:'center'},
-                            {name:'laboratory_progress', index:'laboratory_progress', width:70, align:'center'},
-                            {name:'self_learning_progress', index:'self_learning_progress', width:70, align:'center'},
-                            {name:'lesson_performance', index:'lesson_performance', width:70, align:'center'},
-                            {name:'laboratory_performance', index:'laboratory_performance', width:70, align:'center'},
-                            {name:'self_learning_performance', index:'self_learning_performance', width:150, align:'center'}";
-
-            $column_name_expanded .= ", '" . get_lang('Lesson') . "',
-                           '" . get_lang('Laboratory') . "', '" . get_lang('SelfLearning') . "',
-                           '" . get_lang('Laboratory') . "', '" . get_lang('SelfLearning') . "',
-                           '" . get_lang('LastDate') . "'";
-
-            $extra_params_headers = array(
-                'progress' => array(
-                    "startColumnName" => 'lesson_progress',
-                    "numberOfColumns" => 3,
-                    "titleText" =>  "<center>" . get_lang('Progress') . "</center>",
-                ),
-                'performance' => array(
-                    "startColumnName" => 'lesson_performance',
-                    "numberOfColumns" => 3,
-                    "titleText" =>  "<center>" . get_lang('Performance') . "</center>",
-                ),
-            );
-
-            $extra_params_headers_expanded = "{
-                    startColumnName:'lesson_progress',
-                    numberOfColumns:3,
-                    titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Progress') . "</div>'
-                },
-                {
-                    startColumnName:'lesson_performance',
-                    numberOfColumns:2,
-                    titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Performance') . "</div>'
-                },";
-        }
-
-
+        $extra_params_headers_expanded = "{
+                startColumnName:'general_progress',
+                numberOfColumns:8,
+                titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Progress') . "</div>'
+            },
+            {
+                startColumnName:'general_evaluation_performance',
+                numberOfColumns:5,
+                titleText: '<div style=\"width: 100%; text-align: center;\">" . get_lang('Performance') . "</div>'
+            },";
 
         $action_links = '';
 
@@ -2973,13 +2951,13 @@ class MySpace {
         );
 
         $extra_params['subGridRowExpanded'] = "**function(subgrid_id, row_id) {
-       var subgrid_table_id, pager_id, user_data; 
+            var subgrid_table_id, pager_id, user_data;
             subgrid_table_id = subgrid_id+'_t';
             pager_id = 'p_'+subgrid_table_id;
             user_data = $('#" . $tableId . "').jqGrid('getRowData', row_id);
             $('#'+subgrid_id).html('<table id='+subgrid_table_id+' class=\"scroll\"></table><div id='+pager_id+' class=\"scroll\"></div>');
             $('#'+subgrid_table_id).jqGrid({
-                url: '" . $urlDetail . "&username=' + user_data.username + '&session_id=' + user_data.sessionid + '&course_id=' + user_data.courseid,
+                url: '" . $urlDetail . "&username=' + user_data.student_id + '&session_id=' + user_data.session_id + '&course_id=' + user_data.course_id,
                 datatype: 'json',
                 caption: '" . get_lang('StudentDetail') . "',
                 colNames: [$column_name_expanded],
