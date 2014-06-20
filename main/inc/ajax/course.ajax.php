@@ -94,9 +94,10 @@ switch ($action) {
                         'text' => $title
                         );
                 }
+                $results[] = array('id' => 'T', 'text' => 'TODOS');
                 echo json_encode($results);
             } else {
-                echo json_encode(array());
+                echo json_encode(array(array('id' => 'T', 'text' => 'TODOS')));
             }
         }
         break;
@@ -135,7 +136,6 @@ switch ($action) {
             
             $results = SessionManager::get_course_list_by_session_id_like($_GET['session_id'], $_GET['q']);
 
-            //$results = SessionManager::get_sessions_list(array('s.name LIKE' => "%".$_REQUEST['q']."%"));
             $results2 = array();
             if (!empty($results)) {
                 foreach ($results as $item) {
@@ -150,10 +150,11 @@ switch ($action) {
                     }
                     $results2[] = $item2;
                 }
-                echo json_encode($results2);
-            } else {
-                echo json_encode(array());
             }
+            if ($_GET['display'] == 'session_progress_report') {
+                $results2[] = array('id' => 'T', 'text' => 'TODOS');
+            }
+            echo json_encode($results2);
         }
         break;    
     case 'search_user_by_course':
@@ -181,8 +182,7 @@ switch ($action) {
             if (!empty($data)) 
             {
                 echo json_encode($data);
-            } else
-            {
+            } else {
                 echo json_encode(array());
             }
         }
@@ -204,8 +204,7 @@ switch ($action) {
             {
                 $data[] = array('id' => 'T', 'text' => 'TODOS');
                 echo json_encode($data);
-            } else
-            {
+            } else {
                 echo json_encode(array(array('id' => 'T', 'text' => 'TODOS')));
             }
         }

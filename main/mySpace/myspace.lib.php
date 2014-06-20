@@ -2541,29 +2541,55 @@ class MySpace {
          */
         $columns = array(
             get_lang('CourseId'),
+            get_lang('Category'),
             get_lang('Course'),
+            get_lang('TeacherCode'),
+            get_lang('LastName'),
+            get_lang('FirstName'),
+            get_lang('Students'),
             get_lang('TimeInCourse'),
-            get_lang('Lesson'), //Progress
+            get_lang('General'), //Progress
+            get_lang('Theory'), //Progress
             get_lang('Laboratory'), //Progress
+            get_lang('GeneralEvaluation'), //Progress
             get_lang('SelfLearning'), //Progress
-            get_lang('Lesson'), //Performance
-            get_lang('Laboratory'), //Performance
-            get_lang('SelfLearning'), //Performance
+            get_lang('ContinuousEvaluation'), //Progress
+            get_lang('LaboratoryEvaluation'), //Progress
+            get_lang('FinalEvaluation'), //Progress
+            get_lang('GeneralEvaluation'), //Performance
+            get_lang('SelfEvaluation'), //Performance
+            get_lang('ContinuousEvaluation'), //Performance
+            get_lang('LaboratoryEvaluation'), //Performance
+            get_lang('FinalEvaluation'), //Performance
         );
 
         /**
          * Column config
          */
         $column_model = array(
-            array('name' => 'courseid', 'index' => 'courseid', 'align' => 'left', 'hidden' => 'true'),
+            array('name' => 'course_id', 'index' => 'course_id', 'align' => 'left', 'hidden' => 'true'),
+            array('name' => 'category', 'index' => 'category', 'align' => 'left', 'search' => 'false'),
             array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'teacher_id', 'index' => 'teacher_id', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'last_name', 'index' => 'last_name', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'first_name', 'index' => 'first_name', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'students', 'index' => 'students', 'align' => 'left', 'search' => 'false'),
             array('name' => 'time_in_course', 'index' => 'time_in_course', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'lesson_progress', 'index' => 'lesson_progress', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'self_learning_progress', 'index' => 'self_learning_progress', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'lesson_performance', 'index' => 'lesson_performance', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'laboratory_performance', 'index' => 'laboratory_performance', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'self_learning_perfomance', 'index' => 'self_learning_perfomance', 'align' => 'center', 'search' => 'false'),
+
+            array('name' => 'general_progress', 'index' => 'general_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'theory_progress', 'index' => 'theory_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'general_evaluation_progress', 'index' => 'general_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'self_learning_progress', 'index' => 'self_learning_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'continuous_evaluation_progress', 'index' => 'continuous_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'final_evaluation_progress', 'index' => 'final_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+
+            array('name' => 'general_performance', 'index' => 'general_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'self_learning_performance', 'index' => 'self_learning_performance', 'align' => 'center', 'search' => 'false'),
+            array('name' => 'continuous_evaluation_performance', 'index' => 'continuous_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'laboratory_evaluation_performance', 'index' => 'laboratory_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'final_evaluation_performance', 'index' => 'final_evaluation_performance', 'align' => 'left', 'search' => 'false'),
         );
 
         $action_links = '';
@@ -2573,17 +2599,17 @@ class MySpace {
 
         $tableId = 'course_progress_report';
         $extra_params['autowidth'] = 'true';
-        $extra_params['sortname'] = 'u.lastname';
+        $extra_params['sortname'] = 'course';
         $extra_params['height'] = 'auto';
         $extra_params['groupHeaders'] = array(
             'progress' => array(
-                "startColumnName" => 'lesson_progress',
-                "numberOfColumns" => 3,
+                "startColumnName" => 'general_progress',
+                "numberOfColumns" => 8,
                 "titleText" => get_lang('Progress'),
             ),
             'performance' => array(
-                "startColumnName" => 'lesson_performance',
-                "numberOfColumns" => 3,
+                "startColumnName" => 'general_performance',
+                "numberOfColumns" => 5,
                 "titleText" => get_lang('Performance'),
             ),
         );
@@ -2598,11 +2624,12 @@ class MySpace {
 
         $extra_params['subGrid'] = 'true';
         $extra_params['subGridRowExpanded'] = "**function(subgridid, id) {
+            var row_data = $('#" . $tableId . "').jqGrid('getRowData', id);
             var data = {
                 subgrid: subgridid,
                 rowid: id,
                 gridId: 'session_progress',
-                courseId: '" . $courseId . "',
+                courseId: row_data.course_id,
                 sessionId: '" . $sessionId . "'
             };
             $('#'+ subgridid).load('" .  api_get_path(WEB_AJAX_PATH) . "grid.ajax.php', data);
@@ -2642,32 +2669,61 @@ class MySpace {
         $columns = array(
             get_lang('SessionId'),
             get_lang('CourseId'),
-            get_lang('Section'),
+            get_lang('Category'),
             get_lang('Course'),
+            get_lang('Section'),
+            get_lang('TeacherCode'),
+            get_lang('LastName'),
+            get_lang('FirstName'),
+            get_lang('Students'),
             get_lang('TimeInCourse'),
-            get_lang('Lesson'), //Progress
-            get_lang('Laboratory'), //Progress
-            get_lang('SelfLearning'), //Progress
-            get_lang('Lesson'), //Performance
-            get_lang('Laboratory'), //Performance
-            get_lang('SelfLearning'), //Performance
+            //Progress
+            get_lang('General'),
+            get_lang('Theory'),
+            get_lang('Laboratory'),
+            get_lang('GeneralEvaluation'),
+            get_lang('SelfEvaluation'),
+            get_lang('ContinuousEvaluation'),
+            get_lang('LaboratoryEvaluation'),
+            get_lang('FinalEvaluation'),
+            //Performance
+            get_lang('GeneralEvaluation'),
+            get_lang('SelfEvaluation'),
+            get_lang('ContinuousEvaluation'),
+            get_lang('LaboratoryEvaluation'),
+            get_lang('FinalEvaluation'),
         );
 
         /**
          * Column config
          */
         $column_model = array(
-            array('name' => 'sessionid', 'index' => 'sessionid', 'align' => 'left', 'hidden' => 'true'),
-            array('name' => 'courseid', 'index' => 'courseid', 'align' => 'left', 'hidden' => 'true'),
-            array('name' => 'session', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'session_id', 'index' => 'session_id', 'align' => 'left', 'hidden' => 'true'),
+            array('name' => 'course_id', 'index' => 'course_id', 'align' => 'left', 'hidden' => 'true'),
+            array('name' => 'category', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
             array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'section', 'index' => 'section', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'teacher_id', 'index' => 'teacher_id', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'last_name', 'index' => 'last_name', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'first_name', 'index' => 'first_name', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'students', 'index' => 'students', 'align' => 'left', 'search' => 'false'),
             array('name' => 'time_in_course', 'index' => 'time_in_course', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'lesson_progress', 'index' => 'lesson_progress', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'self_learning_progress', 'index' => 'self_learning_progress', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'lesson_performance', 'index' => 'lesson_performance', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'laboratory_performance', 'index' => 'laboratory_performance', 'align' => 'center', 'search' => 'false'),
-            array('name' => 'self_learning_performance', 'index' => 'self_learning_performance', 'align' => 'center', 'search' => 'false'),
+
+            array('name' => 'general_progress', 'index' => 'general_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'theory_progress', 'index' => 'theory_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'laboratory_progress', 'index' => 'laboratory_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'general_evaluation_progress', 'index' => 'general_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'self_evaluation_progress', 'index' => 'self_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'continuous_evaluation_progress', 'index' => 'course', 'continuous_evaluation_progress' => 'left', 'search' => 'false'),
+            array('name' => 'laboratory_evaluation_progress', 'index' => 'laboratory_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'final_evaluation_progress', 'index' => 'final_evaluation_progress', 'align' => 'left', 'search' => 'false'),
+
+            array('name' => 'general_evaluation_performance', 'index' => 'general_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'self_evaluation_performance', 'index' => 'self_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'continuous_evaluation_performance', 'index' => 'continuous_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'laboratory_evaluation_performance', 'index' => 'laboratory_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+            array('name' => 'final_evaluation_performance', 'index' => 'final_evaluation_performance', 'align' => 'left', 'search' => 'false'),
+
         );
 
         $action_links = '';
@@ -2675,7 +2731,7 @@ class MySpace {
         // jqgrid will use this URL to do the selects
         $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=display_session_progress_summary&course_id=' . $courseId . '&session_id=' . $sessionId;
 
-        $tableId = 'sessc_prgss';
+        $tableId = 'sessc_prgss' . $courseId . "-" . $sessionId ;
         $extra_params['autowidth'] = 'true';
         $extra_params['sortname'] = 'u.lastname';
         $extra_params['height'] = 'auto';
@@ -2709,7 +2765,7 @@ class MySpace {
                 rowid: id,
                 gridId: 'student_progress',
                 courseId: '" . $courseId . "',
-                sessionId: rowData.sessionid
+                sessionId: rowData.session_id
             };
             $('#'+ subgridid).load('" .  api_get_path(WEB_AJAX_PATH) . "grid.ajax.php', data);
         }**";

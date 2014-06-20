@@ -1604,7 +1604,7 @@ function getWorkListTeacher($start, $limit, $column, $direction, $where_conditio
 
     $course_id          = api_get_course_int_id();
     $session_id         = api_get_session_id();
-    $condition_session  = api_get_session_condition($session_id, true, true);
+    $condition_session  = api_get_session_condition($session_id);
     $group_id           = api_get_group_id();
     $is_allowed_to_edit = api_is_allowed_to_edit(null, true);
 
