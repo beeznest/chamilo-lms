@@ -4172,7 +4172,7 @@ class Tracking
         $user = Database::get_main_table(TABLE_MAIN_USER);
         $tblCourseLp = Database::get_course_table(TABLE_LP_MAIN);
 
-        
+
         $course = api_get_course_info_by_id($courseId);
 
         $where = " WHERE course_code = '%s'

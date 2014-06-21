@@ -4645,8 +4645,9 @@ class CourseManager
 
         return $progressAverage;
     }
-
+    /*
     public static getSessionListByCourse($courseId, ) {
 
     }
+    */
 }
