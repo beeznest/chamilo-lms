@@ -4527,4 +4527,48 @@ class CourseManager
 
         return $average;
     }
+
+    /**
+     * Returns the tags option
+     * @param $type
+     * @param $tagName
+     * @return array
+     */
+    public static function getTags($type, $tagName)
+    {
+        $objectEF = new ExtraField($type);
+        $objectEFO = new ExtraFieldOption($type);
+        $extra_field = $objectEF->get_handler_field_info_by_field_variable($tagName);
+        $tags = array();
+        if ($extra_field !== false) {
+            $extra_options = $objectEFO->get_field_options_by_field($extra_field['id']);
+            foreach ($extra_options as $option) {
+                $tags[$option['id']] = array(
+                    'value' => $option['option_value'],
+                    'text' => $option['option_display_text']
+                );
+            }
+        }
+
+        return $tags;
+    }
+
+    public static function getProgressAverageByTag($courseId, $sessionId, $tagName, $tagValue)
+    {
+        /*
+        $sql = "SELECT MAX(view_count), progress
+                        FROM $tbl_course_lp_view lp_view
+                        INNER JOIN $tblFieldVal lv ON lv.lp_id = lp_view.lp_id
+                                                AND lv.c_id = lp_view.c_id
+                        INNER JOIN $tblField lf ON lf.id =  lv.field_id
+                                                 AND lf.field_variable = 'Tipo'
+                        INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
+                                                 AND lf.id = lo.field_id
+                                                 AND lo.option_value = '$type'
+                        WHERE lp_view.c_id = {$course_info['real_id']}
+                        AND $condition_user session_id = $session_id
+                        AND lp_view.lp_id IN (" . implode(',', $lp_id) . ")
+                        GROUP BY lp_view.lp_id, user_id";
+        */
+    }
 }
