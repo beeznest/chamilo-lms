@@ -135,6 +135,44 @@ class Tracking
     }
 
     /**
+     * @param $courseCode
+     * @param int $sessionId
+     * @return mixed
+     */
+    public static function getTimeAverageSpentOnTheCourse($courseCode, $sessionId = 0) {
+        $courseCode = Database::escape_string($courseCode);
+        $sessionId  = intval($sessionId);
+
+        $tableTrackCourse = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_COURSE_ACCESS);
+
+        $sessionCondition = '';
+        if ($sessionId !== 0) {
+            $sessionCondition = ' AND session_id = ' . $sessionId;
+        }
+
+        $sql = "SELECT SUM(UNIX_TIMESTAMP(logout_course_date) - UNIX_TIMESTAMP(login_course_date)) as seconds_sum
+                FROM $tableTrackCourse
+                WHERE UNIX_TIMESTAMP(logout_course_date) > UNIX_TIMESTAMP(login_course_date) AND
+                course_code='$courseCode'
+                $sessionCondition
+                 GROUP BY session_id;";
+
+        $queryResponse = Database::query($sql);
+        $i = 0;
+        $secondsSum = 0;
+        $secondsAverage = 0;
+        if(Database::num_rows($queryResponse) > 0) {
+            if ($row = Database::fetch_array($queryResponse)) {
+                $secondsSum += $row['seconds_sum'];
+                $i++;
+            }
+            $secondsAverage = round($secondsSum / $i, 2);
+        }
+
+        return $secondsAverage;
+    }
+
+    /**
      * Get first connection date for a student
      * @param    int                  Student id
      * @return    string|bool     Date format long without day or false if there are no connections
@@ -4134,6 +4172,7 @@ class Tracking
         $user = Database::get_main_table(TABLE_MAIN_USER);
         $tblCourseLp = Database::get_course_table(TABLE_LP_MAIN);
 
+        
         $course = api_get_course_info_by_id($courseId);
 
         $where = " WHERE course_code = '%s'
@@ -4157,19 +4196,19 @@ class Tracking
         if (!empty($sessionId)) {
             $where .= ' AND id_session = %s';
             $queryVariables[] = $sessionId;
-            $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, 
+            $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username,
                 u.email, s.course_code, s.id_session
                 FROM $tblSessionCourseUser s
                 INNER JOIN $user u ON u.user_id = s.id_user
                 $where $order $limit";
         } else {
-            $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, 
+            $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username,
                 u.email, s.course_code, s.id_session
                 FROM $tblSessionCourseUser s
                 INNER JOIN $user u ON u.user_id = s.id_user
                 $where $order $limit";
         }
-        
+
         $sqlQuery = vsprintf($sql, $queryVariables);
 
         $rs = Database::query($sqlQuery);
@@ -4181,7 +4220,7 @@ class Tracking
          *  Lessons
          */
         $sql = "SELECT * FROM $tblCourseLp
-        WHERE c_id = %s "; 
+        WHERE c_id = %s ";
         $sqlQuery = sprintf($sql, $course['real_id']);
 
         $result = Database::query($sqlQuery);
@@ -4201,8 +4240,8 @@ class Tracking
             $idSession = $user['id_session'];
             //Time Spent in Course
             $timeSpentCourse = Tracking::get_time_spent_on_the_course(
-                $user['user_id'], 
-                $course['code'], 
+                $user['user_id'],
+                $course['code'],
                 $idSession
             );
 
@@ -4210,27 +4249,27 @@ class Tracking
                 foreach ($options['type'] as $key => $type) {
                     //Progress
                     $tagData[$key]['progress'] = Tracking::get_avg_student_progress(
-                        $user['user_id'], 
-                        $course['code'], 
-                        array(), 
-                        $idSession, 
-                        false, 
+                        $user['user_id'],
+                        $course['code'],
+                        array(),
+                        $idSession,
+                        false,
                         $type
                     );
                     //TimeSpent
                     $timeSpent = Tracking::get_time_spent_in_lp(
-                        $user['user_id'], 
-                        $course['code'], 
-                        array(), 
-                        $idSession, 
+                        $user['user_id'],
+                        $course['code'],
+                        array(),
+                        $idSession,
                         $type
                     );
                     //Clicks
                     $clicks = Tracking::getTotalClicksLp(
-                        $user['user_id'], 
-                        $courseId, 
-                        $idSession, 
-                        false, 
+                        $user['user_id'],
+                        $courseId,
+                        $idSession,
+                        false,
                         $type
                     );
                     //Performance
@@ -4263,13 +4302,13 @@ class Tracking
                 }
             }
         }
-        
+
         $gridData = array();
-        
+
         if (!empty($options['getCount']) && $options['getCount']) {
             return count($sessionSum);
         }
-        
+
         foreach ($sessionSum as $session) {
             $secondsProm = self::avg($session['timeSpentCourse'], $session['cont']);
             $gridData[] = array(
@@ -4298,7 +4337,7 @@ class Tracking
                 'continuous_evaluation_performance' => 0,
                 'laboratory_evaluation_performance' => 0,
                 'final_evaluation_performance' => 0,
-            ); 
+            );
         }
         
         return $gridData;

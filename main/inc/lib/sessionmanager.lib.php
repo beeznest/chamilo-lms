@@ -1333,38 +1333,45 @@ class SessionManager
     public static function getCourseProgress($courseId, $options = array())
     {
         $courseId = intval($courseId);
-        //tables
-        $tblSessionCourseUser = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
-        $user = Database::get_main_table(TABLE_MAIN_USER);
-        $tblCourseLp = Database::get_course_table(TABLE_LP_MAIN);
 
         if ($courseId === 0) {
             $courses = CourseManager::get_courses_list($options['from'], $options['rows'], 'code');
         } else {
             $courses = api_get_course_info_by_id($courseId);
+            $courses = array($courses);
         }
 
         $gridData = array();
         foreach ($courses as $course) {
-            $courseId = $course['id'];
-            $courseProgressAverage = CourseManager::getLearningPathProgressAverage($courseId);
-            $gridData[$course['id']] = array(
+            $courseId = $course['real_id'];
+            $courseCode = $course['code'];
+            $courseProgressAverage = CourseManager::getProgressAverage($courseId);
+            $students = CourseManager::getCountStudentsProgress($courseId);
+
+            $timeInCourse = Tracking::getTimeAverageSpentOnTheCourse($courseCode);
+            $lpTags = CourseManager::getTags('lp', 'tipo');
+            // Get the values by lessons tags
+            foreach ($lpTags as $tag) {
+                $tagAverage[$tag['value']] = CourseManager::getProgressAverageByTag('Tipo', $tag['value'], $courseId);
+            }
+
+            $gridData[] = array(
                 'course_id'  => $course['id'],
-                'category' => $course['category_code'],
+                'category' => $course['categoryName'],
                 'course' => $course['code'],
                 'teacher_id' => 0,
                 'last_name' => 0,
                 'first_name' => 0,
-                'students' => 25,
-                'time_in_course' => 1528,
+                'students' => $students,
+                'time_in_course' => $timeInCourse,
 
-                'general_progress' => $courseProgressAverage,
-                'theory_progress' => 0,
-                'laboratory_progress' => 0,
+                'general_progress' => $courseProgressAverage . ' %',
+                'theory_progress' => ((!empty($tagAverage['Teoria'])) ? $tagAverage['Teoria'] : 0) . ' %',
+                'laboratory_progress' => ((!empty($tagAverage['Laboratorio'])) ? $tagAverage['Laboratorio'] : 0) . ' %',
                 'general_evaluation_progress' => 0,
                 'self_learning_progress' => 0,
                 'continuous_evaluation_progress' => 0,
-                'laboratory_progress' => 0,
+                'laboratory_evaluation_progress' => 0,
                 'final_evaluation_progress' => 0,
 
                 'general_performance' => 0,

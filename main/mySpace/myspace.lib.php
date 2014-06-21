@@ -2543,9 +2543,6 @@ class MySpace {
             get_lang('CourseId'),
             get_lang('Category'),
             get_lang('Course'),
-            get_lang('TeacherCode'),
-            get_lang('LastName'),
-            get_lang('FirstName'),
             get_lang('Students'),
             get_lang('TimeInCourse'),
             get_lang('General'), //Progress
@@ -2570,9 +2567,6 @@ class MySpace {
             array('name' => 'course_id', 'index' => 'course_id', 'align' => 'left', 'hidden' => 'true'),
             array('name' => 'category', 'index' => 'category', 'align' => 'left', 'search' => 'false'),
             array('name' => 'course', 'index' => 'course', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'teacher_id', 'index' => 'teacher_id', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'last_name', 'index' => 'last_name', 'align' => 'left', 'search' => 'false'),
-            array('name' => 'first_name', 'index' => 'first_name', 'align' => 'left', 'search' => 'false'),
             array('name' => 'students', 'index' => 'students', 'align' => 'left', 'search' => 'false'),
             array('name' => 'time_in_course', 'index' => 'time_in_course', 'align' => 'left', 'search' => 'false'),
 

@@ -922,9 +922,6 @@ switch ($action) {
             'course_id',
             'category',
             'course',
-            'teacher_id',
-            'last_name',
-            'first_name',
             'students',
             'time_in_course',
 
@@ -934,7 +931,7 @@ switch ($action) {
             'general_evaluation_progress',
             'self_learning_progress',
             'continuous_evaluation_progress',
-            'laboratory_progress',
+            'laboratory_evaluation_progress',
             'final_evaluation_progress',
 
             'general_performance',
