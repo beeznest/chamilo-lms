@@ -4553,6 +4553,14 @@ class CourseManager
         return $tags;
     }
 
+    public static function getIdsFromTagOption($type, $tagName, $option_id, $c_id)
+    {
+        $objectEFV = new ExtraFieldValue($type);
+        $objectEFV->extraFields['c_id'] = $c_id;
+        $ids = $objectEFV->get_item_ids_from_field_variable_and_field_value($tagName, $option_id);
+        return $ids;
+    }
+
     public static function getProgressAverageByTag($courseId, $sessionId, $tagName, $tagValue)
     {
         /*

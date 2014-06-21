@@ -1344,10 +1344,27 @@ class SessionManager
             $courses = api_get_course_info_by_id($courseId);
         }
 
+
         $gridData = array();
         foreach ($courses as $course) {
             $courseId = $course['id'];
+            $courseCode = $course['code'];
             $courseProgressAverage = CourseManager::getLearningPathProgressAverage($courseId);
+
+
+            $tags = CourseManager::getTags('lp', 'Tipo');
+
+            if (!empty($tags) && is_array($tags)) {
+                    foreach ($tags as $key => $value) {
+                    $ids = CourseManager::getIdsFromTagOption('lp', 'Tipo', $key, $courseId);
+                    if (!empty($ids) && is_array($ids)) {
+                        foreach ($ids as $id) {
+                            $score = self::getScore(0, $id, $courseCode, 0, 0, 0);
+                        }
+                    }
+                }
+            }
+
             $gridData[$course['id']] = array(
                 'course_id'  => $course['id'],
                 'category' => $course['category_code'],
@@ -1376,6 +1393,67 @@ class SessionManager
         }
 
         return $gridData;
+    }
+
+    /**
+     * Return the score from Track_e_exercise
+     * @param $show 0: percent 1: average
+     * @param $exercise_id
+     * @param $c_code
+     * @param $user_id Set 0 to get all valid user
+     * @param $lp_id set 0 to get all valid Lp
+     * @param $session_id Set 0 to get all valid session
+     * @return bool|float
+     */
+    function getScore($show, $exercise_id, $c_code, $user_id, $lp_id, $session_id)
+    {
+        if (empty($user_id)) {
+            $user_filter = 'AND orig_lp_id > 0';
+        } else {
+            $user_filter = 'AND orig_lp_id = '.$user_id;
+        }
+
+        if (empty($lp_id)) {
+            $lp_filter = 'AND exe_user_id > 0';
+        } else {
+            $lp_filter = 'AND exe_user_id = '.$lp_id;
+        }
+
+        if (empty($session_id)) {
+            $session_filter = 'AND session_id >= 0';
+        } else {
+            $session_filter = 'AND session_id = '.$session_id;
+        }
+
+        $track_e_exercise_table = Database::get_main_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
+        $sql = "SELECT exe_result, exe_weighting FROM $track_e_exercise_table
+            WHERE exe_cours_id = 'CDFG001'
+            AND exe_exo_id = $exercise_id
+            AND status != 'incomplete'
+            $session_filter
+            $lp_filter
+            $user_filter
+            LIMIT 1
+            ";
+        $result = Database::query($sql);
+        $count_rows = Database::num_rows($result);
+        if ($count_rows > 0) {
+            $total = 0;
+            while ($row = Database::fetch_array($result, 'ASSOC')) {
+                $score = floatval($row['exe_result']);
+                $weight = floatval($row['exe_weighting']);
+                if ($show == 0) {
+                    $total += ($score / $weight * 100);
+                } elseif ($show == 1) {
+                    $total += ($score / ($weight * $count_rows));
+                } else {
+                    return false;
+                }
+            }
+            return $total;
+        } else {
+            return false;
+        }
     }
 
     function get_number_of_tracking_access_overview()
