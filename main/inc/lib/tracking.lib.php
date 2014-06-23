@@ -591,7 +591,7 @@ class Tracking
                 $user_id = array_map('intval', $user_id);
                 $userCondition = " AND ex.exe_user_id IN (".implode(',',$user_id).") ";
             } else {
-                $userCondition = " AND  ex.exe_user_id = $user_id AND  ";
+                $userCondition = " AND ex.exe_user_id = $user_id  ";
             }
         }
 
