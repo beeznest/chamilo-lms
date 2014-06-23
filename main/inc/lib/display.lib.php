@@ -962,7 +962,7 @@ class Display {
         $json_encode = json_encode($obj);
 
         if (!empty($data)) {
-            //Converts the "data":"js_variable" to "data":js_variable, 
+            //Converts the "data":"js_variable" to "data":js_variable,
             // otherwise it will not work
             $json_encode = str_replace('"data":"'.$data_var.'"', '"data":'.$data_var.'', $json_encode);
         }
@@ -976,9 +976,9 @@ class Display {
         $json_encode = str_replace(array('{"first":"first",','"end":"end"}'), '', $json_encode);
         //Avoid " extra params
         $json_encode = str_replace(array('"**', '**"'), "", $json_encode);
-        //Avoid \n 
+        //Avoid \n
         $json_encode = str_replace("\\n", "", $json_encode);
-        
+
         // Creating the jqgrid element.
         $json .= '$("#'.$div_id.'").jqGrid({';
         //$json .= $beforeSelectRow;
@@ -991,7 +991,6 @@ class Display {
         if (isset($extra_params['groupHeaders'])) {
             $groups = '';
             foreach ($extra_params['groupHeaders'] as $group) {
-                //{ "startColumnName" : "courses", "numberOfColumns" : 1, "titleText" : "Order Info" },
                 $groups .= '{ "startColumnName" : "' . $group['startColumnName'] . '", "numberOfColumns" : ' . $group['numberOfColumns'] . ', "titleText" : "' . $group['titleText']  . '" },';
 
             }
