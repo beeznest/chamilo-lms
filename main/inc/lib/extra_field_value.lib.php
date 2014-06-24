@@ -605,8 +605,33 @@ class ExtraFieldValue extends Model
         $fieldId = intval($fieldId);
         $itemId = intval($itemId);
         $extraConditions = $this->getExtraFieldSqlConditions();
-
         $sql = "SELECT s.* FROM {$this->table} s
+                INNER JOIN {$this->table_handler_field} sf
+                ON (s.field_id = sf.id)
+                WHERE
+                    field_id = '".$fieldId."' AND
+                    {$this->handler_id} = '$itemId'
+                    $extraConditions
+                ORDER BY field_value";
+
+        $result = Database::query($sql);
+        if (Database::num_rows($result)) {
+            return Database::store_result($result, 'ASSOC');
+        }
+        return false;
+    }
+
+    /**
+     * @param int $itemId
+     * @param int $fieldId
+     * @return array
+     */
+    public function getAllValuesByItemAndFieldDistinct($itemId, $fieldId)
+    {
+        $fieldId = intval($fieldId);
+        $itemId = intval($itemId);
+        $extraConditions = $this->getExtraFieldSqlConditions();
+        $sql = "SELECT DISTINCT {$this->handler_id} FROM {$this->table} s
                 INNER JOIN {$this->table_handler_field} sf
                 ON (s.field_id = sf.id)
                 WHERE

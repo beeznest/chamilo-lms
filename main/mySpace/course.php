@@ -143,7 +143,9 @@ if ($show_import_icon) {
 
 if (!api_is_drh() && !api_is_session_admin() && !api_is_platform_admin()) {
 	$courses = Tracking::get_courses_followed_by_coach($_user['user_id'], $id_session);
-    $a_courses = array_keys($courses);
+    if (!empty($courses)) {
+        $a_courses = array_keys($courses);
+    }
 }
 
 if (empty($id_session) && api_is_drh() && !api_is_platform_admin()) {
