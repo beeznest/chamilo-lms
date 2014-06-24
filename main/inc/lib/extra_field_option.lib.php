@@ -669,6 +669,33 @@ class ExtraFieldOption extends Model
         return $values;
     }
 
+    /**
+     * @param string $tag
+     * @param int $field_id
+     * @return array
+     */
+    public function searchOneByField($tag, $field_id)
+    {
+        $field_id = intval($field_id);
+        $tag = Database::escape_string($tag);
+        $sql = "SELECT DISTINCT id, option_display_text
+                FROM {$this->table}
+                WHERE
+                    field_id = '".$field_id."' AND
+                    option_value LIKE '%$tag%'
+                ORDER BY option_value
+                LIMIT 1
+                ";
+        $result = Database::query($sql);
+        $values = array();
+        if (Database::num_rows($result)) {
+            $values = Database::store_result($result, 'ASSOC');
+            $values = $values[0];
+        }
+        return $values;
+    }
+
+
 
     /**
      * @param string $tag
