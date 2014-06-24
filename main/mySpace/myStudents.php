@@ -741,7 +741,7 @@ if (empty($_GET['details'])) {
     if (empty($session_id)) {
         $sql_lp = " SELECT lp.name, lp.id FROM $t_lp lp WHERE session_id = 0 AND c_id = {$info_course['real_id']} ORDER BY lp.display_order";
     } else {
-    	$sql_lp = " SELECT lp.name, lp.id FROM $t_lp lp WHERE c_id = {$info_course['real_id']}  ORDER BY lp.display_order";
+    	$sql_lp = " SELECT lp.name, lp.id FROM $t_lp lp WHERE (session_id = $session_id OR session_id = 0) AND c_id = {$info_course['real_id']}  ORDER BY lp.display_order";
     }
     $rs_lp = Database::query($sql_lp);
 
