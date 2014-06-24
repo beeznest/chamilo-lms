@@ -4492,13 +4492,53 @@ class CourseManager
     /**
      * @param $courseId
      * @param int $sessionId
-     * @return mixedss
+     * @return mixed
      */
-    public static function getLearningPathProgressAverage($courseId, $sessionId = 0)
+    public static function getCountStudentsProgress($courseId, $sessionId = 0)
     {
         $courseId = intval($courseId);
         $sessionId = intval($sessionId);
-        $tableLpView = Database :: get_course_table(TABLE_LP_VIEW);
+        $tableLpView = Database::get_course_table(TABLE_LP_VIEW);
+
+        if ($sessionId === 0) {
+            $whereCondition = array(
+                'where' => array(
+                    'c_id = ?' => array(
+                        $courseId
+                    )
+                )
+            );
+        } else {
+            $whereCondition = array(
+                'where' => array(
+                    'c_id = ? and session_id = ?' => array(
+                        $courseId,
+                        $sessionId
+                    )
+                )
+            );
+        }
+
+        $data = Database::select('COUNT(DISTINCT user_id) as students', $tableLpView, $whereCondition, 'all', 'ASSOC');
+
+        $students = 0;
+        if (!empty($data)) {
+            $viewData = current($data);
+            $students = $viewData['students'];
+        }
+
+        return $students;
+    }
+    /**
+     * @param $courseId
+     * @param int $sessionId
+     * @return mixedss
+     */
+    public static function getProgressAverage($courseId, $sessionId = 0)
+    {
+        $courseId = intval($courseId);
+        $sessionId = intval($sessionId);
+        $tableLpView = Database::get_course_table(TABLE_LP_VIEW);
 
         if ($sessionId === 0) {
             $whereCondition = array(
@@ -4562,22 +4602,57 @@ class CourseManager
         return $ids;
     }
 
-    public static function getProgressAverageByTag($courseId, $sessionId, $tagName, $tagValue)
+    /**
+     * @param $tagType
+     * @param $tagValue
+     * @param $courseId
+     * @param int $sessionId
+     * @param int $studentId
+     * @return int
+     */
+    public static function getProgressAverageByTag($tagType, $tagValue, $courseId, $sessionId = 0, $studentId = 0)
     {
-        /*
-        $sql = "SELECT MAX(view_count), progress
-                        FROM $tbl_course_lp_view lp_view
-                        INNER JOIN $tblFieldVal lv ON lv.lp_id = lp_view.lp_id
-                                                AND lv.c_id = lp_view.c_id
-                        INNER JOIN $tblField lf ON lf.id =  lv.field_id
-                                                 AND lf.field_variable = 'Tipo'
-                        INNER JOIN $tblFieldOpt lo ON lv.field_value = lo.id
-                                                 AND lf.id = lo.field_id
-                                                 AND lo.option_value = '$type'
-                        WHERE lp_view.c_id = {$course_info['real_id']}
-                        AND $condition_user session_id = $session_id
-                        AND lp_view.lp_id IN (" . implode(',', $lp_id) . ")
-                        GROUP BY lp_view.lp_id, user_id";
-        */
+        $lpView = Database::get_course_table(TABLE_LP_VIEW);
+        $lpFieldValue = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
+        $lpField = Database::get_main_table(TABLE_MAIN_LP_FIELD);
+        $lpFieldOption = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
+        $courseId = intval($courseId);
+        $sessionId = intval($sessionId);
+        $studentId = intval($studentId);
+
+        $studentCondition = '';
+        $sessionCondition = '';
+
+        if (!empty($sessionId)) {
+            $sessionCondition = ' AND lp_view.session_id = ' . $sessionId;
+        }
+
+        if (!empty($studentId)) {
+            $studentCondition = ' AND lp.view.user_id = ' . $studentId;
+        }
+
+        $sql = "SELECT AVG(progress) as progress
+            FROM $lpView lp_view
+            INNER JOIN $lpFieldValue lv ON lv.lp_id = lp_view.lp_id
+                                    AND lv.c_id = lp_view.c_id
+            INNER JOIN $lpField lf ON lf.id =  lv.field_id
+                                     AND lf.field_variable = '$tagType'
+            INNER JOIN $lpFieldOption lo ON lv.field_value = lo.id
+                                     AND lf.id = lo.field_id
+                                     AND lo.option_value = '$tagValue'
+            WHERE lp_view.c_id = $courseId
+            $sessionCondition
+            $studentCondition";
+
+        $progressAverage = 0;
+        $queryProgressResponse = Database::query($sql);
+        if (Database::num_rows($queryProgressResponse) > 0) {
+            while ($rowAverage = Database::fetch_array($queryProgressResponse))    {
+                $progressAverage = round($rowAverage['progress'], 2);
+            }
+        }
+
+        return $progressAverage;
     }
+
 }

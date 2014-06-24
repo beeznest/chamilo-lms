@@ -4604,7 +4604,7 @@ class SessionManager
                 $courseInfo = api_get_course_info($courseCode);
                 $sessionInfo = api_get_session_info($sessionId);
                 $teacherInfo = api_get_user_info($teacherId[0]);
-                $students = self::getSessionProgress($sessionId, $courseInfo['real_id']);
+                $students = self::getSessionProgress($sessionId, $courseInfo['real_id'], array());
                 $nroStudent = count($students);
                 //Initilize sums
                 $lessonProgress = 0;
