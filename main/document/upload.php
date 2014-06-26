@@ -195,7 +195,15 @@ Display::display_header($nameTools, 'Doc');
 
 // User has submitted a file
 if (!empty($_FILES)) {
-    DocumentManager::upload_document($_FILES, $_POST['curdirpath'], $_POST['title'], $_POST['comment'], $_POST['unzip'], $_POST['if_exists'], $_POST['index_document'], true);
+    $originalFilename = $_FILES['file']['name'];
+    $uniqueFilename = DocumentManager::getUniqueFilename($originalFilename);
+    if ($uniqueFilename === false) {
+        // nothing to do
+    } else {
+        $_FILES['file']['name'] = $uniqueFilename;
+        $title = !empty($_REQUEST['title'])? $_REQUEST['title'] : $originalFilename;
+        DocumentManager::upload_document($_FILES, $_POST['curdirpath'], $title, $_POST['comment'], $_POST['unzip'], $_POST['if_exists'], $_POST['index_document'], true);
+    }
 }
 
 // Actions

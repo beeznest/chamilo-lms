@@ -3547,4 +3547,31 @@ class DocumentManager
             }
         }
     }
+
+    /**
+     * Add a unique id to the filename
+     * @param $filename
+     * @param int $mode 1:Use session_id as unique id
+     * @return string
+     */
+    public static function getUniqueFilename($filename, $mode = 1) {
+        if (strlen($filename) < 1) {
+            return false;
+        }
+        require_once api_get_path(LIBRARY_PATH).'fileManage.lib.php';
+        switch ($mode) {
+            case 0:
+            case 1:
+            default:
+                $unique = api_get_session_id();
+                break;
+        }
+        $ext = getextension($filename);
+        if (!empty($ext[1])) {
+            $uniqueFilename = $ext[1].'_'.$unique.'.'.$ext[0];
+        } else {
+            $uniqueFilename = $filename.'_'.$unique;
+        }
+        return $uniqueFilename;
+    }
 }

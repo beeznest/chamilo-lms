@@ -27,6 +27,11 @@ switch($action) {
         if (!empty($_FILES)) {
             require_once api_get_path(LIBRARY_PATH).'fileDisplay.lib.php';
             $file = $_FILES['file'];
+            $uniqueFilename = DocumentManager::getUniqueFilename($file['name']);
+            if ($uniqueFilename == false) {
+                exit;
+            }
+            $_FILES['file']['name'] = $uniqueFilename;
             $result = DocumentManager::upload_document(
                 $_FILES,
                 $_POST['curdirpath'],
