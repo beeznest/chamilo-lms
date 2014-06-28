@@ -643,14 +643,12 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
     );
 
     if ($is_platform_admin && $view == 'admin' && in_array($display, $listToDisplay)) {
-        //selft script
+        //self script
         $self       = api_get_self();
-        //ajax path
         $ajax_path  = api_get_path(WEB_AJAX_PATH);
-        //script initiatizion
         $script     = '';
 
-        //Session Filter
+        // Session Filter
         $sessionFilter = new FormValidator('session_filter', 'get', '', '', array('class'=> 'form-horizontal'), false);
         $a = 'search_course';
         $an = 'search_session';
@@ -696,6 +694,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 break;
             case 'session_progress_report':
                 $tool_name = get_lang('SessionProgressReport');
+                $a = $an = 'search_course_by_session_all&display=session_progress_report';
                 break;
         }
 
@@ -704,7 +703,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
         $sessionList = array();
         $courseList = array();
         $sessionId = isset($_GET['session_id']) ? Security::remove_XSS($_GET['session_id']) : null;
-        $courseId = isset($_GET['course_id']) ? intval(Security::remove_XSS($_GET['course_id'])) : null;
+        $courseId = isset($_GET['course_id']) ? Security::remove_XSS($_GET['course_id']) : null;
 
         if (!empty($sessionId)) {
             $sessionList = array();
@@ -719,17 +718,19 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             $a = 'search_course_by_session';
         }
 
-        
         if (empty($sessionId) && !$isSessionFirst) {
             $sessionId = 'T';
         }
-        
+
         if (!empty($courseId)) {
             $courseList = array();
-            $courseInfo = api_get_course_info_by_id($courseId);
-            $courseList[] = array('id' => $courseInfo['real_id'], 'text' => $courseInfo['name']);
+            if ($courseId == 'T') {
+                $courseList[] = array('id' => 'T', 'text' => 'TODOS');
+            } else {
+                $courseInfo = api_get_course_info_by_id($courseId);
+                $courseList[] = array('id' => $courseInfo['real_id'], 'text' => $courseInfo['name']);
+            }
             $an = 'search_session_by_course';
-
         }
 
         if ($isSessionFirst) {
@@ -739,15 +740,18 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             $url = $ajax_path . 'course.ajax.php?a='. $a .'&session_id=' . $sessionId;
             $sessionFilter->addElement('select_ajax', 'course_name', get_lang('SearchCourse'), null, array('url' => $url, 'defaults' => $courseList, 'width' => '400px', 'minimumInputLength' => $minimumInputLength));
         } else {
+            if ($display == 'student_progress_report') {
+                $url = $ajax_path . 'course.ajax.php?a='. $a .'&session_id=' . $sessionId;
+                $sessionFilter->addElement('select_ajax', 'course_category', get_lang('Category'), null, array('url' => $url, 'defaults' => '', 'width' => '400px', 'minimumInputLength' => $minimumInputLength));
+            }
             $url = $ajax_path . 'course.ajax.php?a='. $a .'&session_id=' . $sessionId;
             $sessionFilter->addElement('select_ajax', 'course_name', get_lang('SearchCourse'), null, array('url' => $url, 'defaults' => $courseList, 'width' => '400px', 'minimumInputLength' => $minimumInputLength));
 
             $url = $ajax_path . 'session.ajax.php?a='. $an . '&course_id=' . $courseId;
             $sessionFilter->addElement('select_ajax', 'session_name', get_lang('Search') . " " . get_lang('Section'), null, array('url' => $url, 'defaults' => $sessionList, 'width' => '400px', 'minimumInputLength' => $minimumInputLength));
         }
-        //Exercise filter    
+        //Exercise filter
         if (in_array($display, array('exerciseprogress', 'evaluation_detail_report'))) {
-
             $url = $ajax_path .'course.ajax.php?a=search_exercise_by_course&session_id=' . $sessionId . '&course_id=' . $courseId;
             $exerciseList = array();
             $exerciseId = isset($_GET['exercise_id']) ? Security::remove_XSS($_GET['exercise_id']) : null;
@@ -798,9 +802,8 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 STUDENT         => get_lang('Student'),
                 COURSEMANAGER   => get_lang('CourseManager'),
                 DRH             => get_lang('Drh'),
-                );
+            );
             $sessionFilter->addElement('select', 'profile', get_lang('Profile'),$options, array('id' => 'profile', 'class' => 'pull-left'));
-
             $sessionFilter->addElement('select_ajax', 'student_name', get_lang('SearchUser'), null, array('placeholder' => 'Todos', 'url' => $url, 'defaults' => $studentList, 'width' => '400px', 'class' => 'pull-right', 'minimumInputLength' => $minimumInputLength));
 
             $script = '
@@ -859,12 +862,13 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
         if (!empty($sessionId)) {
            $a = 'search_course_by_session';
         }
-        
+
         if ($display == 'lpprogressoverview' || $display == 'progressoverview') {
             $a = 'search_course_by_session_all';
         }
-       
+
         $url = $ajax_path . 'course.ajax.php?a='. $a .'&session_id=' . $sessionId;
+
         echo '<script>
         $(function() {
             if (display == "lpprogressoverview" || display == "progressoverview" || display == "surveyoverview") {
@@ -876,7 +880,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 }
             }
 
-            var display = "' . $display . '"; 
+            var display = "' . $display . '";
             $("#generateReport").click(function(e){
                 url = "'.$self.'?view=admin&display='.$display.'";
                 if (!isEmpty($("#session_name").val())) {
@@ -903,6 +907,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 window.location = url;
                 e.preventDefault();
             });
+
             $( "#date_from, #date_to").datepicker({
                 dateFormat:  "yy-mm-dd"
             });
@@ -913,7 +918,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                         //window.location = "'.$self.'?view=admin&display='.$display.'&session_id="+sessionId;
                         select2("#course_name", "' .  $ajax_path . 'course.ajax.php?a=' . $a . '&session_id=" + sessionId);
                     });
-                    ' :  '  
+                    ' :  '
                     $("#course_name").on("change", function() {
                         if ($(this).val() == "") {
                             $("#session_name").val("");
@@ -933,20 +938,20 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                               $("#session_name").select2("readonly", true);
                           }'
                    ) . '
-                //}     
+                //}
             });
 
             $("#course_name").on("change", function() {
                 if ($(this).val() == "") {
                     $("#session_name").val("");
-                } 
+                }
                 var sessionId = $("#session_name").val();
                 var courseId = $("#course_name").val();
                 var display = "' . $display . '";
                 if (isEmpty(courseId)) {
                     select2("#session_name", "' .  $ajax_path . 'session.ajax.php?a=search_session");
                     if (isEmpty(sessionId)) {
-                        select2("#course_name", "' .  $ajax_path . 'course.ajax.php?a=search_course_by_session_all&session_id=T");
+                        select2("#course_name", "' .  $ajax_path . 'course.ajax.php?a=search_course_by_session_all&session_id=T&display=" + display);
                     } else {
                         select2("#course_name", "' .  $ajax_path . 'course.ajax.php?a=search_course_by_session_all&session_id=" + sessionId);
                     }
@@ -966,6 +971,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 }
             ' . $script . '
         });
+
         function areBothFilled() {
             var returnValue = false;
             if ((document.getElementById("date_from").value != "") && (document.getElementById("date_to").value != "")){
@@ -973,9 +979,11 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             }
             return returnValue;
         }
+
         function isEmpty(str) {
             return (!str || 0 === str.length);
         }
+
         function select2(divId, url) {
             if (typeof $(divId).select2 == "function" && isEmpty($(divId).val())) {
                 $(divId).select2("destroy");
@@ -1015,9 +1023,8 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             $(divId).select2("readonly", false);
         }
         </script>';
-
     }
-    
+
     switch ($display) {
         case 'useroverview':
             MySpace::display_tracking_user_overview();
@@ -1141,16 +1148,15 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             }
             break;
         case 'student_progress_report':
-            if (!empty($_GET['course_id'])) {
-                echo MySpace::displayCourseProgressSummary(intval($_GET['course_id']), intval($_GET['session_id']));
-                //echo MySpace::displayStudentProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
+            if (!empty($_GET['course_id']) || $_GET['course_id'] === 'T') {
+                echo MySpace::displayCourseProgressSummary($_GET['course_id'], $_GET['session_id']);
             } else {
                 Display::display_warning_message(get_lang('ChooseCourse'));
             }
             break;
         case 'session_progress_report':
             if (!empty($_GET['course_id'])) {
-                echo MySpace::displaySessionProgressReport(intval($_GET['session_id']), intval($_GET['course_id']));
+                echo MySpace::displaySessionProgressReport($_GET['session_id'], $_GET['course_id']);
             } else {
                 Display::display_warning_message(get_lang('ChooseCourse'));
             }

@@ -1009,7 +1009,7 @@ if ($display_announcement_list) {
                 }
 
                 /* TITLE */
-    		    $title = Display::url($title.$attachment_icon, '?action=view&id='.$myrow['id']);
+    		    $title = Display::url($title.$attachment_icon, api_get_self().'?'.api_get_cidreq().'&action=view&id='.$myrow['id']);
                 echo Display::tag('td', Security::remove_XSS($title), array('class' => $style));
 
                 $user_info		= api_get_user_info($myrow['insert_user_id']);

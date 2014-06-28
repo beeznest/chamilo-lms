@@ -25,7 +25,7 @@ require_once api_get_path(SYS_CODE_PATH).'survey/survey.lib.php';
 
 api_block_anonymous_users();
 
-if (!api_is_allowed_to_create_course() && !api_is_session_admin() && !api_is_drh()) {
+if (!api_is_allowed_to_create_course() && !api_is_session_admin() && !api_is_drh() && !api_is_course_manager_admin()) {
     // Check if the user is tutor of the course
     $user_course_status = CourseManager::get_tutor_in_course_status(api_get_user_id(), api_get_course_id());
     if ($user_course_status != 1) {
@@ -217,7 +217,6 @@ if (api_is_drh() || api_is_platform_admin()) {
 }
 
 $courses = CourseManager::get_course_list_of_user_as_course_admin(api_get_user_id());
-
 $courses_in_session_by_coach = array();
 $sessions_coached_by_user = Tracking::get_sessions_coached_by_user(api_get_user_id());
 
@@ -234,6 +233,19 @@ if (api_is_session_admin() || api_is_drh()) {
 	}
 }
 
+if (api_is_course_manager_admin()) {
+    $courses_in_session_by_coach = array();
+    $courses = array_flip(array_keys(CourseManager::get_courses_followed_by_course_admin_manager(api_get_user_id())));
+
+    foreach ($courses as $courseCode => $value) {
+        $sessionList = SessionManager::get_session_by_course($courseCode);
+        foreach ($sessionList as $sessionInfo) {
+            $courses_in_session_by_coach[$sessionInfo['id']] = $courseCode;
+        }
+    }
+}
+
+
 // Teacher or admin
 if (!empty($sessions_coached_by_user)) {
 	foreach ($sessions_coached_by_user as $session_coached_by_user) {
@@ -243,10 +255,11 @@ if (!empty($sessions_coached_by_user)) {
 	}
 }
 
+
 $sql = "SELECT course_code FROM $tbl_course_user
         WHERE relation_type <> ".COURSE_RELATION_TYPE_RRHH." AND user_id = ".intval($user_info['user_id']);
-$rs = Database::query($sql);
 
+$rs = Database::query($sql);
 while ($row = Database :: fetch_array($rs)) {
     if ($drh_can_access_all_courses) {
         $courses_in_session[0][] = $row['course_code'];
@@ -728,7 +741,7 @@ if (empty($_GET['details'])) {
     if (empty($session_id)) {
         $sql_lp = " SELECT lp.name, lp.id FROM $t_lp lp WHERE session_id = 0 AND c_id = {$info_course['real_id']} ORDER BY lp.display_order";
     } else {
-    	$sql_lp = " SELECT lp.name, lp.id FROM $t_lp lp WHERE c_id = {$info_course['real_id']}  ORDER BY lp.display_order";
+    	$sql_lp = " SELECT lp.name, lp.id FROM $t_lp lp WHERE (session_id = $session_id OR session_id = 0) AND c_id = {$info_course['real_id']}  ORDER BY lp.display_order";
     }
     $rs_lp = Database::query($sql_lp);
 

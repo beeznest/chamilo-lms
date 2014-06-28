@@ -66,6 +66,14 @@ class ExtraFieldValue extends Model
                 array_push($this->columns, 'c_id');
                 //$this->entityName = 'ChamiloLMS\Entity\QuestionFieldValues';
                 break;
+            case 'exercise':
+                $this->table = Database::get_main_table(TABLE_MAIN_EXERCISE_FIELD_VALUES);
+                $this->table_handler_field = Database::get_main_table(TABLE_MAIN_EXERCISE_FIELD);
+                $this->author_id = 'exercise_id';
+                $this->extraFields['c_id'] = api_get_course_int_id();
+                array_push($this->columns, 'c_id');
+                //$this->entityName = 'ChamiloLMS\Entity\QuestionFieldValues';
+                break;
             default:
                 //unmanaged datatype, return false to let the caller know it
                 // didn't work
@@ -96,6 +104,7 @@ class ExtraFieldValue extends Model
     public function save_field_values($params)
     {
         $extra_field = new ExtraField($this->type);
+
         if (empty($params[$this->handler_id])) {
             return false;
         }
@@ -148,6 +157,7 @@ class ExtraFieldValue extends Model
                                 );
                                 self::save($new_params);
                             }
+
                             if (!empty($deleteItems)) {
                                 foreach ($deleteItems as $deleteFieldValue) {
                                     self::deleteValuesByHandlerAndFieldAndValue(
@@ -198,6 +208,7 @@ class ExtraFieldValue extends Model
                 $params[$extraField] = Database::escape_string($extraValue);
             }
         }
+
         $show_query = true;
 
         $params['field_value'] = $value_to_insert;
@@ -262,7 +273,7 @@ class ExtraFieldValue extends Model
             $params['field_value'] = $value_to_insert;
             $params['tms'] = api_get_utc_datetime();
 
-            if ($this->author_id != 'lp_id') {
+            if (!in_array($this->author_id, array('lp_id', 'exercise_id'))) {
                 $params[$this->author_id] = api_get_user_id();
             }
 
@@ -304,15 +315,15 @@ class ExtraFieldValue extends Model
                     }
                 } else {
                     if ($extra_field_info['field_type'] == ExtraField::FIELD_TYPE_TAG) {
-
                         $option = new ExtraFieldOption($this->type);
                         $optionExists = $option->get($params['field_value']);
+
                         if (empty($optionExists)) {
                             $optionParams = array(
                                 'field_id' => $params['field_id'],
                                 'option_value' => $params['field_value']
                             );
-                            $optionId = $option->saveOptions($optionParams);
+                            $optionId = $option->saveOptionsAndGetIdOfFirstItem($optionParams);
                         } else {
                             $optionId = $optionExists['id'];
                         }
@@ -594,8 +605,33 @@ class ExtraFieldValue extends Model
         $fieldId = intval($fieldId);
         $itemId = intval($itemId);
         $extraConditions = $this->getExtraFieldSqlConditions();
-
         $sql = "SELECT s.* FROM {$this->table} s
+                INNER JOIN {$this->table_handler_field} sf
+                ON (s.field_id = sf.id)
+                WHERE
+                    field_id = '".$fieldId."' AND
+                    {$this->handler_id} = '$itemId'
+                    $extraConditions
+                ORDER BY field_value";
+
+        $result = Database::query($sql);
+        if (Database::num_rows($result)) {
+            return Database::store_result($result, 'ASSOC');
+        }
+        return false;
+    }
+
+    /**
+     * @param int $itemId
+     * @param int $fieldId
+     * @return array
+     */
+    public function getAllValuesByItemAndFieldDistinct($itemId, $fieldId)
+    {
+        $fieldId = intval($fieldId);
+        $itemId = intval($itemId);
+        $extraConditions = $this->getExtraFieldSqlConditions();
+        $sql = "SELECT DISTINCT {$this->handler_id} FROM {$this->table} s
                 INNER JOIN {$this->table_handler_field} sf
                 ON (s.field_id = sf.id)
                 WHERE
@@ -629,7 +665,7 @@ class ExtraFieldValue extends Model
                 WHERE
                     field_id = '".$fieldId."' AND
                     {$this->handler_id} = '$itemId' AND
-                    field_value = $fieldValue
+                    field_value = '$fieldValue'
                     $extraConditions
                 ORDER BY field_value";
 

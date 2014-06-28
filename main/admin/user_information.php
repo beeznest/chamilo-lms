@@ -34,12 +34,8 @@ $table_course = Database :: get_main_table(TABLE_MAIN_COURSE);
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
         case 'unsubscribe':
-            if (CourseManager::get_user_in_course_status($_GET['user_id'], $_GET['course_code']) == STUDENT) {
-                CourseManager::unsubscribe_user($_GET['user_id'], $_GET['course_code']);
-                Display::display_normal_message(get_lang('UserUnsubscribed'));
-            } else {
-                Display::display_error_message(get_lang('CannotUnsubscribeUserFromCourse'));
-            }
+            CourseManager::unsubscribe_user($_GET['user_id'], $_GET['course_code']);
+            Display::display_normal_message(get_lang('UserUnsubscribed'));
             break;
     }
 }

@@ -692,7 +692,11 @@ function modify_filter($user_id) {
         if (api_get_setting('allow_user_course_subscription_by_course_admin') == 'true' or api_is_platform_admin()) {
             // unregister
             if ($user_id != $current_user_id) {
-                $result .= '<a class="btn btn-small btn-danger" href="'.api_get_self().'?'.api_get_cidreq().'&unregister=yes&amp;user_id='.$user_id.'" title="'.get_lang('Unreg').' " onclick="javascript:if(!confirm(\''.addslashes(api_htmlentities(get_lang('ConfirmYourChoice'),ENT_QUOTES,$charset)).'\')) return false;">'.get_lang('Unreg').'</a>&nbsp;';
+                $isSubscribed = CourseManager::is_course_manager_subscribed_to_course($user_id, api_get_course_id());
+                if (!$isSubscribed) {
+                    $result .= '<a class="btn btn-small btn-danger" href="'.api_get_self().'?'.api_get_cidreq().'&unregister=yes&amp;user_id='.$user_id.'" title="'.get_lang('Unreg').' " onclick="javascript:if(!confirm(\''.addslashes(api_htmlentities(get_lang('ConfirmYourChoice'),ENT_QUOTES,$charset)).'\')) return false;">'.get_lang('Unreg').'</a>&nbsp;';
+                }
+
             } else {
                 //$result .= Display::return_icon('unsubscribe_course_na.png', get_lang('Unreg'),'',ICON_SIZE_SMALL).'</a>&nbsp;';
             }

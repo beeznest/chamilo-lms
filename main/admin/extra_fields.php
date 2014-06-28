@@ -206,10 +206,55 @@ CREATE TABLE IF NOT EXISTS lp_field_values(
     field_value	text,
     comment VARCHAR(100) default '',
     tms DATETIME NOT NULL default '0000-00-00 00:00:00',
+    c_id INT,
     PRIMARY KEY(id)
 );
 
 ALTER TABLE lp_field_values ADD INDEX (lp_id, field_id);
+
+
+
+DROP TABLE IF EXISTS exercise_field;
+CREATE TABLE IF NOT EXISTS exercise_field(
+    id INT NOT NULL auto_increment,
+    field_type int NOT NULL DEFAULT 1,
+    field_variable	varchar(64) NOT NULL,
+    field_display_text	varchar(64),
+    field_default_value text,
+    field_order int,
+    field_visible tinyint default 0,
+    field_changeable tinyint default 0,
+    field_filter tinyint default 0,
+    tms	DATETIME NOT NULL default '0000-00-00 00:00:00',
+    PRIMARY KEY(id)
+);
+
+DROP TABLE IF EXISTS exercise_field_options;
+CREATE TABLE IF NOT EXISTS exercise_field_options (
+    id int NOT NULL auto_increment,
+    field_id int NOT NULL,
+    option_value text,
+    option_display_text varchar(64),
+    option_order int,
+    tms	DATETIME NOT NULL default '0000-00-00 00:00:00',
+    priority VARCHAR(255),
+    priority_message VARCHAR(255),
+    PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS exercise_field_values;
+CREATE TABLE IF NOT EXISTS exercise_field_values(
+    id bigint NOT NULL auto_increment,
+    exercise_id int unsigned NOT NULL,
+    field_id int NOT NULL,
+    field_value	text,
+    comment VARCHAR(100) default '',
+    tms DATETIME NOT NULL default '0000-00-00 00:00:00',
+    c_id INT,
+    PRIMARY KEY(id)
+);
+
+ALTER TABLE exercise_field_values ADD INDEX (exercise_id, field_id);
 
 
 

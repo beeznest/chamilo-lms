@@ -902,7 +902,8 @@ class Exercise {
      * Creates the form to create / edit an exercise
      * @param FormValidator $form the formvalidator instance (by reference)
      */
-    function createForm ($form, $type='full') {
+    function createForm ($form, $type='full')
+    {
         global $id;
 
         if (empty($type)){
@@ -1017,7 +1018,7 @@ class Exercise {
                     //we force the options to the DirectFeedback exercisetype
                     $form->addElement('hidden', 'exerciseFeedbackType', EXERCISE_FEEDBACK_TYPE_DIRECT);
                     $form->addElement('hidden', 'exerciseType', ONE_PER_PAGE);
-                    
+
                     // Type of questions disposition on page
                     $radios[] = $form->createElement('radio', 'exerciseType', null, get_lang('SimpleExercise'),    '1', array('onclick' => 'check_per_page_all()', 'id'=>'option_page_all'));
                     $radios[] = $form->createElement('radio', 'exerciseType', null, get_lang('SequentialExercise'),'2', array('onclick' => 'check_per_page_one()', 'id'=>'option_page_one'));
@@ -1143,6 +1144,16 @@ class Exercise {
             $form->addElement('html','</div>');  //End advanced setting
             $form->addElement('html','</div>');
         }
+
+        $extraField = new ExtraField('exercise');
+        $extra = $extraField->addElements($form, $this->id);
+
+        $form->addElement('html',
+        '<script>
+        $(function() {
+            '.$extra['jquery_ready_content'].'
+        });
+        </script>');
 
         // submit
         $text = isset($_GET['exerciseId']) ? get_lang('ModifyExercise') : get_lang('ProcedToQuestions');
@@ -1303,7 +1314,15 @@ class Exercise {
         } else {
             $this->random_answers=0;
         }
+
         $this->save($type);
+
+        // Saving extra fields
+        $extraFieldValue = new ExtraFieldValue('exercise');
+        if (!empty($this->id)) {
+            $_REQUEST['exercise_id'] = $this->id;
+        }
+        $extraFieldValue->save_field_values($_REQUEST);
     }
 
     function search_engine_save() {
@@ -3989,7 +4008,7 @@ class Exercise {
         }
         return $out_max_score;
     }
-    
+
     /**
      * @param int courseid
      * @param int sessionid
@@ -4005,18 +4024,18 @@ class Exercise {
              . "cq.active = 0 "
              . "ORDER BY cq.id";
         $sql = sprintf($sql, $courseId, $sessionId);
-        
+
         $result = Database::query($sql);
-        
+
         $rows = array();
         while($row = Database::fetch_array($result, 'ASSOC')) {
                 $rows[] = $row;
         }
-        
+
         return $rows;
     }
-    
-    
+
+
     /**
      * @param int courseid
      * @param int sessionid
@@ -4035,7 +4054,7 @@ class Exercise {
 
         $tbl_quiz = Database::get_course_table(TABLE_QUIZ_TEST);
         $track_exercises = Database :: get_statistic_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
-        
+
         $whSession = "";
         if ($sessionId != 0) {
             $sql = "SELECT * FROM $track_exercises te "
@@ -4046,7 +4065,7 @@ class Exercise {
               . "te.session_id = %s AND "
               . "cq.id IN (%s) "
               . "ORDER BY cq.id ";
-       
+
             $sql = sprintf($sql, $courseId, $sessionId, $ids);
             $whSession = "te.session_id = %s AND ";
         } else {
@@ -4059,16 +4078,16 @@ class Exercise {
               . "ORDER BY cq.id ";
             $sql = sprintf($sql, $courseId, $ids);
         }
-       
+
         $sql = sprintf($sql, $courseId, $sessionId, $ids);
-    
+
         $result = Database::query($sql);
-        
+
         $rows = array();
         while($row = Database::fetch_array($result, 'ASSOC')) {
                 $rows[] = $row;
         }
-        
+
         return $rows;
     }
 }

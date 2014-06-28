@@ -2,7 +2,7 @@
 /* For licensing terms, see /license.txt */
 /**
  * This file contains only grids without headers or footers
- * @author Francis Gonzales <fgonzales@beeznest.com> 
+ * @author Francis Gonzales <fgonzales@beeznest.com>
  */
 $language_file = array('admin', 'exercice', 'gradebook', 'tracking');
 

@@ -962,9 +962,20 @@ if ((isset($uidReset) && $uidReset) || (isset($cidReset) && $cidReset))
             $is_courseAdmin      = (bool) ($cuData['status'] == 1 );
             $is_courseTutor      = (bool) ($cuData['tutor_id' ] == 1 );
             $is_courseMember     = true;
-
             $_courseUser['role'] = $cuData['role'];
             Session::write('_courseUser',$_courseUser);
+        }
+
+        if (api_is_course_manager_admin()) {
+            $isSubscribed = CourseManager::is_course_manager_subscribed_to_course(
+                $user_id,
+                $cidReq
+            );
+
+            if ($isSubscribed) {
+                $is_courseAdmin = true;
+                $is_courseMember = true;
+            }
         }
 
         // We are in a session course? Check session permissions

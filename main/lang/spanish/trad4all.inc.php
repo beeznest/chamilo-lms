@@ -1517,4 +1517,5 @@ $TeacherCode = "Código del Profesor";
 $StudentDetail = "Detalle del Estudiante";
 $CourseCode = "Código del Curso";
 $SessionCode = "Código de la Sesión";
+$CourseManagerAdmin = "Administrador de cursos";
 ?>

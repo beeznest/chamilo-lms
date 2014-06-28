@@ -163,7 +163,8 @@ class CourseManager
         $alsoSearchCode = false
     ) {
 
-        $sql = "SELECT course.* FROM ".Database::get_main_table(TABLE_MAIN_COURSE)." course ";
+        $sql = "SELECT course.*, course.id as real_id
+                FROM ".Database::get_main_table(TABLE_MAIN_COURSE)." course ";
 
         if (!empty($urlId)) {
             $table = Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_COURSE);
@@ -1561,7 +1562,7 @@ class CourseManager
     public static function get_student_list_from_course_code($course_code, $with_session = false, $session_id = 0, $date_from = null, $date_to = null) {
         $session_id = intval($session_id);
         $course_code = Database::escape_string($course_code);
-        
+
         $students = array();
 
         if ($session_id == 0) {
@@ -1577,23 +1578,23 @@ class CourseManager
         // students subscribed to the course through a session
 
         if ($with_session) {
-            
+
             $joinSession = "";
             //Session creation date
             if (!empty($date_from) && !empty($date_to)) {
                 $joinSession = "INNER JOIN " . Database::get_main_table(TABLE_MAIN_SESSION) . " s";
             }
-            
+
             $sql_query = "SELECT * FROM ".Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER)." scu
                           $joinSession
                           WHERE scu.course_code = '$course_code' AND scu.status <> 2";
-            
+
             if (!empty($date_from) && !empty($date_to)) {
                 $date_from = Database::escape_string($date_from);
                 $date_to = Database::escape_string($date_to);
                 $sql_query .= " AND s.date_start >= '$date_from' AND s.date_end <= '$date_to'";
             }
-            
+
             if ($session_id != 0) {
                 $sql_query .= ' AND scu.id_session = '.$session_id;
             }
@@ -4357,5 +4358,136 @@ class CourseManager
         $result = Database::query($sql);
         return Database::num_rows($result) > 0;
     }
+
+    /**
+     * @param int $userId
+     * @param string $courseCode
+     *
+     * @return bool
+     */
+    public static function is_course_manager_subscribed_to_course($userId, $courseCode)
+    {
+        if (empty($courseCode) || empty($userId)) {
+            return false;
+        }
+
+        $tbl_course_rel_user = Database::get_main_table(TABLE_MAIN_COURSE_USER);
+
+        $userId = intval($userId);
+        $courseCode = Database::escape_string($courseCode);
+
+        $sql = "SELECT user_id FROM $tbl_course_rel_user
+                WHERE
+                    user_id = $userId AND
+                    course_code = '$courseCode' AND
+                    relation_type = ".COURSE_RELATION_TYPE_COURSE_ADMIN;
+
+        $result = Database::query($sql);
+
+        $isSubscribed = false;
+        if (Database::num_rows($result)) {
+            $isSubscribed = true;
+        }
+        return $isSubscribed;
+    }
+
+    /**
+     * Subscribes courses to human resource manager (Dashboard feature)
+     *    @param    int         Human Resource Manager id
+     * @param    array        Courses code
+     * @param    int            Relation type
+     **/
+    public static function subscribe_courses_to_course_admin($hr_manager_id, $courses_list, $deleteOldCourseNotInList = true) {
+        global $_configuration;
+
+        $tbl_course_rel_user    =   Database::get_main_table(TABLE_MAIN_COURSE_USER);
+        $tbl_course_rel_access_url     =   Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_COURSE);
+
+        $hr_manager_id = intval($hr_manager_id);
+        $affected_rows = 0;
+        $status = COURSE_MANAGER_ADMIN;
+        $relation = COURSE_RELATION_TYPE_COURSE_ADMIN;
+
+        if ($deleteOldCourseNotInList) {
+            //Deleting assigned courses to hrm_id
+            if ($_configuration['multiple_access_urls']) {
+                $sql = "SELECT s.course_code FROM $tbl_course_rel_user s
+                        INNER JOIN $tbl_course_rel_access_url a ON (a.course_code = s.course_code)
+                        WHERE user_id = $hr_manager_id AND
+                        relation_type=".$relation." AND
+                        access_url_id = ".api_get_current_access_url_id()."";
+            } else {
+                $sql = "SELECT course_code FROM $tbl_course_rel_user
+                        WHERE user_id = $hr_manager_id AND relation_type=".$relation." ";
+            }
+            $result = Database::query($sql);
+            if (Database::num_rows($result) > 0) {
+                while ($row = Database::fetch_array($result)) {
+                    $sql = "DELETE FROM $tbl_course_rel_user
+                        WHERE course_code = '{$row['course_code']}' AND user_id = $hr_manager_id AND relation_type=" . $relation . " ";
+                    Database::query($sql);
+                }
+            }
+        }
+
+        // inserting new courses list
+        if (is_array($courses_list)) {
+            foreach ($courses_list as $course_code) {
+                $course_code = Database::escape_string($course_code);
+                $insert_sql = "INSERT IGNORE INTO $tbl_course_rel_user(course_code, user_id, status, relation_type)
+                               VALUES('$course_code', $hr_manager_id, '".$status."', '".$relation."')";
+                Database::query($insert_sql);
+                if (Database::affected_rows()) {
+                    $affected_rows++;
+                }
+            }
+        }
+
+        return $affected_rows;
+    }
+
+    /**
+     *
+     * @param int
+     * @return array    courses
+     */
+    public static function get_courses_followed_by_course_admin_manager($user_id) {
+        // Database Table Definitions
+        $tbl_course             =     Database::get_main_table(TABLE_MAIN_COURSE);
+        $tbl_course_rel_user     =     Database::get_main_table(TABLE_MAIN_COURSE_USER);
+        $tbl_course_rel_access_url =   Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_COURSE);
+
+        $user_id = intval($user_id);
+        $assigned_courses_to_hrm = array();
+        $status = COURSE_MANAGER_ADMIN;
+        $relationType = COURSE_RELATION_TYPE_COURSE_ADMIN;
+
+        if (api_get_multiple_access_url()) {
+            $sql = "SELECT *, id as real_id FROM $tbl_course c
+                    INNER JOIN $tbl_course_rel_user cru ON (cru.course_code = c.code)
+                    LEFT JOIN $tbl_course_rel_access_url a
+                    ON (a.course_code = c.code)
+                    WHERE
+                        cru.user_id = '$user_id' AND
+                        status = ".$status." AND
+                        relation_type = '".$relationType."' AND
+                        access_url_id = ".api_get_current_access_url_id()."";
+        } else {
+            $sql = "SELECT *, id as real_id FROM $tbl_course c
+                    INNER JOIN $tbl_course_rel_user cru
+                    ON cru.course_code = c.code AND
+                    cru.user_id = '$user_id' AND
+                    status = ".$status." AND
+                    relation_type = '".$relationType."' ";
+        }
+        $rs_assigned_courses = Database::query($sql);
+        if (Database::num_rows($rs_assigned_courses) > 0) {
+            while ($row_assigned_courses = Database::fetch_array($rs_assigned_courses))    {
+                $assigned_courses_to_hrm[$row_assigned_courses['code']] = $row_assigned_courses;
+            }
+        }
+        return $assigned_courses_to_hrm;
+    }
+
 
 }
