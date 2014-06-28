@@ -3752,18 +3752,13 @@ class Tracking
                 $extraField
                 FROM $ttrack_exercises te
                 INNER JOIN $ttrack_attempt ta ON ta.exe_id = te.exe_id
-                INNER JOIN $tquiz q ON q.id = te.exe_exo_id
-                INNER JOIN $tquiz_rel_question rq ON rq.exercice_id = q.id AND rq.c_id = q.c_id
-                INNER JOIN $tquiz_question qq ON qq.id = rq.question_id 
-                                                AND qq.c_id = rq.c_id 
-                                                AND qq.position = rq.question_order 
-                                                AND ta.question_id = rq.question_id
+                INNER JOIN $tquiz q ON q.id = te.exe_exo_id AND q.c_id = $courseIdx
+                INNER JOIN $tquiz_question qq ON qq.id = ta.question_id
+                                                AND qq.c_id = $courseIdx
                 $fieldType
                 WHERE te.exe_cours_id = '$whereCourseCode' ".(empty($whereSessionParams)?'':"AND te.session_id IN ($whereSessionParams)")."
-                AND q.c_id = $courseIdx
                   $where $order $limit";
             $sql_query = vsprintf($sql, $whereParams);
-
             // Now browse through the results and get the data
             $rs = Database::query($sql_query);
             $userIds = array();
