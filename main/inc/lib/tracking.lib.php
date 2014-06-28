@@ -3777,9 +3777,10 @@ class Tracking
             // Now fill questions data. Query all questions and answers for this test to avoid
             $sqlQuestions = "SELECT tq.c_id, tq.id as question_id, tq.question, tqa.id_auto, 
                                     tqa.answer, tqa.correct, tq.position, tqa.id_auto as answer_id
-                               FROM $tquiz_question tq, $tquiz_answer tqa
-                               WHERE tqa.question_id =tq.id and tqa.c_id = tq.c_id
-                                 AND tq.c_id = $courseIdx AND tq.id IN (".implode(',',$questionIds).")";
+                               FROM $tquiz_question tq
+                               INNER JOIN $tquiz_answer tqa ON tqa.question_id =tq.id and tqa.c_id = tq.c_id
+                               WHERE tq.c_id = $courseIdx AND tq.id IN (".implode(',',$questionIds).")";
+            
             $resQuestions = Database::query($sqlQuestions);
             $answer = array();
             $question = array();
