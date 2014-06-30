@@ -4010,18 +4010,18 @@ class Exercise {
     }
 
     /**
-     * @param int courseid
-     * @param int sessionid
+     * @param int $courseId
+     * @param int $sessionId
      * @return array exercises
      */
-    public function getExercisesByCouseSession($courseId, $sessionId)
+    public function getExercisesByCourseSession($courseId, $sessionId)
     {
         $tbl_quiz = Database::get_course_table(TABLE_QUIZ_TEST);
         $sql = "SELECT * FROM $tbl_quiz cq "
              . "WHERE "
              . "cq.c_id = %s AND "
              . "( cq.session_id = %s OR cq.session_id = 0 ) AND "
-             . "cq.active = 0 "
+             . "cq.active in (0, 1)"
              . "ORDER BY cq.id";
         $sql = sprintf($sql, $courseId, $sessionId);
 
