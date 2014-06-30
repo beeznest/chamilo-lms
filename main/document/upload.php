@@ -195,8 +195,12 @@ Display::display_header($nameTools, 'Doc');
 
 // User has submitted a file
 if (!empty($_FILES)) {
+    $course_info = api_get_course_info();
+    $course_dir = $course_info['path'] . '/document';
+    $sys_course_path = api_get_path(SYS_COURSE_PATH);
+    $base_work_dir = $sys_course_path . $course_dir;
     $originalFilename = $_FILES['file']['name'];
-    $uniqueFilename = DocumentManager::getUniqueFilename($originalFilename);
+    $uniqueFilename = DocumentManager::getUniqueFilename($base_work_dir, $originalFilename);
     if ($uniqueFilename === false) {
         // nothing to do
     } else {

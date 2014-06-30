@@ -25,9 +25,13 @@ switch($action) {
         }
 
         if (!empty($_FILES)) {
+            $course_info = api_get_course_info();
+            $course_dir = $course_info['path'] . '/document';
+            $sys_course_path = api_get_path(SYS_COURSE_PATH);
+            $base_work_dir = $sys_course_path . $course_dir;
             require_once api_get_path(LIBRARY_PATH).'fileDisplay.lib.php';
             $file = $_FILES['file'];
-            $uniqueFilename = DocumentManager::getUniqueFilename($file['name']);
+            $uniqueFilename = DocumentManager::getUniqueFilename($base_work_dir, $file['name']);
             if ($uniqueFilename == false) {
                 exit;
             }

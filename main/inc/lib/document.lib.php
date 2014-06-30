@@ -3550,11 +3550,13 @@ class DocumentManager
 
     /**
      * Add a unique id to the filename
-     * @param $filename
+     * @param $dir Folder path where the file will be stored
+     * @param $filename filename complete
      * @param int $mode 1:Use session_id as unique id
      * @return string
      */
-    public static function getUniqueFilename($filename, $mode = 1) {
+    public static function getUniqueFilename($dir, $filename, $mode = 1) {
+        $dir = realpath($dir).'/';
         // Filename must have at least a letter
         if (strlen($filename) < 1) {
             return false;
@@ -3568,16 +3570,33 @@ class DocumentManager
                 $unique = 'session-'.api_get_session_id();
                 break;
         }
+
         // Get extension array (only filename and file extension)
         $ext = getextension($filename);
         if (!empty($ext[1])) {
             // If $filename contains extension, use filenam from extension array $ext
-            $uniqueFilename = $ext[1].'_'.$unique;
-            $uniqueFilename .= '_'.md5($uniqueFilename).'.'.$ext[0];
+            $found = true;
+            $order = 0;
+            while ($found) {
+                $uniqueFilename = $ext[1].'_'.$unique.'_'.$order.'.'.$ext[0];
+                if(!is_file($dir.$uniqueFilename)) {
+                    $found = false;
+                } else {
+                    $order++;
+                }
+            }
         } else {
             // If $filename doesn't contains extension, use $filename
-            $uniqueFilename = $filename.'_'.$unique;
-            $uniqueFilename .= '_'.md5($uniqueFilename);
+            $found = true;
+            $order = 0;
+            while ($found) {
+                $uniqueFilename = $filename.'_'.$unique.'_'.$order;
+                if(!is_file($dir.$uniqueFilename)) {
+                    $found = false;
+                } else {
+                    $order++;
+                }
+            }
         }
         return $uniqueFilename;
     }
