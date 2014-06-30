@@ -3555,22 +3555,29 @@ class DocumentManager
      * @return string
      */
     public static function getUniqueFilename($filename, $mode = 1) {
+        // Filename must have at least a letter
         if (strlen($filename) < 1) {
             return false;
         }
         require_once api_get_path(LIBRARY_PATH).'fileManage.lib.php';
+        // Get $unique by $mode
         switch ($mode) {
-            case 0:
+            case 0: //@TODO Add modes
             case 1:
             default:
-                $unique = api_get_session_id();
+                $unique = 'session-'.api_get_session_id();
                 break;
         }
+        // Get extension array (only filename and file extension)
         $ext = getextension($filename);
         if (!empty($ext[1])) {
-            $uniqueFilename = $ext[1].'_'.$unique.'.'.$ext[0];
+            // If $filename contains extension, use filenam from extension array $ext
+            $uniqueFilename = $ext[1].'_'.$unique;
+            $uniqueFilename .= '_'.md5($uniqueFilename).'.'.$ext[0];
         } else {
+            // If $filename doesn't contains extension, use $filename
             $uniqueFilename = $filename.'_'.$unique;
+            $uniqueFilename .= '_'.md5($uniqueFilename);
         }
         return $uniqueFilename;
     }
