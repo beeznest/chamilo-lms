@@ -584,7 +584,7 @@ class MySpace {
          * The column order is important. Check $column variable in the main/inc/ajax/model.ajax.php file
          */
         $objExercise = new Exercise();
-        $exercises = $objExercise->getExercisesByCouseSession($courseId, $sessionId);
+        $exercises = $objExercise->getExercisesByCourseSession($courseId, $sessionId);
 
         $cntExer = 4;
         if (!empty($exercises)) {
