@@ -4017,6 +4017,8 @@ class Exercise {
     public function getExercisesByCourseSession($courseId, $sessionId)
     {
         $tbl_quiz = Database::get_course_table(TABLE_QUIZ_TEST);
+        //Remark: cq.active in (0, 1) means non visible and visible
+        //cq.active = -1 means deleted
         $sql = "SELECT * FROM $tbl_quiz cq "
              . "WHERE "
              . "cq.c_id = %s AND "
