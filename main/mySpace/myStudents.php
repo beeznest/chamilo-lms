@@ -897,9 +897,10 @@ if (empty($_GET['details'])) {
 
 		$t_quiz = Database :: get_course_table(TABLE_QUIZ_TEST);
 		$sql_exercices = "SELECT quiz.title, id FROM " . $t_quiz . " AS quiz
-						  WHERE quiz.c_id =  ".$info_course['real_id']." AND
-								(quiz.session_id = $session_id OR quiz.session_id = 0)
-							ORDER BY quiz.title ASC ";
+		    WHERE quiz.c_id =  ".$info_course['real_id']."
+		    AND (quiz.session_id = $session_id OR quiz.session_id = 0)
+		    AND quiz.active >= 0
+		    ORDER BY quiz.title ASC ";
 
 		$result_exercices = Database::query($sql_exercices);
 		$i = 0;
