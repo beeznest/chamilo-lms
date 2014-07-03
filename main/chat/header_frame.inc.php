@@ -17,7 +17,7 @@ if (!defined('FRAME')) {
 $bodyXtra = ' class="course_chat" dir="'.api_get_text_direction().'" ';
 
 if (FRAME == 'hidden') {
-	$bodyXtra .= 'onload="javascript: updateChat(); updateConnected(); setTimeout(\'submitHiddenForm();\', 5000);"';
+	$bodyXtra .= 'onload="javascript: updateChat(); updateConnected(); setTimeout(\'submitHiddenForm();\', 3000);"';
     // Change timeout to change refresh time of the chat window
 } elseif (FRAME == 'message') {
 	$bodyXtra .= 'onload="javascript: eventMessage();"';
