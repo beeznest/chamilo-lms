@@ -764,6 +764,7 @@ switch ($action) {
                 'limit'=> "$start , $limit"
             )
         );
+
         break;
     case 'get_session_lp_progress':
         $sessionId = 0;
@@ -1162,8 +1163,10 @@ switch ($action) {
         }
         break;
     case 'get_exercise_grade':
+        $sessionId = intval($_GET['session_id']);
+        $courseId = intval($_GET['course_id']);
         $objExercise = new Exercise();
-        $exercises = $objExercise->getExercisesByCourseSession($_GET['course_id'], $_GET['session_id']);
+        $exercises = $objExercise->getExercisesByCourseSession($courseId, $sessionId);
         $cntExer = 4;
         if (!empty($exercises)) {
             $cntExer += count($exercises);
@@ -1211,7 +1214,7 @@ switch ($action) {
         }
 
         $course = api_get_course_info_by_id($_GET['course_id']);
-        $listUserSess = CourseManager::get_student_list_from_course_code($course['code'], true, $_GET['session_id']);
+        $listUserSess = CourseManager::get_student_list_from_course_code($course['code'], true, $sessionId);
 
         $usersId = array_keys($listUserSess);
 
@@ -1506,7 +1509,7 @@ if (in_array($action, $allowed_actions)) {
         }
         foreach ($result as $row) {
             foreach ($columns as $col) {
-                $array[$j][] = strip_tags($row[$col]);
+                $array[$j][] = strip_tags(stripHtmlComments($row[$col]));
             }
             $j++;
         }
@@ -1544,7 +1547,7 @@ if (in_array($action, $allowed_actions)) {
             }
             $array = array();
             foreach ($columns as $col) {
-                $array[] = isset($row[$col]) ? $row[$col] : null;
+                $array[] = isset($row[$col]) ? stripHtmlComments($row[$col]) : null;
             }
             $response->rows[$i]['cell']=$array;
             $i++;
