@@ -1894,9 +1894,9 @@ function get_work_user_list_from_documents(
  */
 function get_work_user_list($start, $limit, $column, $direction, $work_id, $where_condition, $studentId = null, $getCount = false)
 {
-    $work_table         = Database::get_course_table(TABLE_STUDENT_PUBLICATION);
-    $iprop_table        = Database::get_course_table(TABLE_ITEM_PROPERTY);
-    $user_table         = Database::get_main_table(TABLE_MAIN_USER);
+    $work_table = Database::get_course_table(TABLE_STUDENT_PUBLICATION);
+    $iprop_table = Database::get_course_table(TABLE_ITEM_PROPERTY);
+    $user_table = Database::get_main_table(TABLE_MAIN_USER);
 
     $session_id     = api_get_session_id();
     $course_id      = api_get_course_int_id();
@@ -2031,7 +2031,7 @@ function get_work_user_list($start, $limit, $column, $direction, $work_id, $wher
                 $work['lastname'] = Display::div($work['lastname'], array('class' => $class));
 
                 if (strlen($work['title']) > 30) {
-                    $short_title = substr($work['title'], 0, 27).'...';
+                    $short_title = mb_substr($work['title'], 0, 27, 'utf-8') . '...';
                     $work['title'] = Display::span($short_title, array('class' => $class, 'title' => $work['title']));
                 } else {
                     $work['title'] = Display::div($work['title'], array('class' => $class));
