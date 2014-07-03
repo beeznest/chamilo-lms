@@ -2761,8 +2761,9 @@ class SessionManager
 
                 // Then update or insert.
                 if (Database::num_rows($rs_check) > 0) {
+                    // Status = 2 for session course coach
                     $sql = "UPDATE $tbl_session_rel_course_rel_user SET status = 2
-					        WHERE id_session = '$session_id' AND course_code = '$course_code' AND id_user = '$user_id' ";
+                        WHERE id_session = '$session_id' AND course_code = '$course_code' AND id_user = '$user_id' ";
                     Database::query($sql);
                     if (Database::affected_rows() > 0) {
                         return true;
