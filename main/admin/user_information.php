@@ -152,7 +152,7 @@ if (count($sessions) > 0) {
                     '<a href="'.api_get_path(WEB_COURSE_PATH).$course_info['path'].'?id_session='.$id_session.'">'.
                       Display::return_icon('course_home.gif', get_lang('CourseHomepage')).'</a>';
 
-            if ($my_course['status'] == STUDENT) {
+            if ($my_course['status'] == STUDENT OR (api_is_platform_admin())) {
                 $tools .= '<a href="user_information.php?action=unsubscribe&course_code='.$course_info['code'].'&user_id='.$user['user_id'].'&sid='.$id_session.'">'.
                       Display::return_icon('delete.png', get_lang('Delete')).'</a>';
             }

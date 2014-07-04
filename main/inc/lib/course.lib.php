@@ -371,6 +371,10 @@ class CourseManager
                     $sql = "DELETE FROM ".Database::get_main_table(TABLE_MAIN_SESSION_USER)."
                             WHERE id_session ='".$session_id."' AND id_user='$uid' AND relation_type<>".SESSION_RELATION_TYPE_RRHH."";
                     Database::query($sql);
+                    // Also delete the user from the session details if he is a general session coach
+                    $sql = "UPDATE ".Database::get_main_table(TABLE_MAIN_SESSION)."
+                            SET id_coach = 0 WHERE id_coach = $uid AND id = $session_id ";
+                    Database::query($sql);
                 }
             }
 
