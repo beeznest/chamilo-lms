@@ -271,7 +271,7 @@ if (!empty($view) && empty($session_id)) {
     $nb_inactive_students 		= 0;
     $nb_posts = $nb_assignments = 0;
 
-    if (!empty($students) && strcmp($view, 'teacher') == 0) {
+    if (!empty($students) && strcmp($view, 'teacher') === 0) {
         foreach ($students as $student_id) {
             // inactive students
             $last_connection_date = Tracking::get_last_connection_date($student_id, true, true);
