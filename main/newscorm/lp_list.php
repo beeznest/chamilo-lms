@@ -144,7 +144,7 @@ if (!empty($flat_list)) {
         echo '<th>'.get_lang('Unit').'</th>';
         echo '<th width="50%">'.get_lang('Title').'</th>';
         echo '<th>'.get_lang('Progress')."</th>";
-        echo '<th>'.get_lang('Actions')."</th>";
+        //echo '<th>'.get_lang('Actions')."</th>";
     }
     echo '</tr>';
 
@@ -260,8 +260,10 @@ if (!empty($flat_list)) {
             $dsp_progress = '<td>'.learnpath::get_progress_bar('%', learnpath::get_db_progress($id, api_get_user_id(), '%', '', false, api_get_session_id())).'</td>';
         }
 
+        /*
         $dsp_edit = '<td class="td_actions">';
         $dsp_edit_close = '</td>';
+        */
 
         $token_parameter = "&sec_token=$token";
 
@@ -406,8 +408,10 @@ if (!empty($flat_list)) {
 
             //if (api_get_setting('pdf_export_watermark_enable') == 'true') {
             //Export to PDF
+            /*
             $export_icon = ' <a href="'.api_get_self().'?'.api_get_cidreq().'&action=export_to_pdf&lp_id='.$id.'">
 				  '.Display::return_icon('pdf.png', get_lang('ExportToPDFOnlyHTMLAndImages'), '', ICON_SIZE_SMALL).'</a>';
+            */
             //}
 
             /* DELETE COMMAND */
@@ -450,7 +454,8 @@ if (!empty($flat_list)) {
             }
         } else { // end if ($is_allowedToEdit)
             //Student
-            $export_icon = ' <a href="'.api_get_self().'?'.api_get_cidreq().'&action=export_to_pdf&lp_id='.$id.'">'.Display::return_icon('pdf.png', get_lang('ExportToPDF'), '', ICON_SIZE_SMALL).'</a>';
+            //$export_icon = ' <a href="'.api_get_self().'?'.api_get_cidreq().'&action=export_to_pdf&lp_id='.$id.'">'.Display::return_icon('pdf.png', get_lang('ExportToPDF'), '', ICON_SIZE_SMALL).'</a>';
+            $export_icon = '';
         }
 
         echo $dsp_line.$start_time.$end_time.$dsp_progress.$dsp_desc.$dsp_export.$dsp_edit.$dsp_build.$dsp_edit_lp.$dsp_visible.$dsp_publish.$dsp_reinit.
