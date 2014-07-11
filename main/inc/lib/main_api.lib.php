@@ -6991,3 +6991,19 @@ function api_protect_course_admin_manager($courseCode)
         api_not_allowed(true);
     }
 }
+
+/**
+ * @param $html
+ * @return mixed|string
+ */
+function stripHtmlComments($html){
+    $html = str_replace(array("\r\n<!--", "\n<!--"), "<!--", $html);
+    while (($pos = strpos($html, "<!--")) !== false) {
+        if (($_pos = strpos($html, "-->", $pos)) === false) {
+            $html = substr($html, 0, $pos);
+        } else {
+            $html = substr($html, 0, $pos).substr($html, $_pos+3);
+        }
+    }
+    return $html;
+}

@@ -350,7 +350,7 @@ class CourseManager
                 WHERE c_id = $course_id AND user_id IN (".$user_ids.")";
         Database::query($sql);
 
-        // Unsubscribe user from the course.
+        // Unsubscribe user from the course inside the session.
         if (!empty($session_id)) {
 
             // Delete in table session_rel_course_rel_user
@@ -371,6 +371,10 @@ class CourseManager
                     $sql = "DELETE FROM ".Database::get_main_table(TABLE_MAIN_SESSION_USER)."
                             WHERE id_session ='".$session_id."' AND id_user='$uid' AND relation_type<>".SESSION_RELATION_TYPE_RRHH."";
                     Database::query($sql);
+                    // Also delete the user from the session details if he is a general session coach
+                    $sql = "UPDATE ".Database::get_main_table(TABLE_MAIN_SESSION)."
+                            SET id_coach = 0 WHERE id_coach = $uid AND id = $session_id ";
+                    Database::query($sql);
                 }
             }
 
@@ -384,7 +388,7 @@ class CourseManager
                     WHERE id = '".$session_id."'";
             Database::query($sql);
 
-            // Update the table session_rel_course
+            // Update the table session_rel_course (status == 2 for session course coach)
             $sql = "SELECT COUNT(*) FROM ".Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER)."
                     WHERE id_session = '$session_id' AND course_code = '$course_code' AND status<>2";
             $row = Database::fetch_array(@Database::query($sql));

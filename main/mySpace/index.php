@@ -271,7 +271,7 @@ if (!empty($view) && empty($session_id)) {
     $nb_inactive_students 		= 0;
     $nb_posts = $nb_assignments = 0;
 
-    if (!empty($students)) {
+    if (!empty($students) && strcmp($view, 'teacher') === 0) {
         foreach ($students as $student_id) {
             // inactive students
             $last_connection_date = Tracking::get_last_connection_date($student_id, true, true);
@@ -319,7 +319,7 @@ if (!empty($view) && empty($session_id)) {
         }
     }
 
-    if (!empty($view) && $nb_students > 0 && $view != 'admin') {
+    if ($nb_students > 0 && $view != 'admin') {
 
         // average progress
         $avg_total_progress = $avg_total_progress / $nb_students;
@@ -1040,17 +1040,17 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             fclose($file_handle);
             echo get_lang('Downloading');
             MySpace::export_csv(
-                    array(
-                'Name',
-                'Sección',
-                'tutor',
-                'carga de archivos',
-                'publicación de enlaces',
-                'foros',
-                'tareas',
-                'wikis',
-                'anuncios',
-                    ), $data
+                array(
+                    'Name',
+                    'Sección',
+                    'tutor',
+                    'carga de archivos',
+                    'publicación de enlaces',
+                    'foros',
+                    'tareas',
+                    'wikis',
+                    'anuncios',
+                ), $data
             );
             break;
         case 'sessionoverview':
@@ -1169,8 +1169,14 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                     $is_western_name_order = api_is_western_name_order();
                 }
                 $sort_by_first_name = api_sort_by_first_name();
-                $tracking_column = isset($_GET['tracking_list_coaches_column']) ? $_GET['tracking_list_coaches_column'] : ($is_western_name_order xor $sort_by_first_name) ? 1 : 0;
-                $tracking_direction = (isset($_GET['tracking_list_coaches_direction']) && in_array(strtoupper($_GET['tracking_list_coaches_direction']), array('ASC', 'DESC', 'ASCENDING', 'DESCENDING', '0', '1'))) ? $_GET['tracking_list_coaches_direction'] : 'DESC';
+                $tracking_column = isset($_GET['tracking_list_coaches_myspace_column']) ?
+                    $_GET['tracking_list_coaches_myspace_column'] : ($is_western_name_order xor $sort_by_first_name) ? 1 : 0;
+                $tracking_page_nr = isset($_GET['tracking_list_coaches_myspace_page_nr']) ? intval($_GET['tracking_list_coaches_myspace_page_nr']) : 1;
+                $tracking_direction = (isset($_GET['tracking_list_coaches_myspace_direction'])
+                    && in_array(strtoupper($_GET['tracking_list_coaches_myspace_direction']), array('ASC', 'DESC', 'ASCENDING', 'DESCENDING', '0', '1'))) ?
+                    $_GET['tracking_list_coaches_myspace_direction'] : 'ASC';
+                $tracking_per_page = isset($_GET['tracking_list_coaches_myspace_per_page']) ? intval($_GET['tracking_list_coaches_myspace_per_page']) : 20;
+
                 // Prepare array for column order - when impossible, use some of user names.
                 if ($is_western_name_order) {
                     $order = array(0 => 'firstname', 1 => 'lastname', 2 => ($sort_by_first_name ? 'firstname' : 'lastname'), 3 => 'login_date', 4 => ($sort_by_first_name ? 'firstname' : 'lastname'), 5 => ($sort_by_first_name ? 'firstname' : 'lastname'));
@@ -1179,6 +1185,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 }
                 $table = new SortableTable('tracking_list_coaches_myspace', 'count_coaches', null, ($is_western_name_order xor $sort_by_first_name) ? 1 : 0);
                 $parameters['view'] = 'admin';
+                $parameters['display'] = 'coaches';
                 $table->set_additional_parameters($parameters);
                 if ($is_western_name_order) {
                     $table->set_header(0, get_lang('FirstName'), true);
@@ -1218,7 +1225,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
 
                 $tbl_track_login = Database :: get_statistic_table(TABLE_STATISTIC_TRACK_E_LOGIN);
 
-                $sqlCoachs = "SELECT DISTINCT scu.id_user as id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
+                $sqlCoachsTotal = "SELECT DISTINCT scu.id_user as id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
 			FROM $tbl_user, $tbl_session_course_user scu, $tbl_track_login
 			WHERE scu.id_user=user_id AND scu.status=2  AND login_user_id=user_id
 			GROUP BY user_id ";
@@ -1227,18 +1234,27 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                     $tbl_session_rel_access_url = Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_SESSION);
                     $access_url_id = api_get_current_access_url_id();
                     if ($access_url_id != -1) {
-                        $sqlCoachs = "SELECT DISTINCT scu.id_user as id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
+                        $sqlCoachsTotal = "SELECT DISTINCT scu.id_user as id_coach, user_id, lastname, firstname, MAX(login_date) as login_date
 					FROM $tbl_user, $tbl_session_course_user scu, $tbl_track_login , $tbl_session_rel_access_url session_rel_url
 					WHERE scu.id_user=user_id AND scu.status=2 AND login_user_id=user_id AND access_url_id = $access_url_id AND session_rel_url.session_id=id_session
 					GROUP BY user_id ";
                     }
                 }
-                if (!empty($order[$tracking_column])) {
-                    $sqlCoachs .= "ORDER BY " . $order[$tracking_column] . " " . $tracking_direction;
-                }
+                $result_coaches_total = Database::query($sqlCoachsTotal);
+                $total_no_coaches = Database::num_rows($result_coaches_total);
 
+                $tracking_page_nr = min($total_no_coaches/$tracking_per_page, $tracking_page_nr);
+
+                if (!empty($order[$tracking_column])) {
+                    $sqlCoachs = $sqlCoachsTotal . "ORDER BY " . $order[$tracking_column] . " " . $tracking_direction;
+                } else {
+                    $sqlCoachs = $sqlCoachsTotal;
+                }
+                $limit_start = max(0, ($tracking_page_nr - 1) * $tracking_per_page);
+                $limit_quantity = $tracking_per_page;
+                $limit_filter = " LIMIT $limit_start, $limit_quantity";
+                $sqlCoachs .= $limit_filter;
                 $result_coaches = Database::query($sqlCoachs);
-                $total_no_coaches = Database::num_rows($result_coaches);
                 $global_coaches = array();
                 while ($coach = Database::fetch_array($result_coaches)) {
                     $global_coaches[$coach['user_id']] = $coach;
@@ -1263,15 +1279,17 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 }
 
                 $result_sessions_coach = Database::query($sql_session_coach);
-                $total_no_coaches += Database::num_rows($result_sessions_coach);
                 while ($coach = Database::fetch_array($result_sessions_coach)) {
-                    $global_coaches[$coach['user_id']] = $coach;
+                    if (!isset($global_coaches[$coaches['user_id']])) {
+                        // nothing to do
+                    } else {
+                        $total_no_coaches++;
+                        $global_coaches[$coach['user_id']] = $coach;
+                    }
                 }
 
                 $all_datas = array();
-
                 foreach ($global_coaches as $id_coach => $coaches) {
-
                     $time_on_platform = api_time_to_hms(Tracking :: get_time_spent_on_the_platform($coaches['user_id']));
                     $last_connection = Tracking :: get_last_connection_date($coaches['user_id']);
                     $nb_students = count(Tracking :: get_student_followed_by_coach($coaches['user_id']));
