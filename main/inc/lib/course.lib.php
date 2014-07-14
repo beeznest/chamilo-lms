@@ -146,11 +146,11 @@ class CourseManager
      * @param int $howmany Number of results we want. Optional.
      * @param int $orderby The column we want to order it by. Optional, defaults to first column.
      * @param string $orderdirection The direction of the order (ASC or DESC). Optional, defaults to ASC.
-     * @param $visibility The visibility of the course, or all by default.
+     * @param int $visibility The visibility of the course, or all by default.
      * @param string $startwith If defined, only return results for which the course *title* begins with this string
-     * @param null $urlId The Access URL ID, if using multiple URLs
+     * @param int $urlId The Access URL ID, if using multiple URLs
      * @param bool $alsoSearchCode An extension option to indicate that we also want to search for course codes (not *only* titles)
-     * @param string $categoryCodeStarsWith Filter also by category code
+     * @param string $categoryCodeStartsWith Filter also by category code
      *
      * @return array
      */
@@ -163,7 +163,7 @@ class CourseManager
         $startwith = '',
         $urlId = null,
         $alsoSearchCode = false,
-        $categoryCodeStarsWith = ''
+        $categoryCodeStartsWith = ''
     ) {
 
         $sql = "SELECT course.*, course.id as real_id
@@ -190,8 +190,8 @@ class CourseManager
             }
         }
 
-        if (!empty($categoryCodeStarsWith)) {
-            $sql .= " AND category_code like '" . Database::escape_string($categoryCodeStarsWith) . "%'";
+        if (!empty($categoryCodeStartsWith)) {
+            $sql .= " AND category_code like '" . Database::escape_string($categoryCodeStartsWith) . "%'";
         }
 
         if (!empty($urlId)) {
