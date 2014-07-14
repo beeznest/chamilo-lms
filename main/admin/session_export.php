@@ -237,7 +237,7 @@ if ($_POST['formSent']) {
 		$errorMsg=get_lang('UserListHasBeenExported').'<br/><a class="btn" href="'.$archiveURL.$archiveFile.'">'.get_lang('ClickHereToDownloadTheFile').'</a>';
 	} else {
         // query sql id_coach = 0
-        Display::display_normal_message(get_lang('CoachIsRequired'), false);
+        Display::display_error_message(get_lang('CoachIsRequired'));
     }
 }
 
