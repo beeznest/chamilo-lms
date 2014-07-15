@@ -409,9 +409,8 @@ function handle_uploaded_document(
 	}
 }
 
-
-
 /**
+ * Return new to unique filename
  * @param string $path of directory in location images
  * @param string $file name include extension
  * @return string with name unique to exist for this directory
@@ -420,8 +419,9 @@ function handle_uploaded_document(
 function uniqueFileinDir($path, $file)
 {
     $fileDefault = FALSE;
-    if(!empty($path) && !empty($file)) {
-        $ext = pathinfo($file, PATHINFO_EXTENSION);
+    $path = (substr($path, -1, 1) != '/') ? $path . '/' : $path;
+    if (!empty($path) && !empty($file)) {
+        $ext = pathinfo($path.$file, PATHINFO_EXTENSION);
         $fileLessExt = str_replace(".$ext", '', $file);
 
         $nb = '';
