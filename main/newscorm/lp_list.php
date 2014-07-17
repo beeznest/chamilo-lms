@@ -260,10 +260,10 @@ if (!empty($flat_list)) {
             $dsp_progress = '<td>'.learnpath::get_progress_bar('%', learnpath::get_db_progress($id, api_get_user_id(), '%', '', false, api_get_session_id())).'</td>';
         }
 
-        /*
-        $dsp_edit = '<td class="td_actions">';
-        $dsp_edit_close = '</td>';
-        */
+        if (!api_is_student()) {
+            $dsp_edit = '<td class="td_actions">';
+            $dsp_edit_close = '</td>';
+        }
 
         $token_parameter = "&sec_token=$token";
 
