@@ -361,6 +361,16 @@ function handle_uploaded_document(
 
 				// Only save the file if it doesn't exist or warn user if it does exist
 				default:
+
+                    // init change name automatic
+                    $pathDirectory = str_replace($file_path, '/', $store_path);
+                    $fileDirectory = str_replace($pathDirectory,'',$store_path);
+                    $fileFlag = uniqueFileinDir($pathDirectory, $fileDirectory);
+                    // setting
+                    $file_path = str_replace($fileDirectory, $fileFlag, $file_path);
+                    $store_path = str_replace($fileDirectory, $fileFlag,$store_path);
+                    // end change name automatic
+
 					if (file_exists($store_path)) {
 					    if ($output) {
 						  Display::display_error_message($clean_name.' '.get_lang('UplAlreadyExists'));
@@ -399,6 +409,31 @@ function handle_uploaded_document(
 	}
 }
 
+/**
+ * Return new to unique filename
+ * @param string $path of directory in location images
+ * @param string $file name include extension
+ * @return string with name unique to exist for this directory
+ * example: apple.jpg or apple_1.jpg or apple_2.jpg
+ */
+function uniqueFileinDir($path, $file)
+{
+    $fileDefault = FALSE;
+    $path = (substr($path, -1, 1) != '/') ? $path . '/' : $path;
+    if (!empty($path) && !empty($file)) {
+        $ext = pathinfo($path.$file, PATHINFO_EXTENSION);
+        $fileLessExt = str_replace(".$ext", '', $file);
+
+        $nb = '';
+        $nbCount = 0;
+        while (file_exists($path.$fileLessExt.$nb.".$ext")) {
+            $nbCount += 1;
+            $nb = "_$nbCount";
+        }
+        $fileDefault = $fileLessExt.$nb.".$ext";
+    }
+    return $fileDefault;
+}
 /**
  * Checks if there is enough place to add a file on a directory
  * on the base of a maximum directory size allowed
