@@ -42,8 +42,9 @@ function show_image(image,width,height) {
 </script>';
 
 $export_csv = isset ($_GET['export']) && $_GET['export'] == 'csv' ? true : false;
+$exportXls = isset ($_GET['export']) && $_GET['export'] == 'xls' ? true : false;
 
-if ($export_csv) {
+if ($export_csv || $exportXls) {
 	ob_start();
 }
 $csv_content = array();
@@ -334,7 +335,8 @@ if (!empty($student_id)) {
 
 	echo '<a href="javascript: void(0);" onclick="javascript: window.print();">'.Display::return_icon('printer.png', get_lang('Print'),'',ICON_SIZE_MEDIUM).'</a>';
 	echo '<a href="' . api_get_self() . '?' . Security :: remove_XSS($_SERVER['QUERY_STRING']) . '&export=csv">'.Display::return_icon('export_csv.png', get_lang('ExportAsCSV'),'',ICON_SIZE_MEDIUM).'</a> ';
-	if (!empty ($user_info['email'])) {
+    echo '<a href="' . api_get_self() . '?' . Security :: remove_XSS($_SERVER['QUERY_STRING']) . '&export=xls">'.Display::return_icon('export_excel.png', get_lang('ExportAsXLS'),'',ICON_SIZE_MEDIUM).'</a> ';
+    if (!empty ($user_info['email'])) {
 		$send_mail = '<a href="mailto:'.$user_info['email'].'">'.Display :: return_icon('mail_send.png', get_lang('SendMail'),'',ICON_SIZE_MEDIUM).'</a>';
 	} else {
 		$send_mail = Display :: return_icon('mail_send_na.png', get_lang('SendMail'),'',ICON_SIZE_MEDIUM);
@@ -1101,9 +1103,13 @@ if (empty($_GET['details'])) {
 <?php
 	} //end details
 }
-if ($export_csv) {
+if ($export_csv || $exportXls) {
 	ob_end_clean();
-	Export::export_table_csv_utf8($csv_content, 'reporting_student');
+    if ($export_csv) {
+	    Export::export_table_csv_utf8($csv_content, 'reporting_student');
+    } else {
+        Export::export_table_xls($csv_content, 'reporting_student', 'iso-8859-1');
+    }
 	exit;
 }
 /*		FOOTER  */
