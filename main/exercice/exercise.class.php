@@ -4023,7 +4023,7 @@ class Exercise {
              . "WHERE "
              . "cq.c_id = %s AND "
              . "( cq.session_id = %s OR cq.session_id = 0 ) AND "
-             . "cq.active in (0, 1)"
+             . "cq.active in (0, 1) "
              . "ORDER BY cq.id";
         $sql = sprintf($sql, $courseId, $sessionId);
 
@@ -4066,6 +4066,7 @@ class Exercise {
               . "c.id = %s AND "
               . "te.session_id = %s AND "
               . "cq.id IN (%s) "
+              . "status = '' "
               . "ORDER BY cq.id ";
 
             $sql = sprintf($sql, $courseId, $sessionId, $ids);
@@ -4076,7 +4077,8 @@ class Exercise {
               . "INNER JOIN course c ON te.exe_cours_id = c.code AND c.id = cq.c_id "
               . "WHERE "
               . "c.id = %s AND "
-              . "cq.id IN (%s) "
+              . "cq.id IN (%s) AND "
+              . "status = '' "
               . "ORDER BY cq.id ";
             $sql = sprintf($sql, $courseId, $ids);
         }
