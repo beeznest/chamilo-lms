@@ -129,7 +129,6 @@ $sql = "SELECT
             INNER JOIN $tableExercise c_quiz
             ON c_quiz.id = exe_exo_id  AND c_quiz.c_id = course.id
         WHERE
-          track_e_exercices.session_id != 0 AND
           track_e_exercices.status = '' AND
           c_quiz.max_attempt = 1
         GROUP BY exe_user_id, c_quiz.id, track_e_exercices.session_id, exe_cours_id
