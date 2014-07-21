@@ -1223,7 +1223,12 @@ switch ($action) {
 
         $arrGrade = array();
         foreach ($exeResults as $exeResult) {
-            $arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']] = $exeResult['exe_result'];
+            if (!empty($arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']]) || $arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']] === 0) {
+                continue;
+            } else {
+                $arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']] = $exeResult['exe_result'];
+            }
+
         }
 
         $result = array();
