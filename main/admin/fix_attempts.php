@@ -160,9 +160,10 @@ if (Database::num_rows($result)) {
         $lpItemId = $attempt['orig_lp_item_id'];
 
         $url = $www . "exercice/exercise_report.php?cidReq=$courseCode&exerciseId=$exerciseId&id_session=$sessionId";
-        echo "Search and select one attempt for user '$user' here: <br /> " . Display::url($url, $url).'<br /><br />';
+        echo "Search the correct attempt for user '$user' here: <br /> " . Display::url($url, $url).'<br /><br />';
 
-        $userResults = get_all_exercise_results_by_user(
+        $userResults = get_all_exercise_results_by_user_by_exercise(
+            $exerciseId,
             $userId,
             $courseCode,
             $sessionId,
@@ -175,7 +176,49 @@ if (Database::num_rows($result)) {
         $bestAttempt = 0;
         $maxScore = 0;
         $scores = array();
+
         foreach ($userResults as $userResult) {
+            $exeId = $userResult['exe_id'];
+            $score = $userResult['exe_result'];
+            $counter++;
+
+            // Skipping first.
+            if ($counter == 1) {
+                echo "*Keeping only attempt: $exeId with score: $score *<br />";
+                // Updating LP just in case.
+                if (!empty($origLpItemViewId)) {
+                    echo 'Ready to update lp_item_view with new score: ' . $score . '<br />';
+                    $sql = "UPDATE $tableLpItemView
+                        SET score = '$score'
+                        WHERE
+                          id = $origLpItemViewId AND
+                          c_id = $courseId AND
+                          lp_item_id = $origLpItemId";
+                    echo $sql;
+                    echo '<br />';
+                    if ($execute) {
+                        Database::query($sql);
+                    }
+                }
+                continue;
+            } else {
+                echo "Removing attempt #$exeId after the first with score: $score<br />";
+                // Removing everything else.
+                $sql1 = 'DELETE FROM ' . $table . ' WHERE exe_id = ' . $exeId;
+                $sql2 = 'DELETE FROM ' . $tableRecording . ' WHERE exe_id = ' . $exeId;
+                $sql3 = 'DELETE FROM ' . $tableAttempts . ' WHERE exe_id = ' . $exeId;
+                var_dump($sql1, $sql2, $sql3);
+
+                if ($execute) {
+                    Database::query($sql1);
+                    Database::query($sql2);
+                    Database::query($sql3);
+                }
+            }
+        }
+
+
+        /*foreach ($userResults as $userResult) {
             $exeId = $userResult['exe_id'];
             $score = $userResult['exe_result'];
 
@@ -224,7 +267,8 @@ if (Database::num_rows($result)) {
                     Database::query($sql);
                 }
             }
-        }
+        }*/
+
 
     }
 }
