@@ -16,10 +16,10 @@ if (empty($courseCode)) {
 }*/
 
 $table = Database::get_main_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
+$tableAttempts = Database::get_main_table(TABLE_STATISTIC_TRACK_E_ATTEMPT);
 $tableRecording = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_ATTEMPT_RECORDING);
 $tableUser= Database::get_main_table(TABLE_MAIN_USER);
 $tableCourse = Database::get_main_table(TABLE_MAIN_COURSE);
-
 $tableQuiz = Database::get_course_table(TABLE_QUIZ_TEST);
 $tableLpItemView = Database::get_course_table(TABLE_LP_ITEM_VIEW);
 
@@ -61,6 +61,7 @@ if (Database::num_rows($result)) {
 
         // The attempt was not review by the teacher, you can modify the total
         if ($recordings == 0) {
+
             $questionAttempts = get_all_exercise_event_by_exe_id(
                 $attempt['exe_id']
             );
@@ -120,7 +121,10 @@ $sql = "SELECT
             user.lastname,
             exe_exo_id,
             track_e_exercices.session_id,
-            exe_cours_id
+            exe_cours_id,
+            orig_lp_id,
+            orig_lp_item_id,
+            orig_lp_item_view_id
         FROM $table track_e_exercices
             INNER JOIN $tableUser user
             ON user.user_id = exe_user_id AND user.status = 5
@@ -137,7 +141,7 @@ $sql = "SELECT
 
 $result = Database::query($sql);
 if (Database::num_rows($result)) {
-    echo "<h2>Double students attempts in exercises with only 1 attempt setting.</h2><br />";
+    echo "<br /><h2>Double students attempts in exercises with only 1 attempt setting.</h2><br />";
     var_dump($sql);
     while ($attempt = Database::fetch_array($result, 'ASSOC')) {
 
@@ -147,14 +151,80 @@ if (Database::num_rows($result)) {
         $sessionId = $attempt['session_id'];
         $user = $attempt["firstname"].' '.$attempt['lastname'];
 
+        $courseInfo = api_get_course_info($courseCode);
+        $courseId = $courseInfo['real_id'];
+
+        $origLpId = $attempt['orig_lp_id'];
+        $origLpItemId = $attempt['orig_lp_item_id'];
+        $origLpItemViewId = $attempt['orig_lp_item_view_id'];
+        $lpItemId = $attempt['orig_lp_item_id'];
+
         $url = $www . "exercice/exercise_report.php?cidReq=$courseCode&exerciseId=$exerciseId&id_session=$sessionId";
         echo "Search and select one attempt for user '$user' here: <br /> " . Display::url($url, $url).'<br /><br />';
 
-        /*
-        $userResults = get_all_exercise_results_by_user($userId, $courseCode, $sessionId);
-        var_dump($userResults);
-        foreach ($userResults as $result) {
-            var_dump($result);
-        }*/
+        $userResults = get_all_exercise_results_by_user(
+            $userId,
+            $courseCode,
+            $sessionId,
+            $origLpId,
+            $origLpItemId,
+            $origLpItemViewId
+        );
+
+        $counter = 0;
+        $bestAttempt = 0;
+        $maxScore = 0;
+        $scores = array();
+        foreach ($userResults as $userResult) {
+            $exeId = $userResult['exe_id'];
+            $score = $userResult['exe_result'];
+
+            $scores[$exeId] = $score;
+
+            if ($score > $maxScore) {
+                $maxScore = $score;
+                $bestAttempt = $exeId;
+            }
+        }
+
+        if (!empty($bestAttempt)) {
+
+            echo "Best attempt of #$bestAttempt with score $maxScore. Other attempts will be removed.<br />";
+            echo "All options: <pre>" . print_r($scores, 1) . '</pre><br />';
+
+            foreach ($userResults as $userResult) {
+                $exeId = $userResult['exe_id'];
+                if ($exeId != $bestAttempt) {
+
+                    $sql1 = 'DELETE FROM ' . $table . ' WHERE exe_id = ' . $exeId;
+                    $sql2 = 'DELETE FROM ' . $tableRecording . ' WHERE exe_id = ' . $exeId;
+                    $sql3 = 'DELETE FROM ' . $tableAttempts . ' WHERE exe_id = ' . $exeId;
+                    var_dump($sql1, $sql2, $sql3);
+
+                    if ($execute) {
+                        Database::query($sql1);
+                        Database::query($sql2);
+                        Database::query($sql3);
+                    }
+                }
+            }
+
+            // Updating lp_item_view
+            if (!empty($origLpItemViewId)) {
+                echo 'Ready to update lp_item_view with new score: ' . $maxScore . '<br />';
+                $sql = "UPDATE $tableLpItemView
+                        SET score = '$maxScore'
+                        WHERE
+                          id = $origLpItemViewId AND
+                          c_id = $courseId AND
+                          lp_item_id = $origLpItemId";
+                echo $sql;
+                echo '<br />';
+                if ($execute) {
+                    Database::query($sql);
+                }
+            }
+        }
+
     }
 }
