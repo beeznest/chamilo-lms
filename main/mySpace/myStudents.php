@@ -723,7 +723,7 @@ if (empty($_GET['details'])) {
 	}
 } else {
 	$csv_content[] = array ();
-    $csv_content[] = array (str_replace('&nbsp;', '', $table_title));
+    $csv_content[] = array (str_replace('&nbsp;', '', strip_tags($table_title)));
 
     $t_lp = Database :: get_course_table(TABLE_LP_MAIN);
 
@@ -1103,7 +1103,7 @@ if (empty($_GET['details'])) {
 }
 if ($export_csv) {
 	ob_end_clean();
-	Export :: export_table_csv($csv_content, 'reporting_student');
+	Export::export_table_csv_utf8($csv_content, 'reporting_student');
 	exit;
 }
 /*		FOOTER  */

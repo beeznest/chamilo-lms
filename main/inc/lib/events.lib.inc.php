@@ -1036,28 +1036,99 @@ function get_all_exercise_results_by_course($course_code, $session_id = 0, $get_
 * @return  array   with the results
 *
 */
-function get_all_exercise_results_by_user($user_id,  $course_code, $session_id = 0)
-{
+function get_all_exercise_results_by_user(
+    $user_id,
+    $course_code,
+    $session_id = 0,
+    $orig_lp_id = 0,
+    $orig_lp_item_id = 0,
+    $orig_lp_item_view_id = 0
+) {
     $table_track_exercises = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
     $table_track_attempt   = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_ATTEMPT);
     $course_code = Database::escape_string($course_code);
-    $exercise_id = intval($exercise_id);
     $session_id = intval($session_id);
     $user_id    = intval($user_id);
 
-    $sql = "SELECT * FROM $table_track_exercises WHERE status = '' AND exe_user_id = $user_id AND exe_cours_id = '$course_code' AND session_id = $session_id AND orig_lp_id = 0 AND orig_lp_item_id = 0   ORDER by exe_id";
+    $orig_lp_id  = intval($orig_lp_id);
+    $orig_lp_item_id    = intval($orig_lp_item_id);
+    $orig_lp_item_view_id    = intval($orig_lp_item_view_id);
+
+    $sql = "SELECT * FROM $table_track_exercises
+            WHERE
+              status = '' AND
+              exe_user_id = $user_id AND
+              exe_cours_id = '$course_code' AND
+              session_id = $session_id AND
+              orig_lp_id = $orig_lp_id  AND
+              orig_lp_item_id = $orig_lp_item_id AND
+              orig_lp_item_view_id = $orig_lp_item_view_id
+            ORDER by exe_id";
 
     $res = Database::query($sql);
     $list = array();
-    while($row = Database::fetch_array($res,'ASSOC')) {
+    while ($row = Database::fetch_array($res,'ASSOC')) {
         $list[$row['exe_id']] = $row;
-    $sql = "SELECT * FROM $table_track_attempt WHERE exe_id = {$row['exe_id']}";
+        $sql = "SELECT * FROM $table_track_attempt WHERE exe_id = {$row['exe_id']}";
         $res_question = Database::query($sql);
-    while($row_q = Database::fetch_array($res_question,'ASSOC')) {
-    $list[$row['exe_id']]['question_list'][$row_q['question_id']] = $row_q;
+        while ($row_q = Database::fetch_array($res_question,'ASSOC')) {
+            $list[$row['exe_id']]['question_list'][$row_q['question_id']] = $row_q;
         }
     }
-    //echo '<pre>'; print_r($list);
+
+    return $list;
+}
+
+/**
+ * Gets all exercise results (NO Exercises in LPs) from a given exercise id, course, session
+ * @param   int     exercise id
+ * @param   string  course code
+ * @param   int     session id
+ * @return  array   with the results
+ *
+ */
+function get_all_exercise_results_by_user_by_exercise(
+    $exerciseId,
+    $user_id,
+    $course_code,
+    $session_id = 0,
+    $orig_lp_id = 0,
+    $orig_lp_item_id = 0,
+    $orig_lp_item_view_id = 0
+) {
+    $table_track_exercises = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
+    $table_track_attempt   = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_ATTEMPT);
+    $course_code = Database::escape_string($course_code);
+    $session_id = intval($session_id);
+    $user_id    = intval($user_id);
+    $exerciseId = intval($exerciseId);
+    $orig_lp_id  = intval($orig_lp_id);
+    $orig_lp_item_id    = intval($orig_lp_item_id);
+    $orig_lp_item_view_id    = intval($orig_lp_item_view_id);
+
+    $sql = "SELECT * FROM $table_track_exercises
+            WHERE
+              exe_exo_id = $exerciseId AND
+              status = '' AND
+              exe_user_id = $user_id AND
+              exe_cours_id = '$course_code' AND
+              session_id = $session_id AND
+              orig_lp_id = $orig_lp_id  AND
+              orig_lp_item_id = $orig_lp_item_id AND
+              orig_lp_item_view_id = $orig_lp_item_view_id
+            ORDER by exe_id";
+
+    $res = Database::query($sql);
+    $list = array();
+    while ($row = Database::fetch_array($res,'ASSOC')) {
+        $list[$row['exe_id']] = $row;
+        $sql = "SELECT * FROM $table_track_attempt WHERE exe_id = {$row['exe_id']}";
+        $res_question = Database::query($sql);
+        while ($row_q = Database::fetch_array($res_question,'ASSOC')) {
+            $list[$row['exe_id']]['question_list'][$row_q['question_id']] = $row_q;
+        }
+    }
+
     return $list;
 }
 
@@ -1205,11 +1276,13 @@ function get_best_exercise_results_by_user($exercise_id, $course_code, $session_
     $exercise_id           = intval($exercise_id);
     $session_id            = intval($session_id);
 
-    $sql = "SELECT * FROM $table_track_exercises WHERE status = ''  AND exe_cours_id = '$course_code' AND exe_exo_id = '$exercise_id' AND session_id = $session_id  AND orig_lp_id =0 AND orig_lp_item_id = 0 ORDER BY exe_id";
+    $sql = "SELECT * FROM $table_track_exercises
+            WHERE status = ''  AND exe_cours_id = '$course_code' AND exe_exo_id = '$exercise_id' AND session_id = $session_id  AND orig_lp_id =0 AND orig_lp_item_id = 0 ORDER BY exe_id";
 
     $res = Database::query($sql);
     $list = array();
-    while($row = Database::fetch_array($res,'ASSOC')) {
+
+    while ($row = Database::fetch_array($res,'ASSOC')) {
         $list[$row['exe_id']] = $row;
         $sql = "SELECT * FROM $table_track_attempt WHERE exe_id = {$row['exe_id']}";
         $res_question = Database::query($sql);
@@ -1217,13 +1290,13 @@ function get_best_exercise_results_by_user($exercise_id, $course_code, $session_
         	$list[$row['exe_id']]['question_list'][$row_q['question_id']] = $row_q;
         }
     }
+
     //Getting the best results of every student
     $best_score_return = array();
 
     foreach($list as $student_result) {
         $user_id = $student_result['exe_user_id'];
         $current_best_score[$user_id] = $student_result['exe_result'];
-        //echo $current_best_score[$user_id].' - '.$best_score_return[$user_id]['exe_result'].'<br />';
         if ($current_best_score[$user_id] > $best_score_return[$user_id]['exe_result']) {
             $best_score_return[$user_id] = $student_result;
         }
