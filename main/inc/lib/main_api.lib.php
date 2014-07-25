@@ -2421,14 +2421,14 @@ function api_is_course_session_coach($user_id, $course_code, $session_id) {
  */
 function api_is_coach($session_id = 0, $course_code = null) {
     // Do not exist coaches in session 0
-    if ($session_id == 0) {
+    /*if ($session_id == 0) {
         return false;
     }
 
     // If already set if is Coach
     if (isset($_SESSION['isCoach'.$session_id])) {
         return $_SESSION['isCoach'.$session_id];
-    }
+    }*/
 
     if (!empty($session_id)) {
         $session_id = intval($session_id);
@@ -2473,8 +2473,11 @@ function api_is_coach($session_id = 0, $course_code = null) {
 	    	$sessionIsCoach = Database::store_result($result);
 	    }
 	}
-    $_SESSION['isCoach'.$session_id] = count($sessionIsCoach) > 0;
-    return $_SESSION['isCoach'.$session_id];
+
+    return (count($sessionIsCoach) > 0);
+
+    /*$_SESSION['isCoach'.$session_id] = count($sessionIsCoach) > 0;
+    return $_SESSION['isCoach'.$session_id];*/
 }
 
 /**
