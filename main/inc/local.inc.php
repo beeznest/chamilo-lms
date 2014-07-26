@@ -659,7 +659,7 @@ if (!empty($cidReq) && (!isset($_SESSION['_cid']) or (isset($_SESSION['_cid']) &
 }
 
 /* USER INIT */
-
+$_userPermissions = array();
 if (isset($uidReset) && $uidReset) {    // session data refresh requested
     unset($_SESSION['_user']['uidReset']);
     $is_platformAdmin = false;

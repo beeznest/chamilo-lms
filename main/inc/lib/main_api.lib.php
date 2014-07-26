@@ -2420,20 +2420,16 @@ function api_is_course_session_coach($user_id, $course_code, $session_id) {
  * @return boolean True if current user is a course or session coach
  */
 function api_is_coach($session_id = 0, $course_code = null) {
-    // Do not exist coaches in session 0
-    /*if ($session_id == 0) {
-        return false;
-    }
-
-    // If already set if is Coach
-    if (isset($_SESSION['isCoach'.$session_id])) {
-        return $_SESSION['isCoach'.$session_id];
-    }*/
 
     if (!empty($session_id)) {
         $session_id = intval($session_id);
     } else {
         $session_id = api_get_session_id();
+    }
+
+    // Do not exist coaches in session 0
+    if ($session_id == 0) {
+        return false;
     }
 
     // The student preview was on
@@ -2446,6 +2442,14 @@ function api_is_coach($session_id = 0, $course_code = null) {
     } else {
         $course_code = api_get_course_id();
     }
+
+    global $_userPermissions;
+
+    // If already set if is Coach
+    if (isset($_userPermissions['isCoach'.$session_id.'_'.$course_code])) {
+        return $_userPermissions['isCoach'.$session_id.'_'.$course_code];
+    }
+
     $session_table 						= Database::get_main_table(TABLE_MAIN_SESSION);
     $session_rel_course_rel_user_table  = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
     $sessionIsCoach = null;
@@ -2474,10 +2478,8 @@ function api_is_coach($session_id = 0, $course_code = null) {
 	    }
 	}
 
-    return (count($sessionIsCoach) > 0);
-
-    /*$_SESSION['isCoach'.$session_id] = count($sessionIsCoach) > 0;
-    return $_SESSION['isCoach'.$session_id];*/
+    $_userPermissions['isCoach'.$session_id.'_'.$course_code] = count($sessionIsCoach) > 0;
+    return $_userPermissions['isCoach'.$session_id.'_'.$course_code];
 }
 
 /**
