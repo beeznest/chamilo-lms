@@ -163,7 +163,7 @@ class Tracking
         $i = 0;
         $secondsSum = 0;
         $secondsAverage = 0;
-        if(Database::num_rows($queryResponse) > 0) {
+        if (Database::num_rows($queryResponse) > 0) {
             if ($row = Database::fetch_array($queryResponse)) {
                 $secondsSum += $row['seconds_sum'];
                 $i++;
@@ -4920,6 +4920,9 @@ class Tracking
         );
     }
 
+    /**
+     * @return array
+     */
     public static function getCustomTags()
     {
         $lpExtraField = 'Tipo';

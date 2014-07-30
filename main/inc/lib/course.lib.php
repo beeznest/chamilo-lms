@@ -4536,6 +4536,7 @@ class CourseManager
 
         return $students;
     }
+
     /**
      * @param $courseId
      * @param int $sessionId
@@ -4601,6 +4602,13 @@ class CourseManager
         return $tags;
     }
 
+    /**
+     * @param $type
+     * @param $tagName
+     * @param $option_id
+     * @param $c_id
+     * @return mixed
+     */
     public static function getIdsFromTagOption($type, $tagName, $option_id, $c_id)
     {
         $objectEFV = new ExtraFieldValue($type);

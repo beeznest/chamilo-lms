@@ -1045,15 +1045,15 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             echo get_lang('Downloading');
             MySpace::export_csv(
                 array(
-                    'Name',
-                    'Sección',
-                    'tutor',
-                    'carga de archivos',
-                    'publicación de enlaces',
-                    'foros',
-                    'tareas',
-                    'wikis',
-                    'anuncios',
+                    get_lang('Name'),
+                    get_lang('Section'),
+                    get_lang('Tutor'),
+                    get_lang('FilesUpload'),
+                    get_lang('LinksPublication'),
+                    get_lang('Forum'),
+                    get_lang('Task'),
+                    get_lang('Wiki'),
+                    get_lang('Announcement'),
                 ), $data
             );
             break;
