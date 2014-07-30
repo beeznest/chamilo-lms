@@ -8340,7 +8340,7 @@ class learnpath
                                     $orig_file_path = str_replace('\\', '/', $orig_file_path);
                                     $relative_path = '';
                                     if (strstr($file_path, $cur_path) !== false) {
-                                        $relative_path = substr($file_path, strlen($orig_file_path));
+                                        $relative_path = str_replace($cur_path, '',$file_path);
                                         $file_path = substr($file_path, strlen($cur_path));
                                     } else {
                                         // This case is still a problem as it's difficult to calculate a relative path easily
