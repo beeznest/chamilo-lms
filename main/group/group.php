@@ -20,7 +20,7 @@ $language_file = 'group';
 
 require_once '../inc/global.inc.php';
 
-$is_allowed_in_course = api_is_allowed_to_edit(false, true);
+$is_allowed_in_course = api_is_allowed_in_course();
 
 $this_section = SECTION_COURSES;
 $current_course_tool  = TOOL_GROUP;
@@ -78,7 +78,7 @@ Display::display_introduction_section(TOOL_GROUP);
  $my_get_id2  = isset($_GET['id2']) ? Security::remove_XSS($_GET['id2']) : null;
  $my_get_id   = isset($_GET['id']) ? Security::remove_XSS($_GET['id']) : null;
 
-if (isset($_GET['action'])) {
+if (isset($_GET['action']) && $is_allowed_in_course) {
     switch ($_GET['action']) {
         case 'self_reg':
             if (GroupManager :: is_self_registration_allowed($_SESSION['_user']['user_id'], $my_group_id)) {

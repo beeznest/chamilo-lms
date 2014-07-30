@@ -146,11 +146,11 @@ class CourseManager
      * @param int $howmany Number of results we want. Optional.
      * @param int $orderby The column we want to order it by. Optional, defaults to first column.
      * @param string $orderdirection The direction of the order (ASC or DESC). Optional, defaults to ASC.
-     * @param $visibility The visibility of the course, or all by default.
+     * @param int $visibility The visibility of the course, or all by default.
      * @param string $startwith If defined, only return results for which the course *title* begins with this string
-     * @param null $urlId The Access URL ID, if using multiple URLs
+     * @param int $urlId The Access URL ID, if using multiple URLs
      * @param bool $alsoSearchCode An extension option to indicate that we also want to search for course codes (not *only* titles)
-     * @param string $categoryCodeStarsWith Filter also by category code
+     * @param string $categoryCodeStartsWith Filter also by category code
      *
      * @return array
      */
@@ -163,7 +163,7 @@ class CourseManager
         $startwith = '',
         $urlId = null,
         $alsoSearchCode = false,
-        $categoryCodeStarsWith = ''
+        $categoryCodeStartsWith = ''
     ) {
 
         $sql = "SELECT course.*, course.id as real_id
@@ -190,8 +190,8 @@ class CourseManager
             }
         }
 
-        if (!empty($categoryCodeStarsWith)) {
-            $sql .= " AND category_code like '" . Database::escape_string($categoryCodeStarsWith) . "%'";
+        if (!empty($categoryCodeStartsWith)) {
+            $sql .= " AND category_code like '" . Database::escape_string($categoryCodeStartsWith) . "%'";
         }
 
         if (!empty($urlId)) {
@@ -357,7 +357,7 @@ class CourseManager
                 WHERE c_id = $course_id AND user_id IN (".$user_ids.")";
         Database::query($sql);
 
-        // Unsubscribe user from the course.
+        // Unsubscribe user from the course inside the session.
         if (!empty($session_id)) {
 
             // Delete in table session_rel_course_rel_user
@@ -378,6 +378,10 @@ class CourseManager
                     $sql = "DELETE FROM ".Database::get_main_table(TABLE_MAIN_SESSION_USER)."
                             WHERE id_session ='".$session_id."' AND id_user='$uid' AND relation_type<>".SESSION_RELATION_TYPE_RRHH."";
                     Database::query($sql);
+                    // Also delete the user from the session details if he is a general session coach
+                    $sql = "UPDATE ".Database::get_main_table(TABLE_MAIN_SESSION)."
+                            SET id_coach = 0 WHERE id_coach = $uid AND id = $session_id ";
+                    Database::query($sql);
                 }
             }
 
@@ -391,7 +395,7 @@ class CourseManager
                     WHERE id = '".$session_id."'";
             Database::query($sql);
 
-            // Update the table session_rel_course
+            // Update the table session_rel_course (status == 2 for session course coach)
             $sql = "SELECT COUNT(*) FROM ".Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER)."
                     WHERE id_session = '$session_id' AND course_code = '$course_code' AND status<>2";
             $row = Database::fetch_array(@Database::query($sql));

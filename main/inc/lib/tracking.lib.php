@@ -3834,7 +3834,7 @@ class Tracking
         if (!empty($sessionId) && empty($courseId)) {
             // $courses is an array of course int id as index and course details hash as value
             $courses = SessionManager::get_course_list_by_session_id($sessionId);
-            $sessions[$sessionId] = api_get_session_info($sessionId);
+            $sessions[][$sessionId] = api_get_session_info($sessionId);
         } elseif (empty($sessionId) && !empty($courseId)) {
             // if, to the contrary, course is defined but not sessions, get the sessions that include this course
             // $sessions is an array like: [0] => ('id' => 3, 'name' => 'Session 35'), [1] => () etc;
@@ -3842,14 +3842,14 @@ class Tracking
             $sessionsTemp = SessionManager::get_session_by_course($course['code']);
             $courses[$courseId] = $course;
             foreach ($sessionsTemp as $sessionItem) {
-                $sessions[$sessionItem['id']] = $sessionItem;
+                $sessions[$courseId][$sessionItem['id']] = $sessionItem;
             }
         } elseif (!empty($courseId) && !empty($sessionId)) {
             //none is empty
             $course = api_get_course_info_by_id($courseId);
             $courses[$courseId] = array($course['code']);
             $courses[$courseId]['code'] = $course['code'];
-            $sessions[$sessionId] = api_get_session_info($sessionId);
+            $sessions[$courseId][$sessionId] = api_get_session_info($sessionId);
         } else {
             //both are empty, not enough data, return an empty array
             return array();
@@ -3881,14 +3881,13 @@ class Tracking
                          INNER JOIN $tblField lf ON lf.id =  lo.field_id
                                                 AND lf.field_variable = 'Tipo'";
         }
-
         foreach ($courses as $courseIdx => $courseData) {
             $where = '';
             $whereParams = array();
             $whereCourseCode = $courseData['code'];
             $whereSessionParams = '';
-            if (count($sessions > 0)) {
-                foreach ($sessions as $sessionIdx => $sessionData) {
+            if (count($sessions[$courseIdx]) > 0) {
+                foreach ($sessions[$courseIdx] as $sessionIdx => $sessionData) {
                     if (!empty($sessionIdx)) {
                         $whereSessionParams .= $sessionIdx.',';
                     }
@@ -3952,39 +3951,43 @@ class Tracking
                 $extraField
                 FROM $ttrack_exercises te
                 INNER JOIN $ttrack_attempt ta ON ta.exe_id = te.exe_id
-                INNER JOIN $tquiz q ON q.id = te.exe_exo_id
-                INNER JOIN $tquiz_rel_question rq ON rq.exercice_id = q.id AND rq.c_id = q.c_id
-                INNER JOIN $tquiz_question qq ON qq.id = rq.question_id
-                                                AND qq.c_id = rq.c_id
-                                                AND qq.position = rq.question_order
-                                                AND ta.question_id = rq.question_id
+                INNER JOIN $tquiz q ON q.id = te.exe_exo_id AND q.c_id = $courseIdx
+                INNER JOIN $tquiz_question qq ON qq.id = ta.question_id
+                                                AND qq.c_id = $courseIdx
                 $fieldType
                 WHERE te.exe_cours_id = '$whereCourseCode' ".(empty($whereSessionParams)?'':"AND te.session_id IN ($whereSessionParams)")."
-                AND q.c_id = $courseIdx
                   $where $order $limit";
             $sql_query = vsprintf($sql, $whereParams);
-
             // Now browse through the results and get the data
             $rs = Database::query($sql_query);
             $userIds = array();
             $questionIds = array();
             $answerIds = array();
+            $dataIndex = 0;
             while ($row = Database::fetch_array($rs)) {
                 //only show if exercise is visible
                 if (api_get_item_visibility($courseData, 'quiz', $row['exercise_id'])) {
                     $userIds[$row['user_id']] = $row['user_id'];
                     $questionIds[$row['question_id']] = $row['question_id'];
                     $answerIds[$row['question_id']][$row['answer_id']] = $row['answer_id'];
-                    $row['session'] = $sessions[$row['session_id']];
-                    $data[] = $row;
+                    $row['session'] = $sessions[$courseIdx][$row['session_id']];
+                    $row['description'] = stripHtmlComments(strip_tags($row['description'], '<img>'));
+                    $row['quiz_title'] = stripHtmlComments(strip_tags($row['quiz_title'], '<img>'));
+                    foreach ($row as $index => $value) {
+                        if (!is_numeric($index)) {
+                            $data[$dataIndex][$index] = $value;
+                        }
+                    }
+                    $dataIndex++;
                 }
             }
             // Now fill questions data. Query all questions and answers for this test to avoid
             $sqlQuestions = "SELECT tq.c_id, tq.id as question_id, tq.question, tqa.id_auto,
                                     tqa.answer, tqa.correct, tq.position, tqa.id_auto as answer_id
-                               FROM $tquiz_question tq, $tquiz_answer tqa
-                               WHERE tqa.question_id =tq.id and tqa.c_id = tq.c_id
-                                 AND tq.c_id = $courseIdx AND tq.id IN (".implode(',',$questionIds).")";
+                               FROM $tquiz_question tq
+                               INNER JOIN $tquiz_answer tqa ON tqa.question_id =tq.id and tqa.c_id = tq.c_id
+                               WHERE tq.c_id = $courseIdx AND tq.id IN (".implode(',',$questionIds).")";
+
             $resQuestions = Database::query($sqlQuestions);
             $answer = array();
             $question = array();
@@ -3992,12 +3995,12 @@ class Tracking
                 $questionId = $rowQuestion['question_id'];
                 $answerId = $rowQuestion['answer_id'];
                 $answer[$questionId][$answerId] = array(
-                                                        'position' => $rowQuestion['position'],
-                                                        'question' => $rowQuestion['question'],
-                                                        'answer' => $rowQuestion['answer'],
-                                                        'correct' => $rowQuestion['correct']
-                                                       );
-                $question[$questionId]['question'] = $rowQuestion['question'];
+                    'position' => $rowQuestion['position'],
+                    'question' => stripHtmlComments(strip_tags($rowQuestion['question'], '<img>')),
+                    'answer' => stripHtmlComments(strip_tags($rowQuestion['answer'], '<img>')),
+                    'correct' => $rowQuestion['correct']
+                );
+                $question[$questionId]['question'] = stripHtmlComments(strip_tags($rowQuestion['question'], '<img>'));
 
             }
 
@@ -4011,7 +4014,7 @@ class Tracking
             foreach ($data as $id => $row) {
                 $rowQuestId = $row['question_id'];
                 $rowAnsId = $row['answer_id'];
-                $data[$id]['session'] = $sessions[$row['session_id']]['name'];
+                $data[$id]['session'] = $sessions[$courseIdx][$row['session_id']]['name'];
                 $data[$id]['firstname'] = $users[$row['user_id']]['firstname'];
                 $data[$id]['lastname'] = $users[$row['user_id']]['lastname'];
                 $data[$id]['username'] = $users[$row['user_id']]['username'];
@@ -4019,8 +4022,6 @@ class Tracking
                 $data[$id]['correct'] = ($answer[$rowQuestId][$rowAnsId]['correct'] == 0 ? get_lang('No') : get_lang('Yes'));
                 $data[$id]['question'] = $question[$rowQuestId]['question'];
                 $data[$id]['question_id'] = $rowQuestId;
-                $data[$id]['description'] = $row['description'];
-                $data[$id]['grade'] = $row['grade'];
                 $data[$id]['course'] = $row['exe_cours_id'];
                 if ($type) {
                     $data[$id]['startTime'] = gmdate('Y-m-d H:i:s', $row['start_time']);

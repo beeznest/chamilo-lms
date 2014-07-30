@@ -34,7 +34,11 @@ $table_course = Database :: get_main_table(TABLE_MAIN_COURSE);
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
         case 'unsubscribe':
-            CourseManager::unsubscribe_user($_GET['user_id'], $_GET['course_code']);
+            $sessionId = 0;
+            if (!empty($_GET['sid'])) {
+                $sessionId = intval($_GET['sid']);
+            }
+            CourseManager::unsubscribe_user($_GET['user_id'], $_GET['course_code'], $sessionId);
             Display::display_normal_message(get_lang('UserUnsubscribed'));
             break;
     }
@@ -148,8 +152,8 @@ if (count($sessions) > 0) {
                     '<a href="'.api_get_path(WEB_COURSE_PATH).$course_info['path'].'?id_session='.$id_session.'">'.
                       Display::return_icon('course_home.gif', get_lang('CourseHomepage')).'</a>';
 
-            if ($my_course['status'] == STUDENT) {
-                $tools .= '<a href="user_information.php?action=unsubscribe&course_code='.$course_info['code'].'&user_id='.$user['user_id'].'">'.
+            if ($my_course['status'] == STUDENT OR (api_is_platform_admin())) {
+                $tools .= '<a href="user_information.php?action=unsubscribe&course_code='.$course_info['code'].'&user_id='.$user['user_id'].'&sid='.$id_session.'">'.
                       Display::return_icon('delete.png', get_lang('Delete')).'</a>';
             }
             $row[] = $tools;
