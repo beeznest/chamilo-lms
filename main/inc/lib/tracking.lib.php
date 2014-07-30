@@ -137,6 +137,44 @@ class Tracking
     }
 
     /**
+     * @param $courseCode
+     * @param int $sessionId
+     * @return mixed
+     */
+    public static function getTimeAverageSpentOnTheCourse($courseCode, $sessionId = 0) {
+        $courseCode = Database::escape_string($courseCode);
+        $sessionId  = intval($sessionId);
+
+        $tableTrackCourse = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_COURSE_ACCESS);
+
+        $sessionCondition = '';
+        if ($sessionId !== 0) {
+            $sessionCondition = ' AND session_id = ' . $sessionId;
+        }
+
+        $sql = "SELECT SUM(UNIX_TIMESTAMP(logout_course_date) - UNIX_TIMESTAMP(login_course_date)) as seconds_sum
+                FROM $tableTrackCourse
+                WHERE UNIX_TIMESTAMP(logout_course_date) > UNIX_TIMESTAMP(login_course_date) AND
+                course_code='$courseCode'
+                $sessionCondition
+                 GROUP BY session_id;";
+
+        $queryResponse = Database::query($sql);
+        $i = 0;
+        $secondsSum = 0;
+        $secondsAverage = 0;
+        if (Database::num_rows($queryResponse) > 0) {
+            if ($row = Database::fetch_array($queryResponse)) {
+                $secondsSum += $row['seconds_sum'];
+                $i++;
+            }
+            $secondsAverage = round($secondsSum / $i, 2);
+        }
+
+        return $secondsAverage;
+    }
+
+    /**
      * Get first connection date for a student
      * @param    int                  Student id
      * @return    string|bool     Date format long without day or false if there are no connections
@@ -4341,8 +4379,10 @@ class Tracking
         $sessionCategories = SessionManager::get_all_session_category();
         $newSessionCategories = array();
         $newSessionCategories[''] = null;
-        foreach ($sessionCategories as $category) {
-            $newSessionCategories[$category['id']] = $category['name'];
+        if ($sessionCategories !== false) {
+            foreach ($sessionCategories as $category) {
+                $newSessionCategories[$category['id']] = $category['name'];
+            }
         }
 
         if (empty($sessionId)) {
@@ -4553,8 +4593,10 @@ class Tracking
         $sessionCategories = SessionManager::get_all_session_category();
         $newSessionCategories = array();
         $newSessionCategories[''] = null;
-        foreach ($sessionCategories as $category) {
-            $newSessionCategories[$category['id']] = $category['name'];
+        if ($sessionCategories !== false) {
+            foreach ($sessionCategories as $category) {
+                $newSessionCategories[$category['id']] = $category['name'];
+            }
         }
 
         if (empty($sessionId)) {
@@ -4689,6 +4731,7 @@ class Tracking
             }
             //var_dump($session);
             $gridData[] = array(
+
                 'session_id' => $session['id'],
                 'course_id' => $course['code'],
                 'category' => $newSessionCategories[$session['session_category_id']],
@@ -4878,6 +4921,9 @@ class Tracking
         );
     }
 
+    /**
+     * @return array
+     */
     public static function getCustomTags()
     {
         $lpExtraField = 'Tipo';

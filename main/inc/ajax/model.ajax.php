@@ -388,9 +388,9 @@ switch ($action) {
                     $session = array_merge($session, $sessionTmp);
                 }
             } else {
-		    	$course = api_get_course_info_by_id($courseId);
-	        	$session = SessionManager::get_session_by_course($course['code']);
-			}
+                $course = api_get_course_info_by_id($courseId);
+                $session = SessionManager::get_session_by_course($course['code']);
+            }
         } else {
             $session = api_get_session_info($sessionId);
         }
@@ -858,6 +858,7 @@ switch ($action) {
         );
         break;
     case 'display_course_progress_summary':
+
         $columnParameters = Tracking::getColumnHeaders();
         $columns = $columnParameters['columns'];
         $column_names = $columnParameters['column_names'];
@@ -1445,7 +1446,7 @@ switch ($action) {
                 $result = array_merge($result, $progress);
             }
         } else {
-        	$result = SessionManager::sessionProgressByCourse($course['code'], $arrSession);
+            $result = SessionManager::sessionProgressByCourse($course['code'], $arrSession);
         }
         break;
     default:

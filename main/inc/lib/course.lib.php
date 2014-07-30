@@ -4500,5 +4500,178 @@ class CourseManager
         return $assigned_courses_to_hrm;
     }
 
+    /**
+     * @param $courseId
+     * @param int $sessionId
+     * @return mixed
+     */
+    public static function getCountStudentsProgress($courseId, $sessionId = 0)
+    {
+        $courseId = intval($courseId);
+        $sessionId = intval($sessionId);
+        $tableLpView = Database::get_course_table(TABLE_LP_VIEW);
+
+        if ($sessionId === 0) {
+            $whereCondition = array(
+                'where' => array(
+                    'c_id = ?' => array(
+                        $courseId
+                    )
+                )
+            );
+        } else {
+            $whereCondition = array(
+                'where' => array(
+                    'c_id = ? and session_id = ?' => array(
+                        $courseId,
+                        $sessionId
+                    )
+                )
+            );
+        }
+
+        $data = Database::select('COUNT(DISTINCT user_id) as students', $tableLpView, $whereCondition, 'all', 'ASSOC');
+
+        $students = 0;
+        if (!empty($data)) {
+            $viewData = current($data);
+            $students = $viewData['students'];
+        }
+
+        return $students;
+    }
+
+    /**
+     * @param $courseId
+     * @param int $sessionId
+     * @return mixedss
+     */
+    public static function getProgressAverage($courseId, $sessionId = 0)
+    {
+        $courseId = intval($courseId);
+        $sessionId = intval($sessionId);
+        $tableLpView = Database::get_course_table(TABLE_LP_VIEW);
+
+        if ($sessionId === 0) {
+            $whereCondition = array(
+                'where' => array(
+                    'c_id = ?' => array(
+                        $courseId
+                    )
+                )
+            );
+        } else {
+            $whereCondition = array(
+                'where' => array(
+                    'c_id = ? and session_id = ?' => array(
+                        $courseId,
+                        $sessionId
+                    )
+                )
+            );
+        }
+
+        $data = Database::select('AVG(progress) as average', $tableLpView, $whereCondition);
+        $average = 0;
+        if (!empty($data)) {
+            $averageData = current($data);
+            $average = round($averageData['average'], 2);
+        }
+
+        return $average;
+    }
+
+    /**
+     * Returns the tags option
+     * @param $type
+     * @param $tagName
+     * @return array
+     */
+    public static function getTags($type, $tagName)
+    {
+        $objectEF = new ExtraField($type);
+        $objectEFO = new ExtraFieldOption($type);
+        $extra_field = $objectEF->get_handler_field_info_by_field_variable($tagName);
+        $tags = array();
+        if ($extra_field !== false) {
+            $extra_options = $objectEFO->get_field_options_by_field($extra_field['id']);
+            foreach ($extra_options as $option) {
+                $tags[$option['id']] = array(
+                    'value' => $option['option_value'],
+                    'text' => $option['option_display_text']
+                );
+            }
+        }
+
+        return $tags;
+    }
+
+    /**
+     * @param $type
+     * @param $tagName
+     * @param $option_id
+     * @param $c_id
+     * @return mixed
+     */
+    public static function getIdsFromTagOption($type, $tagName, $option_id, $c_id)
+    {
+        $objectEFV = new ExtraFieldValue($type);
+        $objectEFV->extraFields['c_id'] = $c_id;
+        $ids = $objectEFV->get_item_ids_from_field_variable_and_field_value($tagName, $option_id);
+        return $ids;
+    }
+
+    /**
+     * @param $tagType
+     * @param $tagValue
+     * @param $courseId
+     * @param int $sessionId
+     * @param int $studentId
+     * @return int
+     */
+    public static function getProgressAverageByTag($tagType, $tagValue, $courseId, $sessionId = 0, $studentId = 0)
+    {
+        $lpView = Database::get_course_table(TABLE_LP_VIEW);
+        $lpFieldValue = Database::get_main_table(TABLE_MAIN_LP_FIELD_VALUES);
+        $lpField = Database::get_main_table(TABLE_MAIN_LP_FIELD);
+        $lpFieldOption = Database::get_main_table(TABLE_MAIN_LP_FIELD_OPTIONS);
+        $courseId = intval($courseId);
+        $sessionId = intval($sessionId);
+        $studentId = intval($studentId);
+
+        $studentCondition = '';
+        $sessionCondition = '';
+
+        if (!empty($sessionId)) {
+            $sessionCondition = ' AND lp_view.session_id = ' . $sessionId;
+        }
+
+        if (!empty($studentId)) {
+            $studentCondition = ' AND lp.view.user_id = ' . $studentId;
+        }
+
+        $sql = "SELECT AVG(progress) as progress
+            FROM $lpView lp_view
+            INNER JOIN $lpFieldValue lv ON lv.lp_id = lp_view.lp_id
+                                    AND lv.c_id = lp_view.c_id
+            INNER JOIN $lpField lf ON lf.id =  lv.field_id
+                                     AND lf.field_variable = '$tagType'
+            INNER JOIN $lpFieldOption lo ON lv.field_value = lo.id
+                                     AND lf.id = lo.field_id
+                                     AND lo.option_value = '$tagValue'
+            WHERE lp_view.c_id = $courseId
+            $sessionCondition
+            $studentCondition";
+
+        $progressAverage = 0;
+        $queryProgressResponse = Database::query($sql);
+        if (Database::num_rows($queryProgressResponse) > 0) {
+            while ($rowAverage = Database::fetch_array($queryProgressResponse))    {
+                $progressAverage = round($rowAverage['progress'], 2);
+            }
+        }
+
+        return $progressAverage;
+    }
 
 }
