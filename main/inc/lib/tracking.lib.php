@@ -987,8 +987,14 @@ class Tracking
                 $fieldCondition = " AND field_id = $fieldId AND field_value = '$fieldValue'";
             }
 
+            $sessionFilter = "";
+            if (!empty($session_id)) {
+                $sessionFilter = " AND lp.session_id in (0, $session_id)";
+            }
+
             $sql = "SELECT DISTINCT lp.id FROM $tbl_course_lp lp $fieldJoin
-                    WHERE lp.c_id = {$course_info['real_id']} $condition_lp $fieldCondition ";
+                    WHERE lp.c_id = {$course_info['real_id']} $condition_lp $fieldCondition $sessionFilter";
+
             $res_count_lp = Database::query($sql);
 
             // count the number of learning paths
@@ -4560,6 +4566,7 @@ class Tracking
     {
         $courseId = intval($courseId);
         $sessionId = intval($sessionId);
+        $sessionSum = 0;
 
         //tables
         $tblSessionCourseUser = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);

@@ -839,11 +839,9 @@ if (empty($_GET['details'])) {
             }
     		echo Display::tag('td', $score_latest);
 
-    		if (is_numeric($progress)) {
-    			$progress = $progress.'%';
-    		} else {
-    			$progress = '-';
-    		}
+            if ($progress == "0%") {
+                $progress = '-';
+            }
 
     		echo Display::tag('td', $progress);
     	    //Do not change with api_convert_and_format_date, because this value came from the lp_item_view table
