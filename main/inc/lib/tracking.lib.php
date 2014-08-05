@@ -5710,7 +5710,7 @@ class TrackingCourseLog
      */
     static function get_user_data($from, $number_of_items, $column, $direction)
     {
-    	global $user_ids, $course_code, $additional_user_profile_info, $export_csv, $is_western_name_order, $csv_content, $session_id, $_configuration;
+    	global $user_ids, $course_code, $additional_user_profile_info, $export_csv, $exportXls, $is_western_name_order, $csv_content, $session_id, $_configuration;
 
     	$course_code        = Database::escape_string($course_code);
     	$tbl_user           = Database::get_main_table(TABLE_MAIN_USER);
@@ -5865,7 +5865,7 @@ class TrackingCourseLog
 
             $users[] = $user_row;
 
-    		if ($export_csv) {
+    		if ($export_csv || $exportXls) {
     		    if (empty($session_id)) {
                     $user_row = array_map('strip_tags', $user_row);
     			    unset($user_row[14]);
