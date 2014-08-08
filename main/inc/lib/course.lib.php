@@ -3448,7 +3448,8 @@ class CourseManager
      * @param   integer     Session ID
      * @param   string      CSS class to apply to course entry
      * @param   boolean     Whether the session is supposedly accessible now (not in the case it has passed and is in invisible/unaccessible mode)
-     * @param bool      Whether to show the document quick-loader or not
+     * @param   bool        Whether to show the document quick-loader or not
+     * @param   boolean     Whether hide session course
      * @return  string      The HTML to be printed for the course entry
      *
      * @version 1.0.3
@@ -3457,7 +3458,7 @@ class CourseManager
      * @todo move code for what's new icons to a separate function to clear things up
      * @todo add a parameter user_id so that it is possible to show the courselist of other users (=generalisation). This will prevent having to write a new function for this.
      */
-    public static function get_logged_user_course_html($course, $session_id = 0, $class = 'courses', $session_accessible = true, $load_dirs = false) {
+    public static function get_logged_user_course_html($course, $session_id = 0, $class = 'courses', $session_accessible = true, $load_dirs = false, $hideCoursesInSessions = false) {
         global $nosession, $nbDigestEntries, $digest, $thisCourseSysCode, $orderKey;
         $user_id  = api_get_user_id();
         $course_info = api_get_course_info($course['code']);
@@ -3505,7 +3506,9 @@ class CourseManager
                     if (empty($course_info['id_session'])) {
                         $course_info['id_session'] = 0;
                     }
-                    if ($user_in_course_status == COURSEMANAGER || ($date_start <= $now && $date_end >= $now) || $date_start == '0000-00-00') {
+                    if ($user_in_course_status == COURSEMANAGER || ($date_start <= $now && $date_end >= $now) || 
+                            $date_start == '0000-00-00' || 
+                            !$hideCoursesInSessions) {
                         $session_url = api_get_path(WEB_COURSE_PATH).$course_info['path'].'/?id_session='.$course_info['id_session'];
                         $session_title = '<a href="'.api_get_path(WEB_COURSE_PATH).$course_info['path'].'/?id_session='.$course_info['id_session'].'">'.$course_info['name'].'</a>';
                     }
