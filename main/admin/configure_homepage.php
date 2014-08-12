@@ -13,8 +13,9 @@
  *
  * @param  string Name of the file been updated by the administration, ex: home_tabs_logged_in_($language).html
  */
-function home_tabs($file_logged_in)
+function home_tabs($file_logged_in) 
 {
+/*
 	$file_logged_out = str_replace('_logged_in','', $file_logged_in);
 
 	//variables initialization
@@ -39,6 +40,7 @@ function home_tabs($file_logged_in)
 	$fp = fopen($file_logged_in, 'w');
 	fputs($fp, implode("\n", $data_logged_in));
 	fclose($fp);
+*/
 }
 /**
  * Code
