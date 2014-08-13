@@ -49,14 +49,7 @@ if ($global) {
     $course_list = array($current_course);
 }
 
-$formAction = api_get_self();
-
-if (isset($_GET['cidReq']) && isset($_GET['id_session']) && isset($_GET['gidReq'])) {
-    $formAction .= '?';
-    $formAction .= 'cidReq=' . Security::remove_XSS($_GET['cidReq']) . '&';
-    $formAction .= 'id_session=' . Security::remove_XSS($_GET['id_session']) . '&';
-    $formAction .= 'gidReq=' . Security::remove_XSS($_GET['gidReq']);
-}
+$formAction = api_get_self() . '?' .  api_get_cidreq();
 
 $form = new FormValidator('search_simple','POST',$formAction,'',null,false);
 $form->addElement('text','score',get_lang('Percentage'));
