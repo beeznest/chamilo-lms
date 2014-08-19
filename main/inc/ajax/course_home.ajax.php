@@ -198,13 +198,15 @@ switch ($action) {
 
         $i =0;
         $response = new stdClass();
-        foreach($temp as $key=>$row) {
-            $row = $row['cell'];
-            if (!empty($row)) {
-                if ($key >= $start  && $key < ($start + $limit)) {
-                    $response->rows[$i]['id']= $key;
-                    $response->rows[$i]['cell']=array($row[0], $row[1], $row[2]);
-                    $i++;
+        if (count($temp) > 0) {
+            foreach($temp as $key=>$row) {
+                $row = $row['cell'];
+                if (!empty($row)) {
+                    if ($key >= $start  && $key < ($start + $limit)) {
+                        $response->rows[$i]['id']= $key;
+                        $response->rows[$i]['cell']=array($row[0], $row[1], $row[2]);
+                        $i++;
+                    }
                 }
             }
         }
@@ -443,13 +445,15 @@ switch ($action) {
 
         $response = new stdClass();
         $i =0;
-        foreach($temp as $key=>$row) {
-            $row = $row['cell'];
-            if (!empty($row)) {
-                if ($key >= $start  && $key < ($start + $limit)) {
-                    $response->rows[$i]['id']= $key;
-                    $response->rows[$i]['cell']=array($row[0], $row[1], $row[2],$row[3]);
-                    $i++;
+        if (count($temp) > 0) {
+            foreach($temp as $key=>$row) {
+                $row = $row['cell'];
+                if (!empty($row)) {
+                    if ($key >= $start  && $key < ($start + $limit)) {
+                        $response->rows[$i]['id']= $key;
+                        $response->rows[$i]['cell']=array($row[0], $row[1], $row[2],$row[3]);
+                        $i++;
+                    }
                 }
             }
         }
