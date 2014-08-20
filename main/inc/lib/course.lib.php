@@ -3508,6 +3508,8 @@ class CourseManager
                     if ($user_in_course_status == COURSEMANAGER || ($date_start <= $now && $date_end >= $now) || $date_start == '0000-00-00') {
                         $session_url = api_get_path(WEB_COURSE_PATH).$course_info['path'].'/?id_session='.$course_info['id_session'];
                         $session_title = '<a href="'.api_get_path(WEB_COURSE_PATH).$course_info['path'].'/?id_session='.$course_info['id_session'].'">'.$course_info['name'].'</a>';
+                    } else {
+                        $session_title = $course_info['name'];
                     }
                 } else {
                     $session_url   = api_get_path(WEB_COURSE_PATH).$course_info['path'].'/';

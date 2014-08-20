@@ -1981,8 +1981,6 @@ function api_get_session_visibility($session_id, $course_code = null, $ignore_vi
 
                     // Only if date_start said that it was ok
                     if ($visibility == SESSION_AVAILABLE) {
-                        $visibility = $row['visibility'];
-
                         if ($now < api_strtotime($row['date_end'], 'UTC')) {
                             //date still available
                             $visibility = SESSION_AVAILABLE;
@@ -2035,6 +2033,7 @@ function api_get_session_visibility($session_id, $course_code = null, $ignore_vi
             $visibility = SESSION_INVISIBLE;
         }
     }
+    error_log($visibility. ' ' .$session_id);
     return $visibility;
 }
 
