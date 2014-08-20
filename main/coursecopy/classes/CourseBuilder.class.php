@@ -120,12 +120,18 @@ class CourseBuilder
      */
 	function build($session_id = 0, $course_code = '', $with_base_content = false)
     {
-        $table_link       = Database :: get_course_table(TABLE_LINKED_RESOURCES);
+        $table_link = Database :: get_course_table(TABLE_LINKED_RESOURCES);
         $table_properties = Database :: get_course_table(TABLE_ITEM_PROPERTY);
 
-        $course_info      = api_get_course_info($course_code);
-        $course_id        = $course_info['real_id'];
-        $course_code = empty($course_code) ? $course_info['code'] : $course_code;
+        $course_info = api_get_course_info($course_code);
+
+        if (empty($course_info)) {
+            return false;
+        }
+
+        $course_code = $course_info['code'];
+
+        $course_id = $course_info['real_id'];
         foreach ($this->tools_to_build as $tool) {
             $function_build = 'build_'.$tool;
             $specificIdList = isset($this->specific_id_list[$tool]) ? $this->specific_id_list[$tool] : null;
@@ -173,7 +179,7 @@ class CourseBuilder
         $table_doc   = Database::get_course_table(TABLE_DOCUMENT);
         $table_prop  = Database::get_course_table(TABLE_ITEM_PROPERTY);
 
-        $this->_filterBuildDocuments($course_info['code']);
+        $this->filterBuildDocuments($course_info['code']);
 
         //Remove chat_files and shared_folder files
         $avoid_paths = " path NOT LIKE '/shared_folder%' AND
@@ -250,62 +256,99 @@ class CourseBuilder
     }
 
     /**
-     * Crea nuevos documentos para crear el ZIP exportado.
-     * tambien copia estos documentos  a raiz shared_folder ('carpetas de usuarios')
-     * para su portabilidad.
-     * example:
-     * /courses/CURSOANIBAL/document/shared_folder/sf_user_3/Selection_001.png
-     * a:
+     * Create new documents if the document belongs in the course user shared folder     *
+     * @example:
+     * /courses/XXX/document/shared_folder/sf_user_3/Selection_001.png
+     * to:
      * /shared_folder/Selection_001.png
-     * @param string codigo del curso
+     * @param string $course_code
      * @return void
      */
-    private function _filterBuildDocuments($course_code)
+    private function filterBuildDocuments($course_code)
     {
-        $arrayDocuments = $this->_getDocumentOfToolIntro($course_code);
+        $arrayDocuments = $this->getDocumentOfToolIntro($course_code);
+
         // unique files
         if (is_array($arrayDocuments) && count($arrayDocuments) > 0) {
-            foreach($arrayDocuments as $indice => $array) {
-                $arrayDocuments[$indice] = array_unique($array);
+            foreach ($arrayDocuments as $index => $array) {
+                $arrayDocuments[$index] = array_unique($array);
             }
         }
+
         // add document
-        foreach($arrayDocuments as $arreglo) {
-            foreach($arreglo as $key => $value) {
+        $sharedFolderPath = api_get_path(SYS_PATH) . "courses/$course_code/document/shared_folder/";
+        foreach ($arrayDocuments as $document) {
+            foreach ($document as $key => $value) {
+                $insideSharedFolder = explode("/shared_folder/", $value);
                 $item = explode("/document", $value);
-                $value = substr($value, 1, strlen($value));
+                $folders = explode("/", $insideSharedFolder[1]);
+                $folderToAdd = null;
+                $folderToAddList = array();
+                $counter = 0;
+
+                if (strpos($folders[0], 'sf_user' === false)) {
+                    continue;
+                }
+
+                foreach ($folders as $folder) {
+                    if ($counter == 0) {
+                        $counter++;
+                        continue;
+                    }
+                    if ($counter == count($folders) -1) {
+                        break;
+                    }
+                    $folderToAdd .= '/' . $folder;
+                    $folderToAddList[] = $folderToAdd;
+                    $counter++;
+                }
+
+                if (!empty($folderToAdd)) {
+                    $folderToAdd .= '/';
+                    $folderToAdd = ltrim($folderToAdd, '/');
+                    foreach ($folderToAddList as $folder) {
+                        mkdir($sharedFolderPath.$folder, api_get_permissions_for_new_directories());
+                    }
+                }
+
                 $filename = substr(strrchr($item[1], "/"), 1);
 
-                $srcFile = api_get_path(SYS_PATH).$value;
-                $desFile = api_get_path(SYS_PATH)."courses/$course_code/document/shared_folder/".$filename;
+                $srcFile = api_get_path(SYS_COURSE_PATH) .$course_code.'/document'.$item[1];
+                $desFile = $sharedFolderPath . $folderToAdd . $filename;
+
                 copy($srcFile, $desFile);
-
                 $item2 = explode("/document", $desFile);
-
-                $fileZise = filesize($srcFile);
-                $doc = new Document(uniqid(), $item2[1], 'NULL', "$filename", 'file', $fileZise);
+                $fileSize = filesize($srcFile);
+                $doc = new Document(
+                    uniqid(),
+                    $item2[1],
+                    'NULL',
+                    "$filename",
+                    'file',
+                    $fileSize
+                );
                 $this->course->add_resource($doc);
             }
         }
     }
 
     /**
-     * Elimina los archivos que fueron copiados temporarmente por _filterBuildDocuments()
-     * a /courses/CURSOANIBAL/document/shared_folder/
+     * Delete files that were copied temporarily by filterBuildDocuments()
+     * a /courses/XXX/document/shared_folder/
      * @return void
      */
     public function filterBuildDocumentsClean()
     {
         $course_info = api_get_course_info();
         $course_code = $course_info['code'];
-        $arrayDocuments = $this->_getDocumentOfToolIntro($course_code);
+        $arrayDocuments = $this->getDocumentOfToolIntro($course_code);
         // add document
-        if(is_array($arrayDocuments) && count($arrayDocuments)>0) {
-            foreach($arrayDocuments as $arreglo) {
-                foreach($arreglo as $key => $value) {
+        if (is_array($arrayDocuments) && count($arrayDocuments) > 0) {
+            foreach ($arrayDocuments as $document) {
+                foreach ($document as $key => $value) {
                     $item = explode("/document", $value);
                     $filename = substr(strrchr($item[1], "/"), 1);
-                    $rmFile = api_get_path(SYS_PATH)."courses/$course_code/document/shared_folder/".$filename;
+                    $rmFile = api_get_path(SYS_PATH) . "courses/$course_code/document/shared_folder/" . $filename;
                     @unlink($rmFile);
                 }
             }
@@ -444,17 +487,18 @@ class CourseBuilder
         $sql = "SELECT * FROM $table WHERE c_id = $course_id ";
         $db_result = Database::query($sql);
         while ($obj = Database::fetch_object($db_result)) {
-            $stringIntroText = $this->_filterToolIntro($course_code, $obj->intro_text);
+            $stringIntroText = $this->filterToolIntro($course_code, $obj->intro_text);
             $tool_intro = new ToolIntro($obj->id, $stringIntroText);
             $this->course->add_resource($tool_intro);
         }
     }
 
     /**
-     * @param string $course_code codigo del curso
-     * @return array lista de documentos
+     * @param string $course_code
+     *
+     * @return array document list
      */
-    private function _getDocumentOfToolIntro($course_code)
+    private function getDocumentOfToolIntro($course_code)
     {
         $table = Database :: get_course_table(TABLE_TOOL_INTRO);
         $course_id = api_get_course_int_id();
@@ -470,7 +514,7 @@ class CourseBuilder
                 if ($pos === false) {
                     //
                 } else {
-                    $arraySrc[] = $this->_getSrcOfHtml($stringIntroText, 'shared_folder');
+                    $arraySrc[] = $this->getSrcOfHtml($stringIntroText, 'shared_folder');
                 }
             }
         }
@@ -479,40 +523,62 @@ class CourseBuilder
     }
 
     /**
-     * ayuda a filtrar si existen imagenes que apuntan ah un usuario o a muchos
-     * formatea String para que todo los recursos direccionen ah
-     * document/shared_folder/imagen.jpg
-     * @paran string $course_code codigo del curso
-     * @param string $introText cadena html a filtrar
+     * Changes file path
+     * From:
+     * courses/XXX/document/shared_folder/sf_user_3/image.jpg
+     * to:
+     * document/shared_folder/image.jpg
+     *
+     * @param string $courseCode
+     * @param string $text
+     *
+     * @return string
      */
-    private function _filterToolIntro($course_code, $string)
+    private function filterToolIntro($courseCode, $text)
     {
-        $pathBase = '/courses/' . $course_code . '/document/shared_folder/';
-        $pos = strpos($string, $pathBase);
+        $pathBase = '/courses/' . $courseCode . '/document/shared_folder';
+        $pos = strpos($text, $pathBase);
         if ($pos === false) {
             //
         } else {
-            $arraySrc = $this->_getSrcOfHtml($string, 'shared_folder');
+            $arraySrc = $this->getSrcOfHtml($text, 'shared_folder');
             if (is_array($arraySrc) && count($arraySrc) > 0) {
-                foreach($arraySrc as $value) {
-                    $FileName = substr(strrchr($value, "/"), 1);
-                    $pathBaseReplace = $pathBase . $FileName;
-                    $string = str_replace($value, $pathBaseReplace, $string);
+                foreach ($arraySrc as $value) {
+                    $sharedFolder = explode('/shared_folder/', $value);
+                    $sharedFolderPart = $sharedFolder[1];
+                    $sharedFolderPart = explode('/', $sharedFolderPart);
+
+                    if (strpos($sharedFolderPart[0], 'sf_user') === false) {
+                        continue;
+                    } else {
+                        $counter = 0;
+                        $fileToAdd = null;
+                        foreach ($sharedFolderPart as $part) {
+                            if ($counter == 0) {
+                                $counter++;
+                                continue;
+                            }
+                            $fileToAdd .= '/'.$part;
+
+                            $counter++;
+                        }
+                    }
+                    $pathBaseReplace = $pathBase . $fileToAdd;
+                    $text = str_replace($value, $pathBaseReplace, $text);
                 }
             }
         }
-
-        return $string;
+        return $text;
     }
 
     /**
-     * Obtiene todos los recursos (src) del html
-     * y los lista segun el patron $filter si se indica
-     * @param string $string cadena html
-     * @param string $filter lista solo los que cumplen con este patron.
+     * Get all src attributes from an HTML
+     *
+     * @param string $string
+     * @param string $filter only get "src" depending of this attribute
      * @return array list path document
      */
-    private function _getSrcOfHtml($string, $filter = '')
+    private function getSrcOfHtml($string, $filter = '')
     {
         $src = array();
         if (!empty($string)) {
