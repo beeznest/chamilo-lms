@@ -1024,8 +1024,10 @@ class IndexManager {
                             if ($session_now > $allowed_time && $days_access_after_end > $dif_time_after - 1) {
                                 // Read only and accessible.
 
-                                if (api_get_setting('hide_courses_in_sessions') == 'false') {
-                                    $c = CourseManager::get_logged_user_course_html($course, $session_id, 'session_course_item', true, $this->load_directories_preview);
+                                $hideCoursesInSessions = api_get_setting('hide_courses_in_sessions') != 'false';
+
+                                if (!$hideCoursesInSessions) {
+                                    $c = CourseManager::get_logged_user_course_html($course, $session_id, 'session_course_item', true, $this->load_directories_preview, $hideCoursesInSessions);
                                     $html_courses_session .= $c[1];
                                 }
                                 $count_courses_session++;
