@@ -828,9 +828,9 @@ if ($is_allowed_to_edit || $group_member_with_upload_rights || is_my_shared_fold
             $dir_name = $curdirpath.$added_slash.replace_dangerous_char($post_dir_name);
             
             if (!empty($session_id)) {
-                $dir_name = disable_dangerous_file($dir_name . '_session-' . $session_id . '_');
+                $dir_name = disable_dangerous_file($dir_name) . '_session-' . $session_id . '_';
             } else {
-                $dir_name = disable_dangerous_file($dir_name . '_');
+                $dir_name = disable_dangerous_file($dir_name) . '_';
             }
 
             $created_dir = create_unexisting_directory($_course, api_get_user_id(), $session_id, $to_group_id, $to_user_id, $base_work_dir, $dir_name, $post_dir_name);
