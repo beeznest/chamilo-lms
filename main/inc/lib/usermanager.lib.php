@@ -2277,14 +2277,15 @@ class UserManager
         // Get the list of sessions where the user is subscribed
         // This is divided into two different queries
         $sessions = array();
-        $sessions_sql = "SELECT DISTINCT id, name, date_start, date_end
-                        FROM $tbl_session_user, $tbl_session
-                        WHERE (
-                            id_session = id AND
-                            id_user = $user_id AND
-                            relation_type <> ".SESSION_RELATION_TYPE_RRHH."
-                        )
+        $sessions_sql = "SELECT DISTINCT s.id, s.name, s.date_start, s.date_end
+                        FROM $tbl_session s
+                        INNER JOIN $tbl_session_user su
+                        ON su.id_session = s.id
+                        AND
+                        (su.id_user = $user_id
+                        AND relation_type != ".SESSION_RELATION_TYPE_RRHH."
                         $coachCourseConditions
+                        )
                         ORDER BY date_start, date_end, name";
 
         $result = Database::query($sessions_sql);
@@ -2294,7 +2295,7 @@ class UserManager
             }
         }
         $sessions_sql = "SELECT DISTINCT id, name, date_start, date_end
-                        FROM $tbl_session_user, $tbl_session
+                        FROM $tbl_session
                         WHERE (
                             id_coach = $user_id
                         )

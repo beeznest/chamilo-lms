@@ -3997,24 +3997,28 @@ class Tracking
             $resQuestions = Database::query($sqlQuestions);
             $answer = array();
             $question = array();
-            while ($rowQuestion = Database::fetch_assoc($resQuestions)) {
-                $questionId = $rowQuestion['question_id'];
-                $answerId = $rowQuestion['answer_id'];
-                $answer[$questionId][$answerId] = array(
-                    'position' => $rowQuestion['position'],
-                    'question' => stripHtmlComments(strip_tags($rowQuestion['question'], '<img>')),
-                    'answer' => stripHtmlComments(strip_tags($rowQuestion['answer'], '<img>')),
-                    'correct' => $rowQuestion['correct']
-                );
-                $question[$questionId]['question'] = stripHtmlComments(strip_tags($rowQuestion['question'], '<img>'));
+            if ($resQuestions) {
+                while ($rowQuestion = Database::fetch_assoc($resQuestions)) {
+                    $questionId = $rowQuestion['question_id'];
+                    $answerId = $rowQuestion['answer_id'];
+                    $answer[$questionId][$answerId] = array(
+                        'position' => $rowQuestion['position'],
+                        'question' => stripHtmlComments(strip_tags($rowQuestion['question'], '<img>')),
+                        'answer' => stripHtmlComments(strip_tags($rowQuestion['answer'], '<img>')),
+                        'correct' => $rowQuestion['correct']
+                    );
+                    $question[$questionId]['question'] = stripHtmlComments(strip_tags($rowQuestion['question'], '<img>'));
 
+                }
             }
 
             // Now fill users data
             $sqlUsers = "SELECT user_id, username, lastname, firstname FROM $tuser WHERE user_id IN (".implode(',',$userIds).")";
             $resUsers = Database::query($sqlUsers);
-            while ($rowUser = Database::fetch_assoc($resUsers)) {
-                $users[$rowUser['user_id']] = $rowUser;
+            if ($resUsers) {
+                while ($rowUser = Database::fetch_assoc($resUsers)) {
+                    $users[$rowUser['user_id']] = $rowUser;
+                }
             }
 
             foreach ($data as $id => $row) {
