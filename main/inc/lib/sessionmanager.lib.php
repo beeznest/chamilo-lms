@@ -3507,6 +3507,7 @@ class SessionManager
     $file, $updateSession, $defaultUserId = null, $logger = null, $extraFields = array(), $extraFieldId = null, $daysCoachAccessBeforeBeginning = null, $daysCoachAccessAfterBeginning = null, $sessionVisibility = 1, $fieldsToAvoidUpdate = array(), $deleteUsersNotInList = false, $updateCourseCoaches = false
     )
     {
+        global $_configuration;
         $content = file($file);
 
         $error_message = null;
@@ -3849,6 +3850,9 @@ class SessionManager
 
                         // Checking if the flag is set TeachersWillBeAddedAsCoachInAllCourseSessions (course_edit.php)
                         $addTeachersToSession = true;
+                        if (isset($_configuration['add_teachers_to_sessions_courses'])) {
+                            $addTeachersToSession = $_configuration['add_teachers_to_sessions_courses'];
+                        }
                         if (array_key_exists('add_teachers_to_sessions_courses', $courseInfo)) {
                             $addTeachersToSession = $courseInfo['add_teachers_to_sessions_courses'];
                         }
