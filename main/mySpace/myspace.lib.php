@@ -270,29 +270,31 @@ class MySpace {
 		$table->set_column_filter(4, array('MySpace','course_info_tracking_filter'));
 		$table->display();
 	}
+
     /**
      * Display a sortable table that contains an overview off all the progress of the user in a session
      * @author César Perales <cesar.perales@beeznest.com>, Beeznest Team
      */
-    public static function display_tracking_lp_progress_overview($sessionId = '', $courseId = '', $date_from, $date_to) {
-
+    public static function display_tracking_lp_progress_overview($sessionId = '', $courseId = '', $date_from, $date_to)
+    {
         $course = api_get_course_info_by_id($courseId);
         /**
          * Column name
          * The order is important you need to check the $column variable in the model.ajax.php file
          */
         $columns = array(
+            get_lang('Session'),
             get_lang('Username'),
             get_lang('FirstName'),
             get_lang('LastName'),
         );
-        //add lessons of course
+
+        // Add lessons of course
         require_once api_get_path(SYS_CODE_PATH).'newscorm/learnpathList.class.php';
         $lessons = LearnpathList::get_course_lessons($course['code'], $sessionId);
 
-        //create columns array
-        foreach ($lessons as $lesson_id => $lesson)
-        {
+        // Create columns array
+        foreach ($lessons as $lesson_id => $lesson) {
             $columns[] = $lesson['name'];
         }
 
@@ -302,17 +304,23 @@ class MySpace {
          * Column config
          */
         $column_model   = array(
+            array('name'=>'session',   'index'=>'session_name',  'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
             array('name'=>'username',   'index'=>'username',  'align'=>'left', 'search' => 'true', 'wrap_cell' => "true"),
             array('name'=>'firstname',  'index'=>'firstname',    'align'=>'left', 'search' => 'true'),
             array('name'=>'lastname',   'index'=>'lastname',     'align'=>'left', 'search' => 'true'),
         );
-        //get dinamic column names
-        foreach ($lessons as $lesson_id => $lesson)
-        {
+
+        // Get dynamic column names
+        foreach ($lessons as $lesson_id => $lesson) {
             $column_model[] = array('name'=> $lesson['id'],   'index'=>$lesson['id'],    'align'=>'left', 'search' => 'true');
         }
 
-        $column_model[] = array('name'=>'total',   'index'=>'total',    'align'=>'left', 'search' => 'true');
+        $column_model[] = array(
+            'name' => 'total',
+            'index' => 'total',
+            'align' => 'left',
+            'search' => 'true'
+        );
 
         $action_links = '';
         // jqgrid will use this URL to do the selects
@@ -340,8 +348,10 @@ class MySpace {
                 });
             });</script>';
         $return .= Display::grid_html($tableId);
+
         return $return;
     }
+
     /**
      * Display a sortable table that contains an overview off all the progress of the user in a session
      * @param   int $sessionId  The session ID
@@ -351,7 +361,8 @@ class MySpace {
      * @return  string  HTML array of results formatted for gridJS
      * @author César Perales <cesar.perales@beeznest.com>, Beeznest Team
      */
-    static function display_tracking_exercise_progress_overview($sessionId = 0, $courseId = 0, $exerciseId = 0, $date_from, $date_to) {
+    static function display_tracking_exercise_progress_overview($sessionId = 0, $courseId = 0, $exerciseId = 0, $date_from, $date_to)
+    {
         /**
          * Column names
          * The column order is important. Check $column variable in the main/inc/ajax/model.ajax.php file
@@ -497,7 +508,6 @@ class MySpace {
 
         return $return;
     }
-
 
     /**
      * Display a sortable table that contains an overview off all the progress of the session
@@ -684,8 +694,8 @@ class MySpace {
      * Display a sortable table that contains an overview off all the progress of the user in a session
      * @author César Perales <cesar.perales@beeznest.com>, Beeznest Team
      */
-    function display_survey_overview($sessionId = 0, $courseId = 0, $surveyId = 0, $date_from, $date_to) {
-
+    function display_survey_overview($sessionId = 0, $courseId = 0, $surveyId = 0, $date_from, $date_to)
+    {
         $course = api_get_course_info_by_id($courseId);
         /**
          * Column name
@@ -747,11 +757,13 @@ class MySpace {
         $return .= Display::grid_html($tableId);
         return $return;
     }
+
     /**
      * Display a sortable table that contains an overview off all the progress of the user in a session
      * @author César Perales <cesar.perales@beeznest.com>, Beeznest Team
      */
-    static function display_tracking_progress_overview($sessionId = 0, $courseId = 0,  $date_from, $date_to) {
+    static function display_tracking_progress_overview($sessionId = 0, $courseId = 0,  $date_from, $date_to)
+    {
 
        //The order is important you need to check the the $column variable in the model.ajax.php file
         $columns = array(
@@ -913,12 +925,14 @@ class MySpace {
         $return .= Display::grid_html($tableId);
         return $return;
     }
+
     /**
      * Display a sortable table that contains an overview off all the access to a session
      * @author César Perales <cesar.perales@beeznest.com>, Beeznest Team
      * @version Chamilo 1.9.6
      */
-    static function display_tracking_access_overview($sessionId = 0, $courseId = 0, $studentId = '', $profile = '', $date_from, $date_to) {
+    static function display_tracking_access_overview($sessionId = 0, $courseId = 0, $studentId = '', $profile = '', $date_from, $date_to)
+    {
         //The order is important you need to check the the $column variable in the model.ajax.php file
         $columns = array(
             get_lang('LoginDate'),
@@ -970,15 +984,6 @@ class MySpace {
         $return .= Display::grid_html($tableId);
         return $return;
     }
-    /**
-     * get the numer of users on track_e_course_access
-     *
-     * @return integer
-     *
-     * @author César Perales <cesar.perales@beeznest.com>, Beeznest Team
-     * @version Chamilo 1.9.6
-     */
-
 
 	/**
 	 * Displays a form with all the additionally defined user fields of the profile
@@ -988,10 +993,9 @@ class MySpace {
 	 * @version Dokeos 1.8.6
 	 * @since November 2008
 	 */
-	function display_user_overview_export_options() {
+	function display_user_overview_export_options()
+    {
 		// include the user manager and formvalidator library
-
-
 		if ($_GET['export'] == 'options') {
 			// get all the defined extra fields
 			$extrafields = UserManager::get_extra_fields(0, 50, 5, 'ASC', false, 1);
@@ -1067,7 +1071,8 @@ class MySpace {
 	/**
 	 * Display a sortable table that contains an overview of all the reporting progress of all courses
 	 */
-	function display_tracking_course_overview() {
+	function display_tracking_course_overview()
+    {
 		//MySpace::display_user_overview_export_options();
 
 		$t_head .= '	<table style="width: 100%;border:0;padding:0;border-collapse:collapse;table-layout: fixed">';
@@ -1104,7 +1109,8 @@ class MySpace {
 	 *
 	 * @return integer Total number of courses
 	 */
-	public function get_total_number_courses() {
+	public function get_total_number_courses()
+    {
 		// database table definition
 		$main_course_table = Database :: get_main_table(TABLE_MAIN_COURSE);
 		return Database::count_rows($main_course_table);
@@ -1119,7 +1125,8 @@ class MySpace {
 	 * @param string Order direction
 	 * @return array Results
 	 */
-	public function get_course_data_tracking_overview($from, $number_of_items, $column, $direction) {
+	public function get_course_data_tracking_overview($from, $number_of_items, $column, $direction)
+    {
 		$main_course_table = Database :: get_main_table(TABLE_MAIN_COURSE);
         $from = intval($from);
         $number_of_items = intval($number_of_items);
@@ -1143,7 +1150,8 @@ class MySpace {
 	 * @param array $row the row information (the other columns)
 	 * @return string html code
 	 */
-	function course_tracking_filter($course_code, $url_params, $row) {
+	function course_tracking_filter($course_code, $url_params, $row)
+    {
 		$course_code = $row[0];
 		// the table header
 		$return .= '<table class="data_table" style="width: 100%;border:0;padding:0;border-collapse:collapse;table-layout: fixed">';
@@ -1246,7 +1254,8 @@ class MySpace {
 	 * This function exports the table that we see in display_tracking_course_overview()
 	 *
 	 */
-	function export_tracking_course_overview() {
+	function export_tracking_course_overview()
+    {
 		// database table definition
 		$tbl_course_rel_user = Database :: get_main_table(TABLE_MAIN_COURSE_USER);
 		$tbl_course = Database :: get_main_table(TABLE_MAIN_COURSE);
@@ -1387,7 +1396,8 @@ class MySpace {
 	 * Display a sortable table that contains an overview of all the reporting progress of all sessions and all courses the user is subscribed to
 	 * @author Guillaume Viguier <guillaume@viguierjust.com>
 	 */
-	function display_tracking_session_overview() {
+	function display_tracking_session_overview()
+    {
 		//MySpace::display_user_overview_export_options();
 
 		$t_head .= '	<table style="width: 100%;border:0;padding:0;border-collapse:collapse;table-layout: fixed">';
@@ -1425,7 +1435,8 @@ class MySpace {
 	 *
 	 * @return integer Total number of sessions
 	 */
-	public function get_total_number_sessions() {
+	public function get_total_number_sessions()
+    {
 		// database table definition
 		$main_session_table = Database :: get_main_table(TABLE_MAIN_SESSION);
 		return Database::count_rows($main_session_table);
@@ -1440,7 +1451,8 @@ class MySpace {
 	 * @param string Order direction
 	 * @return array Results
 	 */
-	public function get_session_data_tracking_overview($from, $number_of_items, $column, $direction) {
+	public function get_session_data_tracking_overview($from, $number_of_items, $column, $direction)
+    {
 		//global $_configuration;
 		// database table definition
 		//$access_url_id = api_get_current_access_url_id();
@@ -1476,7 +1488,8 @@ class MySpace {
 	 * @param array $row the row information (the other columns)
 	 * @return string html code
 	 */
-	function session_tracking_filter($session_id, $url_params, $row) {
+	function session_tracking_filter($session_id, $url_params, $row)
+    {
 		$session_id = $row[0];
 		// the table header
 		$return .= '<table class="data_table" style="width: 100%;border:0;padding:0;border-collapse:collapse;table-layout: fixed">';
@@ -1602,7 +1615,8 @@ class MySpace {
 	 * This function exports the table that we see in display_tracking_session_overview()
 	 *
 	 */
-	function export_tracking_session_overview() {
+	function export_tracking_session_overview()
+    {
             // database table definition
             $tbl_session_rel_course = Database :: get_main_table(TABLE_MAIN_SESSION_COURSE);
             $tbl_course = Database :: get_main_table(TABLE_MAIN_COURSE);
@@ -1626,7 +1640,7 @@ class MySpace {
             } else {
                 $direction = 'ASC';
             }
-            
+
             $numberOfItems = MySpace::get_total_number_sessions();
             $session_data = MySpace::get_session_data_tracking_overview($from, $numberOfItems, $orderby, $direction);
 
@@ -1647,15 +1661,15 @@ class MySpace {
             $csv_row[] = get_lang('TotalExercisesScorePercentage', '');
             $csv_row[] = get_lang('LatestLogin', '');
             $csv_content[] = $csv_row;
-            
+
             // the other lines (the data)
             foreach ($session_data as $key => $session) {
                 $session_id = $session[0];
                 $session_title = $session[1];
 
                 // getting all the courses of the session
-                $sql = "SELECT * FROM $tbl_course AS c 
-                        INNER JOIN $tbl_session_rel_course AS sc ON sc.course_code = c.code 
+                $sql = "SELECT * FROM $tbl_course AS c
+                        INNER JOIN $tbl_session_rel_course AS sc ON sc.course_code = c.code
                         WHERE sc.id_session = '".$session_id."';";
                 $result = Database::query($sql);
                 while ($row = Database::fetch_object($result)) {
@@ -1663,8 +1677,8 @@ class MySpace {
                     $csv_row[] = $session_title;
                     $csv_row[] = $row->title;
                     // get the users in the course
-                    $sql = "SELECT user_id FROM $tbl_user AS u 
-                            INNER JOIN $tbl_session_rel_course_rel_user AS scu ON u.user_id = scu.id_user 
+                    $sql = "SELECT user_id FROM $tbl_user AS u
+                            INNER JOIN $tbl_session_rel_course_rel_user AS scu ON u.user_id = scu.id_user
                             WHERE scu.id_session = '".$session_id."' AND scu.course_code = '".$row->code."';";
                     $result_users = Database::query($sql);
                     $time_spent = 0;

@@ -508,28 +508,16 @@ class SessionManager
         $session_course_user = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
         $user = Database::get_main_table(TABLE_MAIN_USER);
         $tbl_course_lp_view = Database::get_course_table(TABLE_LP_VIEW);
+        $sessionTable = Database::get_main_table(TABLE_MAIN_SESSION);
 
         $course = api_get_course_info_by_id($courseId);
 
-
-        //getting all the students of the course
-        //we are not using this because it only returns user ids
-        /* if (empty($sessionId)
-          {
-          // Registered students in a course outside session.
-          $users = CourseManager :: get_student_list_from_course_code($course_code);
-          } else {
-          // Registered students in session.
-          $users = CourseManager :: get_student_list_from_course_code($course_code, true, $sessionId);
-          } */
-
-        $sessionCond = 'and id_session = %s';
+        $sessionCond = ' AND s.id_session = %s';
         if ($sessionId == 'T') {
             $sessionCond = "";
         }
 
-        $where = " WHERE course_code = '%s'
-        AND s.status <> 2 $sessionCond";
+        $where = " WHERE course_code = '%s' AND s.status <> 2 $sessionCond";
 
         $limit = null;
         if (!empty($options['limit'])) {
@@ -545,52 +533,53 @@ class SessionManager
             $order = " ORDER BY " . $options['order'];
         }
 
-        $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, u.email, s.course_code
-        FROM $session_course_user s
-        INNER JOIN $user u ON u.user_id = s.id_user
-        $where $order $limit";
+        $sql = "SELECT u.user_id, u.lastname, u.firstname, u.username, u.email, s.course_code, s.id_session, ss.name
+                FROM $session_course_user s
+                INNER JOIN $user u ON u.user_id = s.id_user
+                INNER JOIN $sessionTable ss ON (ss.id = s.id_session)
+                $where
+                $order
+                $limit";
 
         $sql_query = sprintf($sql, $course['code'], $sessionId);
 
         $rs = Database::query($sql_query);
+        $users = array();
         while ($user = Database::fetch_array($rs)) {
             $users[$user['user_id']] = $user;
         }
 
-        //Get lessons
-        require_once api_get_path(SYS_CODE_PATH) . 'newscorm/learnpathList.class.php';
+        // Get lessons.
+        require_once api_get_path(SYS_CODE_PATH).'newscorm/learnpathList.class.php';
         $lessons = LearnpathList::get_course_lessons($course['code'], $sessionId);
 
         $table = array();
         foreach ($users as $user) {
             $data = array(
-                'lastname' => $user[1],
-                'firstname' => $user[2],
-                'username' => $user[3],
+                'session_name' => $user['name'],
+                'lastname' => $user['lastname'],
+                'firstname' => $user['firstname'],
+                'username' => $user['username'],
             );
 
-            $sessionCond = 'AND v.session_id = %d';
+            $sessionCond = ' AND v.session_id = %d';
             if ($sessionId == 'T') {
                 $sessionCond = "";
             }
 
-            //Get lessons progress by user
+            // Get lessons progress by user.
             $sql = "SELECT v.lp_id as id, v.progress
-            FROM  $tbl_course_lp_view v
-            WHERE v.c_id = %d
-            AND v.user_id = %d
+                    FROM $tbl_course_lp_view v
+                    WHERE v.c_id = %d AND v.user_id = %d
             $sessionCond";
-
             $sql_query = sprintf($sql, $courseId, $user['user_id'], $sessionId);
-
             $result = Database::query($sql_query);
-
             $user_lessons = array();
             while ($row = Database::fetch_array($result)) {
                 $user_lessons[$row['id']] = $row;
             }
 
-            //Match course lessons with user progress
+            // Match course lessons with user progress.
             $progress = 0;
             $count = 0;
             foreach ($lessons as $lesson) {

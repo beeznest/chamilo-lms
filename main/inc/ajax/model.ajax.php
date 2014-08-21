@@ -768,8 +768,7 @@ switch ($action) {
         break;
     case 'get_session_lp_progress':
         $sessionId = 0;
-        if (!empty($_GET['course_id']))
-        {
+        if (!empty($_GET['course_id'])) {
             $sessionId  = $_GET['session_id'] == 'T' ? 'T' : intval($_GET['session_id']);
             $courseId   = intval($_GET['course_id']);
             $course     = api_get_course_info_by_id($courseId);
@@ -782,14 +781,15 @@ switch ($action) {
          *
          */
         $columns = array(
+            'session_name',
             'username',
             'firstname',
             'lastname',
         );
+
         require_once api_get_path(SYS_CODE_PATH).'newscorm/learnpathList.class.php';
         $lessons = LearnpathList::get_course_lessons($course['code'], $sessionId);
-        foreach ($lessons as $lesson_id => $lesson)
-        {
+        foreach ($lessons as $lesson_id => $lesson) {
             $columns[] = $lesson_id;
         }
         $columns[] = 'total';
