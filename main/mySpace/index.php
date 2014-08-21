@@ -46,8 +46,9 @@ $count_sessions 	= 0;
 $count_courses		= 0;
 $title 				= null;
 
-//Set Minimun Input Length = 3 used with Select2
+//Set Minimum Input Length = 3 used with Select2
 $minimumInputLength = 3;
+$minimumInputLengthCategory = 1;
 
 // Access control
 api_block_anonymous_users();
@@ -742,7 +743,7 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
         } else {
             if ($display == 'student_progress_report') {
                 $url = $ajax_path . 'course.ajax.php?a=search_category';
-                $sessionFilter->addElement('select_ajax', 'category_code', get_lang('Category'), null, array('url' => $url, 'defaults' => '', 'width' => '400px', 'minimumInputLength' => $minimumInputLength));
+                $sessionFilter->addElement('select_ajax', 'category_code', get_lang('Category'), null, array('url' => $url, 'defaults' => '', 'width' => '400px', 'minimumInputLength' => $minimumInputLengthCategory));
             }
             $url = $ajax_path . 'course.ajax.php?a='. $a .'&session_id=' . $sessionId;
             $sessionFilter->addElement('select_ajax', 'course_name', get_lang('SearchCourse'), null, array('url' => $url, 'defaults' => $courseList, 'width' => '400px', 'minimumInputLength' => $minimumInputLength));
@@ -870,7 +871,6 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
         }
 
         $url = $ajax_path . 'course.ajax.php?a='. $a .'&session_id=' . $sessionId;
-
         echo '<script>
         $(function() {
             if (display == "lpprogressoverview" || display == "progressoverview" || display == "surveyoverview") {
