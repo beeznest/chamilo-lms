@@ -1048,7 +1048,7 @@ class Tracking
                 if (!$return_array) {
                     $avg_progress = round($sum / $number_items, 1);
                     if ($divideWithUsers) {
-                        $avg_progress = round($avg_progress / count($student_id), 2).'%';
+                        $avg_progress = round($avg_progress / count($student_id), 2);
                     }
                     return $avg_progress.'%';
                 } else {
@@ -4521,7 +4521,7 @@ class Tracking
                 $firstName = $coachInfo['firstname'];
                 $lastName = $coachInfo['lastname'];
             }
-            //var_dump($session);
+
             $gridData[] = array(
                 'session_id' => $session['id'],
                 'course_id' => $course['code'],
