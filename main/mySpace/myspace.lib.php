@@ -290,7 +290,8 @@ class MySpace
 
         // Add lessons of course
         require_once api_get_path(SYS_CODE_PATH).'newscorm/learnpathList.class.php';
-        $lessons = LearnpathList::get_course_lessons($course['code'], $sessionId);
+        $intSessionId = $sessionId == 'T' ? 0 : $sessionId;
+        $lessons = LearnpathList::get_course_lessons($course['code'], $intSessionId);
 
         // Create columns array
         foreach ($lessons as $lesson_id => $lesson) {

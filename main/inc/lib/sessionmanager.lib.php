@@ -549,9 +549,11 @@ class SessionManager
             $users[$user['user_id']] = $user;
         }
 
+        $intSessionId = $sessionId  == 'T' ? 0 : $sessionId;
+
         // Get lessons.
         require_once api_get_path(SYS_CODE_PATH).'newscorm/learnpathList.class.php';
-        $lessons = LearnpathList::get_course_lessons($course['code'], $sessionId);
+        $lessons = learnpathList::get_course_lessons($course['code'], $intSessionId);
 
         $table = array();
         foreach ($users as $user) {
@@ -579,15 +581,32 @@ class SessionManager
                 $user_lessons[$row['id']] = $row;
             }
 
+            // Getting LP list from the user
+            $lpListForUser = new learnpathList(
+                $user['user_id'],
+                $course['code'],
+                $intSessionId
+            );
+
+            if (!empty($lpListForUser)) {
+                $lpListForUser = array_keys($lpListForUser->list);
+            }
+
             // Match course lessons with user progress.
             $progress = 0;
             $count = 0;
+            // Teacher LP list
             foreach ($lessons as $lesson) {
-                $data[$lesson['id']] = (!empty($user_lessons[$lesson['id']]['progress'])) ? $user_lessons[$lesson['id']]['progress'] : 0;
-                $progress += $data[$lesson['id']];
-                $data[$lesson['id']] = $data[$lesson['id']] . '%';
-                $count++;
+                if (in_array($lesson['id'], $lpListForUser)) {
+                    $data[$lesson['id']] = (!empty($user_lessons[$lesson['id']]['progress'])) ? $user_lessons[$lesson['id']]['progress'] : 0;
+                    $progress += $data[$lesson['id']];
+                    $count++;
+                    $data[$lesson['id']] = $data[$lesson['id']] . '%';
+                } else {
+                    $data[$lesson['id']] = '--';
+                }
             }
+
             if ($count == 0) {
                 $data['total'] = 0;
             } else {

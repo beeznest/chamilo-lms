@@ -63,10 +63,10 @@ class learnpathList
         $time_conditions = '';
 
         if ($check_publication_dates) {
-            $time_conditions = " AND ( (publicated_on <> '0000-00-00 00:00:00' AND publicated_on < '$now'  AND expired_on <> '0000-00-00 00:00:00'  AND expired_on > '$now' )  OR 
+            $time_conditions = " AND ( (publicated_on <> '0000-00-00 00:00:00' AND publicated_on < '$now'  AND expired_on <> '0000-00-00 00:00:00'  AND expired_on > '$now' )  OR
                         (publicated_on <> '0000-00-00 00:00:00'  AND publicated_on < '$now'  AND expired_on = '0000-00-00 00:00:00') OR
-                        (publicated_on = '0000-00-00 00:00:00'   AND expired_on <> '0000-00-00 00:00:00' AND expired_on > '$now') OR                        
-                        (publicated_on = '0000-00-00 00:00:00'   AND expired_on = '0000-00-00 00:00:00' )) 
+                        (publicated_on = '0000-00-00 00:00:00'   AND expired_on <> '0000-00-00 00:00:00' AND expired_on > '$now') OR
+                        (publicated_on = '0000-00-00 00:00:00'   AND expired_on = '0000-00-00 00:00:00' ))
             ";
         }
 
@@ -177,14 +177,20 @@ class learnpathList
      *  @param int  Id of session
      *  @return array List of lessons with lessons id as keys
      */
-    static function get_course_lessons($course_code, $session_id)
+    static function get_course_lessons($course_code, $session_id = null)
     {
         $tbl_course_lp = Database::get_course_table(TABLE_LP_MAIN);
-
         $course = api_get_course_info($course_code);
-        //QUery
+        $sessionCondition = null;
+        if (!empty($session_id)) {
+            $sessionCondition = api_get_session_condition(
+                $session_id,
+                true,
+                false
+            );
+        }
         $sql = "SELECT * FROM $tbl_course_lp
-        WHERE c_id = %s ";  //TODO AND session_id = %s ? 
+                WHERE c_id = %s $sessionCondition ";  //TODO AND session_id = %s ?
         $sql_query = sprintf($sql, $course['real_id']);
         $result = Database::query($sql_query);
 
@@ -228,7 +234,7 @@ class learnpathList
                 $units[$row['option_value']]['lp_id'] = $lpId;
             }
         }
-        
+
         return $units;
     }
 
