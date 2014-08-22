@@ -25,11 +25,16 @@ require_once api_get_path(SYS_CODE_PATH).'survey/survey.lib.php';
 
 api_block_anonymous_users();
 
-if (!api_is_allowed_to_create_course() && !api_is_session_admin() && !api_is_drh() && !api_is_course_manager_admin()) {
-    // Check if the user is tutor of the course
-    $user_course_status = CourseManager::get_tutor_in_course_status(api_get_user_id(), api_get_course_id());
-    if ($user_course_status != 1) {
-        api_not_allowed(true);
+if (!api_is_platform_admin()) {
+    if (!api_is_allowed_to_create_course() && !api_is_session_admin() && !api_is_drh() && !api_is_course_manager_admin()) {
+        // Check if the user is tutor of the course
+        $user_course_status = CourseManager::get_tutor_in_course_status(
+            api_get_user_id(),
+            api_get_course_id()
+        );
+        if ($user_course_status != 1) {
+            api_not_allowed(true);
+        }
     }
 }
 
