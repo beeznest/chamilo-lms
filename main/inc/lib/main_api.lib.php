@@ -2033,7 +2033,6 @@ function api_get_session_visibility($session_id, $course_code = null, $ignore_vi
             $visibility = SESSION_INVISIBLE;
         }
     }
-    error_log($visibility. ' ' .$session_id);
     return $visibility;
 }
 
