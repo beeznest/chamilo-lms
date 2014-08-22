@@ -311,12 +311,16 @@ if ($time_control) {
 
 			// First we update the attempt to today
 			// How the expired time is changed into "track_e_exercices" table,then the last attempt for this student should be changed too,so
-	        $sql_track_e_exe = "UPDATE $exercice_attemp_table SET tms = '".api_get_utc_datetime()."' WHERE exe_id = '".$exercise_stat_info['exe_id']."' AND tms = '".$last_attempt_date."' ";
+	        $sql = "UPDATE $exercice_attemp_table SET
+	                tms = '".api_get_utc_datetime()."'
+	                WHERE
+	                    exe_id = '".$exercise_stat_info['exe_id']."' AND
+	                    tms = '".$last_attempt_date."' ";
 	        if ($debug) {error_log('7.10. $sql_track_e_exe2: '.$sql_track_e_exe); }
-	        Database::query($sql_track_e_exe);
+	        Database::query($sql);
 
 	        //Sessions  that contain the expired time
-	        $_SESSION['expired_time'][$current_expired_time_key] 		= $clock_expired_time;
+	        $_SESSION['expired_time'][$current_expired_time_key] = $clock_expired_time;
 	        if ($debug) {error_log('7.11. Setting the $_SESSION[expired_time]: '.$_SESSION['expired_time'][$current_expired_time_key] ); };
         }
     } else {
@@ -764,7 +768,7 @@ if (!empty($error)) {
 
             $(function() {
     			//$(".exercise_save_now_button").hide();
-    		    $(".main_question").mouseover(function() {
+                $(".main_question").mouseover(function() {
     		    	//$(this).find(".exercise_save_now_button").show();
     		    	//$(this).addClass("question_highlight");
                 });
@@ -775,12 +779,18 @@ if (!empty($error)) {
                 });
 
                 $(".no_remind_highlight").hide();
+
+		    // if the users validates the form using return key, prevent form action and simulates click on validation button
+		    $("#exercise_form").submit(function(){
+			    $(".question-validate-btn").first().trigger("click");
+			    return false;
+		    });
     		});
 
-			function previous_question(question_num) {
-				url = "exercise_submit.php?'.$params.'&num="+question_num;
-				window.location = url;
-			}
+		function previous_question(question_num) {
+			url = "exercise_submit.php?'.$params.'&num="+question_num;
+			window.location = url;
+		}
 
             function previous_question_and_save(previous_question_id, question_id_to_save) {
                 url = "exercise_submit.php?'.$params.'&num="+previous_question_id;

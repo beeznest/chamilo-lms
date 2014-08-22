@@ -217,9 +217,6 @@ if (!empty($attempts)) {
 }
 
 if ($objExercise->selectAttempts()) {
-	if ($is_allowed_to_edit) {
-		//$options.= Display::div(get_lang('ExerciseAttempts').' '.$objExercise->selectAttempts(), array('class'=>'right_option'));
-	}
     $attempt_message = get_lang('Attempts').' '.$counter.' / '.$objExercise->selectAttempts();
 
 	if ($counter == $objExercise->selectAttempts()) {
@@ -229,15 +226,14 @@ if ($objExercise->selectAttempts()) {
     }
     if ($visible_return['value'] == true) {
         $message .=   $attempt_message;
-    }
-	//$options.= $attempt_message; //Display::div($attempt_message, array('class'=>"offset2 span2"));
+    }	
 }
 
 if ($time_control) {
     $html.= $objExercise->return_time_left_div();
 }
 
-$html .=  $message;
+$html .= $message;
 
 if (!empty($exercise_url_button)) {
     $html .=  Display::div(Display::div($exercise_url_button, array('class'=>'exercise_overview_options span12')), array('class'=>' row'));
