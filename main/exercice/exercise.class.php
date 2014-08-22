@@ -1792,12 +1792,13 @@ class Exercise
                     buttons: {
                         '".addslashes(get_lang("EndTest"))."': function() {
                             $('#clock_warning').dialog('close');
-                        },
+                        }
                     },
                     close: function() {
                         send_form();
                     }
                 });
+
                 $('#clock_warning').dialog('open');
 
                 $('#counter_to_redirect').epiclock({
@@ -2113,13 +2114,11 @@ class Exercise
         $answer_correct_array = array();
 
         for ($answerId = 1; $answerId <= $nbrAnswers; $answerId++) {
-            $answer             = $objAnswerTmp->selectAnswer($answerId);
-            $answerComment      = $objAnswerTmp->selectComment($answerId);
-            $answerCorrect      = $objAnswerTmp->isCorrect($answerId);
-            $answerWeighting    = (float)$objAnswerTmp->selectWeighting($answerId);
-
-            $numAnswer          = $objAnswerTmp->selectAutoId($answerId);
-
+            $answer = $objAnswerTmp->selectAnswer($answerId);
+            $answerComment = $objAnswerTmp->selectComment($answerId);
+            $answerCorrect = $objAnswerTmp->isCorrect($answerId);
+            $answerWeighting = (float)$objAnswerTmp->selectWeighting($answerId);
+            $numAnswer = $objAnswerTmp->selectAutoId($answerId);
             $answer_correct_array[$answerId] = (bool)$answerCorrect;
 
             if ($debug) {
@@ -2136,9 +2135,12 @@ class Exercise
                 case UNIQUE_ANSWER:
                 case UNIQUE_ANSWER_NO_OPTION:
                     if ($from_database) {
-                        $queryans = "SELECT answer FROM ".$TBL_TRACK_ATTEMPT." WHERE exe_id = '".$exeId."' and question_id= '".$questionId."'";
-                        $resultans = Database::query($queryans);
-                        $choice = Database::result($resultans,0,"answer");
+                        $sql = "SELECT answer FROM $TBL_TRACK_ATTEMPT
+                                WHERE
+                                    exe_id = '".$exeId."' AND
+                                    question_id= '".$questionId."'";
+                        $result = Database::query($sql);
+                        $choice = Database::result($result,0,"answer");
 
                         $studentChoice = ($choice == $numAnswer)?1:0;
                         if ($studentChoice) {
@@ -2146,7 +2148,7 @@ class Exercise
                             $totalScore+=$answerWeighting;
                         }
                     } else {
-                        $studentChoice = ($choice == $numAnswer)?1:0;
+                        $studentChoice = ($choice == $numAnswer) ? 1 : 0;
                         if ($studentChoice) {
                             $questionScore+=$answerWeighting;
                             $totalScore+=$answerWeighting;
@@ -2172,13 +2174,13 @@ class Exercise
                     }
 
                     if (!empty($studentChoice)) {
-                        if ($studentChoice == $answerCorrect ) {
-                            $questionScore  += $true_score;
+                        if ($studentChoice == $answerCorrect) {
+                            $questionScore += $true_score;
                         } else {
                             if ($quiz_question_options[$studentChoice]['name'] != "Don't know") {
-                                $questionScore   +=  $false_score;
+                                $questionScore += $false_score;
                             } else {
-                                $questionScore  +=  $doubt_score;
+                                $questionScore += $doubt_score;
                             }
                         }
                     } else {
@@ -2191,7 +2193,8 @@ class Exercise
                 case MULTIPLE_ANSWER: //2
                     if ($from_database) {
                         $choice = array();
-                        $queryans = "SELECT answer FROM ".$TBL_TRACK_ATTEMPT." WHERE exe_id = '".$exeId."' AND question_id= '".$questionId."'";
+                        $queryans = "SELECT answer FROM ".$TBL_TRACK_ATTEMPT."
+                                     WHERE exe_id = '".$exeId."' AND question_id= '".$questionId."'";
                         $resultans = Database::query($queryans);
                         while ($row = Database::fetch_array($resultans)) {
                             $ind = $row['answer'];
@@ -2434,8 +2437,7 @@ class Exercise
                                 $totalScore += $answerWeighting[$i];
                                 // adds the word in green at the end of the string
                                 $answer .= $user_tags[$i];
-                            }
-                            elseif (!empty ($user_tags[$i])) {
+                            } elseif (!empty ($user_tags[$i])) {
                                 // else if the word entered by the student IS NOT the same as the one defined by the professor
                                 // adds the word in red at the end of the string, and strikes it
                                 $answer .= '<font color="red"><s>' . $user_tags[$i] . '</s></font>';
@@ -2592,7 +2594,7 @@ class Exercise
                                 $totalScore     += $answerWeighting;
                             }
                         }
-                    }  else {
+                    } else {
                         $studentChoice = $choice[$answerId];
                         if ($studentChoice) {
                             $questionScore  += $answerWeighting;
@@ -2617,7 +2619,13 @@ class Exercise
                     if ($from_database) {
                         // getting the user answer
                         $TBL_TRACK_HOTSPOT = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_HOTSPOT);
-                        $query   = "SELECT hotspot_correct, hotspot_coordinate from ".$TBL_TRACK_HOTSPOT." where hotspot_exe_id = '".$exeId."' and hotspot_question_id= '".$questionId."' AND hotspot_answer_id='1'"; //by default we take 1 because it's a delineation
+                        $query   = "SELECT hotspot_correct, hotspot_coordinate
+                                    FROM $TBL_TRACK_HOTSPOT
+                                    WHERE
+                                        hotspot_exe_id = '".$exeId."' AND
+                                        hotspot_question_id= '".$questionId."' AND
+                                        hotspot_answer_id='1'";
+                        //by default we take 1 because it's a delineation
                         $resq    = Database::query($query);
                         $row     = Database::fetch_array($resq,'ASSOC');
 
@@ -3349,9 +3357,11 @@ class Exercise
 
         if ($saved_results) {
             $stat_table = Database :: get_statistic_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
-            $sql_update = 'UPDATE ' . $stat_table . ' SET exe_result = exe_result + ' . floatval($questionScore) . ' WHERE exe_id = ' . $exeId;
-            if ($debug) error_log($sql_update);
-            Database::query($sql_update);
+            $sql = 'UPDATE ' . $stat_table . ' SET
+                        exe_result = exe_result + ' . floatval($questionScore) . '
+                    WHERE exe_id = ' . $exeId;
+            if ($debug) error_log($sql);
+            Database::query($sql);
         }
 
         $return_array = array(
@@ -3419,10 +3429,10 @@ class Exercise
         }
 
         if (!empty($open_question_list)) {
-            $msg .=  '<p><br />'.get_lang('OpenQuestionsAttemptedAre').' :</p>
+            $msg .= '<p><br />'.get_lang('OpenQuestionsAttemptedAre').' :</p>
                     <table width="730" height="136" border="0" cellpadding="3" cellspacing="3">';
             $msg .= $open_question_list;
-            $msg.='</table><br />';
+            $msg .= '</table><br />';
 
 
             $msg1   = str_replace("#exercise#",    $this->exercise, $msg);
@@ -3432,7 +3442,7 @@ class Exercise
             $msg    = str_replace("#course#",      $course_info['name'],$msg1);
 
             if ($origin != 'learnpath') {
-                $msg.= get_lang('ClickToCommentAndGiveFeedback').', <br />
+                $msg .= get_lang('ClickToCommentAndGiveFeedback').', <br />
                             <a href="#url#">#url#</a>';
             }
             $msg1 = str_replace("#url#", $url_email, $msg);
@@ -3607,15 +3617,26 @@ class Exercise
     public function get_exercise_result($exe_id) {
         $result = array();
         $track_exercise_info = get_exercise_track_exercise_info($exe_id);
+
         if (!empty($track_exercise_info)) {
+            $totalScore = 0;
             $objExercise = new Exercise();
             $objExercise->read($track_exercise_info['exe_exo_id']);
             if (!empty($track_exercise_info['data_tracking'])) {
                 $question_list = explode(',', $track_exercise_info['data_tracking']);
             }
             foreach ($question_list as $questionId) {
-                $question_result = $objExercise->manage_answer($exe_id, $questionId, '','exercise_show', array(), false, true, false, $objExercise->selectPropagateNeg());
-                $questionScore   = $question_result['score'];
+                $question_result = $objExercise->manage_answer(
+                    $exe_id,
+                    $questionId,
+                    '',
+                    'exercise_show',
+                    array(),
+                    false,
+                    true,
+                    false,
+                    $objExercise->selectPropagateNeg()
+                );
                 $totalScore      += $question_result['score'];
             }
 
@@ -3634,7 +3655,12 @@ class Exercise
      *  Checks if the exercise is visible due a lot of conditions - visibility, time limits, student attempts
      * @return bool true if is active
      */
-    public function is_visible($lp_id = 0, $lp_item_id = 0 , $lp_item_view_id = 0, $filter_by_admin = true) {
+    public function is_visible(
+        $lp_id = 0,
+        $lp_item_id = 0,
+        $lp_item_view_id = 0,
+        $filter_by_admin = true
+    ) {
         //1. By default the exercise is visible
         $is_visible = true;
         $message = null;
@@ -3657,12 +3683,18 @@ class Exercise
         if (empty($lp_id)) {
             //2.1 LP is OFF
             if ($this->active == 0) {
-                return array('value' => false, 'message' => Display::return_message(get_lang('ExerciseNotFound'), 'warning', false));
+                return array(
+                    'value' => false,
+                    'message' => Display::return_message(get_lang('ExerciseNotFound'), 'warning', false)
+                );
             }
         } else {
             //2.1 LP is loaded
             if ($this->active == 0 AND !learnpath::is_lp_visible_for_student($lp_id, api_get_user_id())) {
-                return array('value' => false, 'message' => Display::return_message(get_lang('ExerciseNotFound'), 'warning', false));
+                return array(
+                    'value' => false,
+                    'message' => Display::return_message(get_lang('ExerciseNotFound'), 'warning', false)
+                );
             }
         }
 
@@ -3689,25 +3721,47 @@ class Exercise
                 }
             }
             if ($is_visible == false && $this->start_time != '0000-00-00 00:00:00' && $this->end_time != '0000-00-00 00:00:00') {
-                $message =  sprintf(get_lang('ExerciseWillBeActivatedFromXToY'), api_convert_and_format_date($this->start_time), api_convert_and_format_date($this->end_time));
+                $message = sprintf(
+                    get_lang('ExerciseWillBeActivatedFromXToY'),
+                    api_convert_and_format_date($this->start_time),
+                    api_convert_and_format_date($this->end_time)
+                );
             }
         }
 
-        // 4. We check if the student have attempts
-        if ($is_visible) {
-            if ($this->selectAttempts() > 0) {
-                $attempt_count = get_attempt_count_not_finished(api_get_user_id(), $this->id, $lp_id, $lp_item_id, $lp_item_view_id);
+           // 4. We check if the student have attempts
+        $exerciseAttempts = $this->selectAttempts();
 
-                if ($attempt_count >= $this->selectAttempts()) {
-                    $message = sprintf(get_lang('ReachedMaxAttempts'), $this->name, $this->selectAttempts());
+        if ($is_visible) {
+            if ($exerciseAttempts > 0) {
+
+                $attempt_count = get_attempt_count_not_finished(
+                    api_get_user_id(),
+                    $this->id,
+                    $lp_id,
+                    $lp_item_id,
+                    $lp_item_view_id
+                );
+
+                if ($attempt_count >= $exerciseAttempts) {
+                    $message = sprintf(
+                        get_lang('ReachedMaxAttempts'),
+                        $this->name,
+                        $exerciseAttempts
+                    );
                     $is_visible = false;
                 }
             }
         }
+
         if (!empty($message)){
-            $message = Display :: return_message($message, 'warning', false);
+            $message = Display::return_message($message, 'warning', false);
         }
-        return array('value' => $is_visible, 'message' => $message);
+
+        return array(
+            'value' => $is_visible,
+            'message' => $message
+        );
     }
 
     public function added_in_lp()

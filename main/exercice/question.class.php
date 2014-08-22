@@ -1543,9 +1543,6 @@ abstract class Question
     static function get_course_medias($course_id, $start = 0, $limit = 100, $sidx = "question", $sord = "ASC", $where_condition = array()) {
         $table_question = Database::get_course_table(TABLE_QUIZ_QUESTION);
         $default_where = array('c_id = ? AND parent_id = 0 AND type = ?' => array($course_id, MEDIA_QUESTION));
-        if (!empty($where_condition)) {
-            //$where_condition
-        }
         $result = Database::select('*', $table_question,
             array(
                 'limit' => " $start, $limit",
