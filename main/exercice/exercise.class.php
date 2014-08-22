@@ -60,6 +60,7 @@ class Exercise
     public $is_gradebook_locked = false;
     public $exercise_was_added_in_lp = false;
     public $force_edit_exercise_in_lp = false;
+    public $sessionId = 0;
 
     /**
      * Constructor of the class
@@ -141,6 +142,7 @@ class Exercise
             $this->text_when_finished       = $object->text_when_finished;
             $this->display_category_name    = $object->display_category_name;
             $this->pass_percentage          = $object->pass_percentage;
+            $this->sessionId = $object->session_id;
 
             $this->is_gradebook_locked      = api_resource_is_locked_by_gradebook($id, LINK_EXERCISE);
 
@@ -948,11 +950,12 @@ class Exercise
         // Title.
         $form->addElement('text', 'exerciseTitle', get_lang('ExerciseName'), array('class' => 'span6','id'=>'exercise_title'));
 
-        $form->addElement('advanced_settings','
-			<a href="javascript://" onclick=" return show_media()">
+        $form->addElement('advanced_settings',
+            '<a href="javascript://" onclick=" return show_media()">
 				<span id="media_icon">
-					<img style="vertical-align: middle;" src="../img/looknfeel.png" alt="" /> '.addslashes(api_htmlentities(get_lang('ExerciseDescription'))).'
-					</span>
+					<img style="vertical-align: middle;" src="../img/looknfeel.png" alt="" />'.
+                    addslashes(api_htmlentities(get_lang('ExerciseDescription'))).'
+                </span>
 			</a>
 		');
 
@@ -1647,6 +1650,7 @@ class Exercise
         $new_array = array();
         if (Database::num_rows($result) > 0 ) {
             $new_array = Database::fetch_array($result, 'ASSOC');
+            $new_array['num_exe'] = Database::num_rows($result);
         }
         return $new_array;
     }
@@ -1971,38 +1975,54 @@ class Exercise
 
     /**
      * This function was originally found in the exercise_show.php
-     * @param   int     exe id
-     * @param   int     question id
-     * @param   int     the choice the user selected
-     * @param   array   the hotspot coordinates $hotspot[$question_id] = coordinates
-     * @param   string  function is called from 'exercise_show' or 'exercise_result'
-     * @param   bool    save results in the DB or just show the reponse
-     * @param   bool    gets information from DB or from the current selection
-     * @param   bool    show results or not
+     * @param int       $exeId
+     * @param int       $questionId
+     * @param int       $choice the user selected
+     * @param string    $from  function is called from 'exercise_show' or 'exercise_result'
+     * @param array     $exerciseResultCoordinates the hotspot coordinates $hotspot[$question_id] = coordinates
+     * @param bool      $saved_results save results in the DB or just show the reponse
+     * @param bool      $from_database gets information from DB or from the current selection
+     * @param bool      $show_result show results or not
+     * @param int       $propagate_neg
+     * @param array     $hotspot_delineation_result
+     *
      * @todo    reduce parameters of this function
      * @return  string  html code
      */
-    public function manage_answer($exeId, $questionId, $choice, $from = 'exercise_show', $exerciseResultCoordinates = array(), $saved_results = true, $from_database = false, $show_result = true, $propagate_neg = 0, $hotspot_delineation_result = array())
-    {
+    public function manage_answer(
+        $exeId,
+        $questionId,
+        $choice,
+        $from = 'exercise_show',
+        $exerciseResultCoordinates = array(),
+        $saved_results = true,
+        $from_database = false,
+        $show_result = true,
+        $propagate_neg = 0,
+        $hotspot_delineation_result = array()
+    ) {
         global $debug;
+        //needed in order to use in the exercise_attempt() for the time
         global $learnpath_id, $learnpath_item_id; //needed in order to use in the exercise_attempt() for the time
+        require_once api_get_path(LIBRARY_PATH).'geometry.lib.php';
 
         $feedback_type = $this->selectFeedbackType();
         $results_disabled = $this->selectResultsDisabled();
 
-        require_once api_get_path(LIBRARY_PATH).'geometry.lib.php';
-
-        if ($debug) error_log("<------ manage_answer ------> ");
-        if ($debug) error_log('manage_answer called exe_id: '.$exeId);
-        if ($debug) error_log('manage_answer $from:  '.$from);
-        if ($debug) error_log('manage_answer $saved_results: '.$saved_results);
-        if ($debug) error_log('manage_answer $from_database: '.$from_database);
-        if ($debug) error_log('manage_answer $show_result: '.$show_result);
-        if ($debug) error_log('manage_answer $propagate_neg: '.$propagate_neg);
-        if ($debug) error_log('manage_answer $exerciseResultCoordinates: '.print_r($exerciseResultCoordinates, 1));
-        if ($debug) error_log('manage_answer $hotspot_delineation_result: '.print_r($hotspot_delineation_result, 1));
-        if ($debug) error_log('manage_answer $learnpath_id: '.$learnpath_id);
-        if ($debug) error_log('manage_answer $learnpath_item_id: '.$learnpath_item_id);
+        if ($debug) {
+            error_log("<------ manage_answer ------> ");
+            error_log('exe_id: '.$exeId);
+            error_log('$from:  '.$from);
+            error_log('$saved_results: '.intval($saved_results));
+            error_log('$from_database: '.intval($from_database));
+            error_log('$show_result: '.$show_result);
+            error_log('$propagate_neg: '.$propagate_neg);
+            error_log('$exerciseResultCoordinates: '.print_r($exerciseResultCoordinates, 1));
+            error_log('$hotspot_delineation_result: '.print_r($hotspot_delineation_result, 1));
+            error_log('$learnpath_id: '.$learnpath_id);
+            error_log('$learnpath_item_id: '.$learnpath_item_id);
+            error_log('$choice: '.print_r($choice, 1));
+        }
 
         $extra_data = array();
         $final_overlap = 0;
@@ -2041,12 +2061,12 @@ class Exercise
 
         //Extra information of the question
         if (!empty($extra)) {
-            $extra          = explode(':', $extra);
+            $extra = explode(':', $extra);
             if ($debug) error_log(print_r($extra, 1));
             //Fixes problems with negatives values using intval
-            $true_score     = intval($extra[0]);
-            $false_score    = intval($extra[1]);
-            $doubt_score    = intval($extra[2]);
+            $true_score     = floatval(trim($extra[0]));
+            $false_score    = floatval(trim($extra[1]));
+            $doubt_score    = floatval(trim($extra[2]));
         }
 
         $totalWeighting 		= 0;
@@ -2159,19 +2179,22 @@ class Exercise
                 case MULTIPLE_ANSWER_TRUE_FALSE:
                     if ($from_database) {
                         $choice = array();
-                        $queryans = "SELECT answer FROM ".$TBL_TRACK_ATTEMPT." where exe_id = ".$exeId." and question_id = ".$questionId;
-                        $resultans = Database::query($queryans);
-                        while ($row = Database::fetch_array($resultans)) {
-                            $ind          = $row['answer'];
-                            $result       = explode(':',$ind);
-                            $my_answer_id = $result[0];
-                            $option       = $result[1];
+                        $sql = "SELECT answer FROM $TBL_TRACK_ATTEMPT
+                                WHERE
+                                    exe_id = $exeId AND
+                                    question_id = ".$questionId;
+
+                        $result = Database::query($sql);
+                        while ($row = Database::fetch_array($result)) {
+                            $ind = $row['answer'];
+                            $values = explode(':', $ind);
+                            $my_answer_id = $values[0];
+                            $option = $values[1];
                             $choice[$my_answer_id] = $option;
                         }
-                        $studentChoice  =$choice[$numAnswer];
-                    } else {
-                        $studentChoice  =$choice[$numAnswer];
                     }
+
+                    $studentChoice = isset($choice[$numAnswer]) ? $choice[$numAnswer] : null;
 
                     if (!empty($studentChoice)) {
                         if ($studentChoice == $answerCorrect) {
@@ -2371,22 +2394,29 @@ class Exercise
                         }
                         if ($from_database) {
                             $queryfill = "SELECT answer FROM ".$TBL_TRACK_ATTEMPT."
-                                          WHERE exe_id = '".$exeId."' AND question_id= '".Database::escape_string($questionId)."'";
+                                          WHERE
+                                            exe_id = '".$exeId."' AND
+                                            question_id= '".Database::escape_string($questionId)."'";
                             $resfill = Database::query($queryfill);
-                            $str = Database::result($resfill,0,'answer');
+                            $str = Database::result($resfill, 0, 'answer');
 
                             api_preg_match_all('#\[([^[]*)\]#', $str, $arr);
                             $str = str_replace('\r\n', '', $str);
                             $choice = $arr[1];
 
-                            $tmp = api_strrpos($choice[$j],' / ');
-                            $choice[$j] = api_substr($choice[$j],0,$tmp);
-                            $choice[$j] = trim($choice[$j]);
+                            if (isset($choice[$j])) {
+                                $tmp = api_strrpos($choice[$j], ' / ');
+                                $choice[$j] = api_substr($choice[$j], 0, $tmp);
+                                $choice[$j] = trim($choice[$j]);
 
                             //Needed to let characters ' and " to work as part of an answer
-                            $choice[$j] = stripslashes($choice[$j]);
+                                $choice[$j] = stripslashes($choice[$j]);
+                            } else {
+                                $choice[$j] = null;
+                            }
                         } else {
-                            $choice[$j] = trim($choice[$j]);
+			    // This value is the user input, not escaped while correct answer is escaped by fckeditor
+			    $choice[$j] = api_htmlentities(trim($choice[$j]));
                         }
 
                         //No idea why we api_strtolower user reponses
@@ -2423,7 +2453,7 @@ class Exercise
                                 $answer .= '<font color="red"><s>' . $user_tags[$i] . '</s></font>';
                             } else {
                                 // adds a tabulation if no word has been typed by the student
-                                $answer .= '&nbsp;&nbsp;&nbsp;';
+                                $answer .= ''; // remove &nbsp; that causes issue
                             }
                         } else {
                             // switchable fill in the blanks
@@ -2443,7 +2473,7 @@ class Exercise
                                 $answer .= '<font color="red"><s>' . $user_tags[$i] . '</s></font>';
                             } else {
                                 // adds a tabulation if no word has been typed by the student
-                                $answer .= '&nbsp;&nbsp;&nbsp;';
+                                $answer .= '';  // remove &nbsp; that causes issue
                             }
                         }
                         // adds the correct word, followed by ] to close the blank
@@ -2583,16 +2613,19 @@ class Exercise
                     }
                 case HOT_SPOT :
                     if ($from_database) {
-                        if ($show_result) {
-                            $TBL_TRACK_HOTSPOT = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_HOTSPOT);
-                            $query = "SELECT hotspot_correct FROM ".$TBL_TRACK_HOTSPOT." WHERE hotspot_exe_id = '".$exeId."' and hotspot_question_id= '".$questionId."' AND hotspot_answer_id='".Database::escape_string($answerId)."'";
-                            $resq = Database::query($query);
-                            $studentChoice = Database::result($resq,0,"hotspot_correct");
+                        $TBL_TRACK_HOTSPOT = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_HOTSPOT);
+                        $sql = "SELECT hotspot_correct
+                                FROM $TBL_TRACK_HOTSPOT
+                                WHERE
+                                    hotspot_exe_id = '".$exeId."' AND
+                                    hotspot_question_id= '".$questionId."' AND
+                                    hotspot_answer_id = '".Database::escape_string($answerId)."'";
+                        $result = Database::query($sql);
+                        $studentChoice = Database::result($result, 0, "hotspot_correct");
 
-                            if ($studentChoice) {
-                                $questionScore  += $answerWeighting;
-                                $totalScore     += $answerWeighting;
-                            }
+                        if ($studentChoice) {
+                            $questionScore  += $answerWeighting;
+                            $totalScore     += $answerWeighting;
                         }
                     } else {
                         $studentChoice = $choice[$answerId];

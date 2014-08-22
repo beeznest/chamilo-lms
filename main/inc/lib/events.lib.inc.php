@@ -125,17 +125,17 @@ function event_access_course() {
     }
     $sql = "INSERT INTO ".$TABLETRACK_ACCESS."  (access_user_id, access_cours_code, access_date, access_session_id) VALUES
             (".$user_id.", '".$_cid."', '".$now."','".$id_session."')";
-    $res = Database::query($sql);
+    Database::query($sql);
 
     // added for "what's new" notification
     $sql = "UPDATE $TABLETRACK_LASTACCESS  SET access_date = '$now'
             WHERE access_user_id = $user_id AND access_cours_code = '$_cid' AND access_tool IS NULL AND access_session_id=".$id_session;
-    $res = Database::query($sql);
+    Database::query($sql);
 
     if (Database::affected_rows() == 0) {
         $sql = "INSERT INTO $TABLETRACK_LASTACCESS (access_user_id, access_cours_code, access_date, access_session_id)
                 VALUES (".$user_id.", '".$_cid."', '$now', '".$id_session."')";
-        $res = Database::query($sql);
+        Database::query($sql);
     }
     // end "what's new" notification
     return 1;
@@ -171,7 +171,6 @@ function event_access_tool($tool, $id_session = 0)
     // only if user comes from the course $_cid
     //if( eregi($_configuration['root_web'].$_cid,$_SERVER['HTTP_REFERER'] ) )
     //$pos = strpos($_SERVER['HTTP_REFERER'],$_configuration['root_web'].$_cid);
-
     $pos = isset($_SERVER['HTTP_REFERER']) ? strpos(strtolower($_SERVER['HTTP_REFERER']), strtolower(api_get_path(WEB_COURSE_PATH).$_course['path'])) : false;
     // added for "what's new" notification
     $pos2 = isset($_SERVER['HTTP_REFERER']) ? strpos(strtolower($_SERVER['HTTP_REFERER']), strtolower($_configuration['root_web']."index")) : false;
@@ -190,7 +189,7 @@ function event_access_tool($tool, $id_session = 0)
         			'".$tool."',
         			'".$reallyNow."',
         			'".$id_session."')";
-        $res = Database::query($sql);
+        Database::query($sql);
     }
     // "what's new" notification
     $sql = "UPDATE $TABLETRACK_LASTACCESS
@@ -200,7 +199,7 @@ function event_access_tool($tool, $id_session = 0)
     if (Database::affected_rows() == 0) {
         $sql = "INSERT INTO $TABLETRACK_LASTACCESS (access_user_id,access_cours_code,access_tool, access_date, access_session_id)
         		VALUES (".$user_id.", '".$_cid."' , '$tool', '$reallyNow', $id_session)";
-        $res = Database::query($sql);
+        Database::query($sql);
     }
     return 1;
 }
@@ -269,7 +268,7 @@ function event_link($link_id)
         		 '".$reallyNow."',
         		 '".api_get_session_id()."'
         		)";
-    $res = Database::query($sql);
+    Database::query($sql);
     return 1;
 }
 
@@ -289,8 +288,21 @@ function event_link($link_id)
  * @author Julio Montoya Armas <gugli100@gmail.com> Reworked 2010
  * @desc Record result of user when an exercice was done
 */
-function update_event_exercice($exeid, $exo_id, $score, $weighting, $session_id, $learnpath_id = 0, $learnpath_item_id = 0, $learnpath_item_view_id = 0, $duration = 0, $question_list = array(), $status = '', $remind_list = array() , $end_date = null)
-{
+function update_event_exercice(
+    $exeid,
+    $exo_id,
+    $score,
+    $weighting,
+    $session_id,
+    $learnpath_id = 0,
+    $learnpath_item_id = 0,
+    $learnpath_item_view_id = 0,
+    $duration = 0,
+    $question_list = array(),
+    $status = '',
+    $remind_list = array(),
+    $end_date = null
+) {
     require_once api_get_path(SYS_CODE_PATH).'exercice/exercise.lib.php';
     global $debug;
 
@@ -298,6 +310,7 @@ function update_event_exercice($exeid, $exo_id, $score, $weighting, $session_id,
     if ($debug) error_log('duration:' . $duration);
 
     if ($exeid != '') {
+
         // Validation in case of fraud with actived control time
         if (!exercise_time_control_is_valid($exo_id, $learnpath_id, $learnpath_item_id)) {
         	$score = 0;
@@ -1563,12 +1576,10 @@ function event_course_login($course_code, $user_id, $session_id) {
         $sql = "UPDATE $course_tracking_table  SET logout_course_date = '$time', counter = counter+1
             WHERE course_access_id = ".intval($i_course_access_id)." AND session_id = ".$session_id;
         Database::query($sql);
-        //error_log(preg_replace('/\s+/',' ',$sql));
     } else {
         $sql="INSERT INTO $course_tracking_table (course_code, user_id, login_course_date, logout_course_date, counter, session_id)" .
             "VALUES('".$course_code."', '".$user_id."', '$time', '$time', '1','".$session_id."')";
         Database::query($sql);
-        //error_log(preg_replace('/\s+/',' ',$sql));
     }
     // Course catalog stats modifications see #4191
     CourseManager::update_course_ranking(null, null, null, null, true, false);

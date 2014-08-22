@@ -144,6 +144,7 @@ Display :: display_normal_message(get_lang('Saved').'<br />',false);
 // Display questions
 display_question_list_by_attempt($objExercise, $exe_id, true);
 
+
 //If is not valid
 
 /*

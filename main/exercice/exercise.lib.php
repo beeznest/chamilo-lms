@@ -45,6 +45,7 @@ function showQuestion($questionId, $only_questions = false, $origin = false, $cu
 
     $answerType    = $objQuestionTmp->selectType();
     $pictureName   = $objQuestionTmp->selectPicture();
+    $s = '';
 
     if ($answerType != HOT_SPOT && $answerType != HOT_SPOT_DELINEATION) {
     	// Question is not a hotspot
@@ -65,8 +66,6 @@ function showQuestion($questionId, $only_questions = false, $origin = false, $cu
         }
 
         echo '<div class="question_options">';
-
-    	$s = '';
 
     	// construction of the Answer object (also gets all answers details)
     	$objAnswerTmp = new Answer($questionId);
@@ -178,8 +177,17 @@ function showQuestion($questionId, $only_questions = false, $origin = false, $cu
 
         if ($answerType == MULTIPLE_ANSWER_TRUE_FALSE || $answerType ==  MULTIPLE_ANSWER_COMBINATION_TRUE_FALSE) {
             $header = Display::tag('th', get_lang('Options'));
-            foreach ($objQuestionTmp->options as $key=>$item) {
-                $header .= Display::tag('th', $item);
+            foreach ($objQuestionTmp->options as $item) {
+                if ($answerType == MULTIPLE_ANSWER_TRUE_FALSE) {
+                    if (in_array($item, $objQuestionTmp->options)) {
+                        $header .= Display::tag('th', get_lang($item));
+                    } else {
+                        $header .= Display::tag('th', $item);
+                    }
+                } else {
+                    $header .= Display::tag('th', $item);
+                }
+
             }
             if ($show_comment) {
                 $header .= Display::tag('th', get_lang('Feedback'));
@@ -195,7 +203,7 @@ function showQuestion($questionId, $only_questions = false, $origin = false, $cu
                     $header .= Display::tag('th', get_lang('Feedback'));
                 }
                 $s .= '<table class="data_table">';
-                $s.= Display::tag('tr',$header, array('style'=>'text-align:left;'));
+                $s .= Display::tag('tr',$header, array('style'=>'text-align:left;'));
             }
         }
 
@@ -353,16 +361,16 @@ function showQuestion($questionId, $only_questions = false, $origin = false, $cu
                 $answer_input .= '</label>';
 
                 if ($show_comment) {
-                    $s.= '<tr>';
+                    $s .= '<tr>';
                     $s .= '<td>';
-                    $s.= $answer_input;
+                    $s .= $answer_input;
                     $s .= '</td>';
                     $s .= '<td>';
                     $s .= $comment;
                     $s .= '</td>';
-                    $s.= '</tr>';
+                    $s .= '</tr>';
                 } else {
-                    $s.= $answer_input;
+                    $s .= $answer_input;
                 }
 
             } elseif ($answerType == MULTIPLE_ANSWER_COMBINATION_TRUE_FALSE) {
@@ -400,7 +408,7 @@ function showQuestion($questionId, $only_questions = false, $origin = false, $cu
                     $s .= $comment;
                     $s .= '</td>';
                 }
-            	$s.='</tr>';
+            	$s .='</tr>';
 
     		} elseif ($answerType == FILL_IN_BLANKS) {
     			list($answer) = explode('::', $answer);
@@ -501,7 +509,7 @@ function showQuestion($questionId, $only_questions = false, $origin = false, $cu
     				}  // end foreach()
 
     				$s .= '</select></td>';
-    				$s.='<td width="45%" valign="top" >';
+    				$s .='<td width="45%" valign="top" >';
     				if (isset($select_items[$lines_count])) {
     					$s.='<span style="float:left; width:5%;"><b>'.$select_items[$lines_count]['letter'].'.</b></span>'.
     						 '<span style="float:left; width:95%;">'.$select_items[$lines_count]['answer'].'</span>';
@@ -519,8 +527,8 @@ function showQuestion($questionId, $only_questions = false, $origin = false, $cu
     						$s .= '<tr>
     							  <td colspan="2"></td>
     							  <td valign="top">';
-    						$s.='<b>'.$select_items[$lines_count]['letter'].'.</b> '.$select_items[$lines_count]['answer'];
-    						$s.="</td>
+    						$s .='<b>'.$select_items[$lines_count]['letter'].'.</b> '.$select_items[$lines_count]['answer'];
+    						$s .="</td>
     						</tr>";
     						$lines_count++;
     					}	// end while()
@@ -1421,8 +1429,8 @@ function convert_score($score, $weight) {
  * @param   boolean Check publications dates
  * @param   string  Search exercise name
  * @param   boolean Search exercises in all sessions
- * @param   int     0 = only inactive exercises 
- *                  1 = only active exercises, 
+ * @param   int     0 = only inactive exercises
+ *                  1 = only active exercises,
  *                  2 = all exercises
  *                  3 = active <> -1
  * @return  array   array with exercise data
@@ -1450,7 +1458,7 @@ function get_all_exercises($course_info = null, $session_id = 0, $check_publicat
     }
 
     $needle_where   = (!empty($search_exercise)) ? " AND title LIKE '?' "       : '';
-    $needle         = (!empty($search_exercise)) ? "%" . $search_exercise . "%" : ''; 
+    $needle         = (!empty($search_exercise)) ? "%" . $search_exercise . "%" : '';
 
     //Show courses by active status
     $active_sql = '';
@@ -1476,7 +1484,7 @@ function get_all_exercises($course_info = null, $session_id = 0, $check_publicat
  * Get exercise information by id
  * @param int $exerciseId Exercise Id
  * @param int $courseId The course ID (necessary as c_quiz.id is not unique)
- * @return array Exercise info 
+ * @return array Exercise info
  */
 function get_exercise_by_id($exerciseId = 0, $courseId = null) {
     $TBL_EXERCICES = Database :: get_course_table(TABLE_QUIZ_TEST);
@@ -2160,7 +2168,6 @@ function display_question_list_by_attempt($objExercise, $exe_id, $save_user_resu
         if ($save_user_result == false) {
             $question_list = $objExercise->get_validated_question_list();
         }
-        //error_log("Data tracking is empty! exe_id: $exe_id");
     }
 
     $counter = 1;
@@ -2220,12 +2227,23 @@ function display_question_list_by_attempt($objExercise, $exe_id, $save_user_resu
             ob_start();
 
             // We're inside *one* question. Go through each possible answer for this question
-            $result = $objExercise->manage_answer($exercise_stat_info['exe_id'], $questionId, null, 'exercise_result', array(), $save_user_result, true, $show_results, $objExercise->selectPropagateNeg(), $hotspot_delineation_result);
+
+            $result = $objExercise->manage_answer(
+                $exercise_stat_info['exe_id'],
+                $questionId,
+                null,
+                'exercise_result',
+                array(),
+                $save_user_result,
+                true,
+                $show_results,
+                $objExercise->selectPropagateNeg(),
+                $hotspot_delineation_result
+            );
 
             if (empty($result)) {
                 continue;
             }
-
             $total_score += $result['score'];
             $total_weight += $result['weight'];
 
