@@ -113,7 +113,12 @@ $exercise_url = api_get_path(WEB_CODE_PATH).'exercice/exercise_submit.php?'.api_
 $exercise_url_button = Display::url($label, $exercise_url, array('class'=>'btn btn-primary btn-large'));
 
 //3. Checking visibility of the exercise (overwrites the exercise button)
-$visible_return = $objExercise->is_visible($learnpath_id, $learnpath_item_id, null, false);
+$visible_return = $objExercise->is_visible(
+    $learnpath_id,
+    $learnpath_item_id,
+    null,
+    false
+);
 
 //Exercise is not visible remove the button
 if ($visible_return['value'] == false) {

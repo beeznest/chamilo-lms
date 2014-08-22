@@ -802,8 +802,6 @@ function exercise_time_control_is_valid($exercise_id, $lp_id = 0 , $lp_item_id =
             $current_time = time();
     		$expired_time = api_strtotime($_SESSION['expired_time'][$current_expired_time_key], 'UTC');
     		$total_time_allowed = $expired_time + 30;
-    		//error_log('expired time converted + 30: '.$total_time_allowed);
-    		//error_log('$current_time: '.$current_time);
             if ($total_time_allowed < $current_time) {
             	return false;
             }
@@ -855,6 +853,10 @@ function get_count_exam_results($exercise_id, $extra_where_conditions) {
     return $count;
 }
 
+/**
+ * @param string $in_hotpot_path
+ * @return int
+ */
 function get_count_exam_hotpotatoes_results($in_hotpot_path) {
     return get_exam_results_hotpotatoes_data(0, 0, '', '', $in_hotpot_path, true, '');
 }
@@ -1458,18 +1460,16 @@ function get_all_exercises($course_info = null, $session_id = 0, $check_publicat
         $active_sql = sprintf(' active = %d AND', $active);
     }
 
-
-    if ($search_all_sessions == true) 
-    {
+    if ($search_all_sessions == true) {
         $conditions = array('where'=>array($active_sql . ' c_id = ? '. $needle_where . $time_conditions => array($course_id, $needle)), 'order'=>'title');
-    } else 
-    {
+    } else {
         if ($session_id == 0) {
             $conditions = array('where'=>array($active_sql . ' session_id = ? AND c_id = ? '. $needle_where . $time_conditions => array($session_id, $course_id, $needle)), 'order'=>'title');
         } else {
             $conditions = array('where'=>array($active_sql . ' (session_id = 0 OR session_id = ? ) AND c_id = ? ' . $needle_where . $time_conditions => array($session_id, $course_id, $needle)), 'order'=>'title');
         }
     }
+
     return Database::select('*',$TBL_EXERCICES, $conditions);
 }
 /**
@@ -2140,11 +2140,12 @@ function delete_chat_exercise_session($exe_id) {
 
 /**
  * Display the exercise results
- * @param obj   exercise obj
- * @param int   attempt id (exe_id)
- * @param bool  save users results (true) or just show the results (false)
+ * @param Exercise $objExercise
+ * @param int $exe_id
+ * @param bool $save_user_result save users results (true) or just show the results (false)
  */
-function display_question_list_by_attempt($objExercise, $exe_id, $save_user_result = false) {
+function display_question_list_by_attempt($objExercise, $exe_id, $save_user_result = false)
+{
     global $origin, $debug;
 
     //Getting attempt info
@@ -2159,7 +2160,7 @@ function display_question_list_by_attempt($objExercise, $exe_id, $save_user_resu
         if ($save_user_result == false) {
             $question_list = $objExercise->get_validated_question_list();
         }
-        error_log("Data tracking is empty! exe_id: $exe_id");
+        //error_log("Data tracking is empty! exe_id: $exe_id");
     }
 
     $counter = 1;
@@ -2190,7 +2191,11 @@ function display_question_list_by_attempt($objExercise, $exe_id, $save_user_resu
     if ($show_results || $show_only_score) {
         $user_info   = api_get_user_info($exercise_stat_info['exe_user_id']);
         //Shows exercise header
-        echo $objExercise->show_exercise_result_header($user_info['complete_name'], api_convert_and_format_date($exercise_stat_info['start_date'], DATE_TIME_FORMAT_LONG), $exercise_stat_info['duration']);
+        echo $objExercise->show_exercise_result_header(
+            $user_info['complete_name'],
+            api_convert_and_format_date($exercise_stat_info['start_date'], DATE_TIME_FORMAT_LONG),
+            $exercise_stat_info['duration']
+        );
     }
 
     // Display text when test is finished #4074 and for LP #4227
@@ -2206,7 +2211,6 @@ function display_question_list_by_attempt($objExercise, $exe_id, $save_user_resu
 
     // Loop over all question to show results for each of them, one by one
     if (!empty($question_list)) {
-        if ($debug) { error_log('Looping question_list '.print_r($question_list,1));}
         foreach ($question_list as $questionId) {
 
             // creates a temporary Question object
@@ -2222,8 +2226,8 @@ function display_question_list_by_attempt($objExercise, $exe_id, $save_user_resu
                 continue;
             }
 
-            $total_score     += $result['score'];
-            $total_weight    += $result['weight'];
+            $total_score += $result['score'];
+            $total_weight += $result['weight'];
 
             $question_list_answers[] = array(
                 'question' => $result['open_question'],
@@ -2233,7 +2237,6 @@ function display_question_list_by_attempt($objExercise, $exe_id, $save_user_resu
 
             $my_total_score  = $result['score'];
             $my_total_weight = $result['weight'];
-
 
             //Category report
             $category_was_added_for_this_test = false;
@@ -2254,6 +2257,13 @@ function display_question_list_by_attempt($objExercise, $exe_id, $save_user_resu
 
             //No category for this question!
             if ($category_was_added_for_this_test == false) {
+                if (!isset($category_list['none']['score'])) {
+                    $category_list['none']['score'] = 0;
+                }
+                if (!isset($category_list['none']['total'])) {
+                    $category_list['none']['total'] = 0;
+                }
+
                 $category_list['none']['score'] += $my_total_score;
                 $category_list['none']['total'] += $my_total_weight;
             }
@@ -2329,7 +2339,6 @@ function display_question_list_by_attempt($objExercise, $exe_id, $save_user_resu
         echo $total_score_text;
     }
 
-
     if ($save_user_result) {
 
         // Tracking of results
@@ -2338,7 +2347,20 @@ function display_question_list_by_attempt($objExercise, $exe_id, $save_user_resu
         $learnpath_item_view_id = $exercise_stat_info['orig_lp_item_view_id'];
 
         if (api_is_allowed_to_session_edit()) {
-            update_event_exercice($exercise_stat_info['exe_id'], $objExercise->selectId(), $total_score, $total_weight, api_get_session_id(), $learnpath_id, $learnpath_item_id, $learnpath_item_view_id, $exercise_stat_info['exe_duration'], $question_list, '', array(), $end_date);
+            update_event_exercice(
+                $exercise_stat_info['exe_id'],
+                $objExercise->selectId(),
+                $total_score,
+                $total_weight,
+                api_get_session_id(),
+                $learnpath_id,
+                $learnpath_item_id,
+                $learnpath_item_view_id,
+                $exercise_stat_info['exe_duration'],
+                $question_list,
+                '',
+                array()
+            );
         }
 
         // Send notification ..
