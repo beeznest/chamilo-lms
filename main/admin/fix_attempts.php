@@ -142,7 +142,6 @@ $sql = "SELECT
 $result = Database::query($sql);
 if (Database::num_rows($result)) {
     echo "<br /><h2>Double students attempts in exercises with only 1 attempt setting.</h2><br />";
-    var_dump($sql);
     while ($attempt = Database::fetch_array($result, 'ASSOC')) {
 
         $userId = $attempt['exe_user_id'];
@@ -160,7 +159,7 @@ if (Database::num_rows($result)) {
         $lpItemId = $attempt['orig_lp_item_id'];
 
         $url = $www . "exercice/exercise_report.php?cidReq=$courseCode&exerciseId=$exerciseId&id_session=$sessionId";
-        echo "Search the correct attempt for user '$user' here: <br /> " . Display::url($url, $url).'<br /><br />';
+        echo "<br />Search the correct attempt for user '$user' here: <br /> " . Display::url($url, $url).'<br />';
 
         $userResults = get_all_exercise_results_by_user_by_exercise(
             $exerciseId,
@@ -182,18 +181,17 @@ if (Database::num_rows($result)) {
             $score = $userResult['exe_result'];
             $counter++;
 
-            // Skipping first.
+            // Skipping first attempt.
             if ($counter == 1) {
-                echo "*Keeping only attempt: $exeId with score: $score *<br />";
+                echo "Keeping only attempt: $exeId with score: '$score'<br />";
                 // Updating LP just in case.
                 if (!empty($origLpItemViewId)) {
                     echo 'Ready to update lp_item_view with new score: ' . $score . '<br />';
-                    $sql = "UPDATE $tableLpItemView
-                        SET score = '$score'
-                        WHERE
-                          id = $origLpItemViewId AND
-                          c_id = $courseId AND
-                          lp_item_id = $origLpItemId";
+                    $sql = "UPDATE $tableLpItemView SET score = '$score'
+                            WHERE
+                                  id = $origLpItemViewId AND
+                                  c_id = $courseId AND
+                                  lp_item_id = $origLpItemId";
                     echo $sql;
                     echo '<br />';
                     if ($execute) {

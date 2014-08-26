@@ -49,7 +49,9 @@ if ($global) {
     $course_list = array($current_course);
 }
 
-$form = new FormValidator('search_simple','POST','','',null,false);
+$formAction = api_get_self() . '?' .  api_get_cidreq();
+
+$form = new FormValidator('search_simple','POST',$formAction,'',null,false);
 $form->addElement('text','score',get_lang('Percentage'));
 if ($global) {
     $form->addElement('hidden','view','admin');

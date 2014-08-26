@@ -27,6 +27,8 @@ $from = isset($_GET['from']) ? $_GET['from'] : null;
 
 // Starting the output buffering when we are exporting the information.
 $export_csv = isset($_GET['export']) && $_GET['export'] == 'csv' ? true : false;
+$exportXls = isset($_GET['export']) && $_GET['export'] == 'xls' ? true : false;
+
 $session_id = intval($_REQUEST['id_session']);
 
 if ($from == 'myspace') {
@@ -91,7 +93,7 @@ require_once api_get_path(SYS_CODE_PATH).'resourcelinker/resourcelinker.inc.php'
 require_once api_get_path(SYS_CODE_PATH).'survey/survey.lib.php';
 require_once api_get_path(SYS_CODE_PATH).'exercice/exercise.lib.php';
 
-if ($export_csv) {
+if ($export_csv || $exportXls) {
     if (!empty($session_id)) {
         $_SESSION['id_session'] = $session_id;
     }
@@ -218,6 +220,8 @@ if (isset($_GET['users_tracking_per_page'])) {
 }
 echo '<a href="'.api_get_self().'?'.api_get_cidreq().'&export=csv&'.$addional_param.$users_tracking_per_page.'">
 '.Display::return_icon('export_csv.png', get_lang('ExportAsCSV'),'',ICON_SIZE_MEDIUM).'</a>';
+echo '<a href="'.api_get_self().'?'.api_get_cidreq().'&export=xls&'.$addional_param.$users_tracking_per_page.'">
+'.Display::return_icon('export_excel.png', get_lang('ExportAsXLS'),'',ICON_SIZE_MEDIUM).'</a>';
 
 echo '</span>';
 echo '</div>';
@@ -282,7 +286,7 @@ if (count($a_students) > 0) {
     // PERSON_NAME_DATA_EXPORT is buggy
     $is_western_name_order = api_is_western_name_order();
 
-    if ($export_csv) {
+    if ($export_csv || $exportXls) {
         $csv_content = array();
         //override the SortableTable "per page" limit if CSV
         $_GET['users_tracking_per_page'] = 1000000;
@@ -405,7 +409,26 @@ if (isset($_configuration['permissions_teacher_make_course_sessions_drh']) &&
 }
 
 // Send the csv file if asked.
-if ($export_csv) {
+if ($export_csv || $exportXls) {
+    $fileName = '';
+    $CSVMainHehader = array();
+
+    if ($session_id) {
+        $sesionName = api_get_session_name($session_id);
+        $courseName = get_lang('Course') . ' ' . $course_info['name'];
+
+        $CSVMainHehader[] = $sesionName;
+        $CSVMainHehader[] = $courseName;
+
+        $fileName = $sesionName . ' ' . $courseName;
+    } else {
+        $CSVMainHehader[] = $course_info['name'];
+        
+        $fileName = $course_info['name'];
+    }
+    
+    $fileName .= ' ' . date('d-m-Y');
+    
     $csv_headers = array();
 
     $csv_headers[] = get_lang('OfficialCode', '');
@@ -437,8 +460,14 @@ if ($export_csv) {
     }
     ob_end_clean();
     array_unshift($csv_content, $csv_headers); // Adding headers before the content.
+    array_unshift($csv_content, array());
+    array_unshift($csv_content, $CSVMainHehader);
 
-    Export::export_table_csv($csv_content, 'reporting_student_list');
+    if ($export_csv) {
+        Export::export_table_csv_utf8($csv_content, $fileName);
+    } else {
+        Export::export_table_xls($csv_content, $fileName, 'iso-8859-1');
+    }
     exit;
 }
 Display::display_footer();

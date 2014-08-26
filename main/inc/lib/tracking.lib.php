@@ -1048,7 +1048,7 @@ class Tracking
                 if (!$return_array) {
                     $avg_progress = round($sum / $number_items, 1);
                     if ($divideWithUsers) {
-                        $avg_progress = round($avg_progress / count($student_id), 2).'%';
+                        $avg_progress = round($avg_progress / count($student_id), 2);
                     }
                     return $avg_progress.'%';
                 } else {
@@ -3958,8 +3958,8 @@ class Tracking
                 FROM $ttrack_exercises te
                 INNER JOIN $ttrack_attempt ta ON ta.exe_id = te.exe_id
                 INNER JOIN $tquiz q ON q.id = te.exe_exo_id AND q.c_id = $courseIdx
-                INNER JOIN $tquiz_question qq ON qq.id = ta.question_id
-                                                AND qq.c_id = $courseIdx
+                INNER JOIN $tquiz_question qq
+                ON qq.id = ta.question_id AND qq.c_id = $courseIdx
                 $fieldType
                 WHERE te.exe_cours_id = '$whereCourseCode' ".(empty($whereSessionParams)?'':"AND te.session_id IN ($whereSessionParams)")."
                   $where $order $limit";
@@ -3991,30 +3991,39 @@ class Tracking
             $sqlQuestions = "SELECT tq.c_id, tq.id as question_id, tq.question, tqa.id_auto,
                                     tqa.answer, tqa.correct, tq.position, tqa.id_auto as answer_id
                                FROM $tquiz_question tq
-                               INNER JOIN $tquiz_answer tqa ON tqa.question_id =tq.id and tqa.c_id = tq.c_id
-                               WHERE tq.c_id = $courseIdx AND tq.id IN (".implode(',',$questionIds).")";
+                               INNER JOIN $tquiz_answer tqa
+                               ON tqa.question_id = tq.id and tqa.c_id = tq.c_id
+                               WHERE
+                                  tq.c_id = $courseIdx AND
+                                  tq.id IN (".implode(',',$questionIds).")";
 
             $resQuestions = Database::query($sqlQuestions);
             $answer = array();
             $question = array();
-            while ($rowQuestion = Database::fetch_assoc($resQuestions)) {
-                $questionId = $rowQuestion['question_id'];
-                $answerId = $rowQuestion['answer_id'];
-                $answer[$questionId][$answerId] = array(
-                    'position' => $rowQuestion['position'],
-                    'question' => stripHtmlComments(strip_tags($rowQuestion['question'], '<img>')),
-                    'answer' => stripHtmlComments(strip_tags($rowQuestion['answer'], '<img>')),
-                    'correct' => $rowQuestion['correct']
-                );
-                $question[$questionId]['question'] = stripHtmlComments(strip_tags($rowQuestion['question'], '<img>'));
-
+            if (Database::num_rows($resQuestions)) {
+                while ($rowQuestion = Database::fetch_assoc($resQuestions)) {
+                    $questionId = $rowQuestion['question_id'];
+                    $answerId = $rowQuestion['answer_id'];
+                    $answer[$questionId][$answerId] = array(
+                        'position' => $rowQuestion['position'],
+                        'question' => stripHtmlComments(strip_tags($rowQuestion['question'], '<img>')),
+                        'answer' => stripHtmlComments(strip_tags($rowQuestion['answer'], '<img>')),
+                        'correct' => $rowQuestion['correct']
+                    );
+                    $question[$questionId]['question'] = stripHtmlComments(strip_tags($rowQuestion['question'], '<img>'));
+                }
             }
 
             // Now fill users data
-            $sqlUsers = "SELECT user_id, username, lastname, firstname FROM $tuser WHERE user_id IN (".implode(',',$userIds).")";
+            $sqlUsers = "SELECT user_id, username, lastname, firstname
+                         FROM $tuser WHERE user_id IN (".implode(',', $userIds).")";
             $resUsers = Database::query($sqlUsers);
-            while ($rowUser = Database::fetch_assoc($resUsers)) {
-                $users[$rowUser['user_id']] = $rowUser;
+
+            $users = array();
+            if (Database::num_rows($resUsers)) {
+                while ($rowUser = Database::fetch_assoc($resUsers)) {
+                    $users[$rowUser['user_id']] = $rowUser;
+                }
             }
 
             foreach ($data as $id => $row) {
@@ -4521,7 +4530,7 @@ class Tracking
                 $firstName = $coachInfo['firstname'];
                 $lastName = $coachInfo['lastname'];
             }
-            //var_dump($session);
+
             $gridData[] = array(
                 'session_id' => $session['id'],
                 'course_id' => $course['code'],
@@ -5549,10 +5558,10 @@ class TrackingCourseLog
     	return array('table_name' => $table_name,'link_tool' => $link_tool,'id_tool' => $id_tool);
     }
 
-    static function display_additional_profile_fields() {
+    static function display_additional_profile_fields()
+    {
     	// getting all the extra profile fields that are defined by the platform administrator
     	$extra_fields = UserManager :: get_extra_fields(0,50,5,'ASC');
-
 
     	// creating the form
     	$return = '<form action="courseLog.php" method="get" name="additional_profile_field_form" id="additional_profile_field_form">';
@@ -5710,7 +5719,7 @@ class TrackingCourseLog
      */
     static function get_user_data($from, $number_of_items, $column, $direction)
     {
-    	global $user_ids, $course_code, $additional_user_profile_info, $export_csv, $is_western_name_order, $csv_content, $session_id, $_configuration;
+    	global $user_ids, $course_code, $additional_user_profile_info, $export_csv, $exportXls, $is_western_name_order, $csv_content, $session_id, $_configuration;
 
     	$course_code        = Database::escape_string($course_code);
     	$tbl_user           = Database::get_main_table(TABLE_MAIN_USER);
@@ -5865,7 +5874,7 @@ class TrackingCourseLog
 
             $users[] = $user_row;
 
-    		if ($export_csv) {
+    		if ($export_csv || $exportXls) {
     		    if (empty($session_id)) {
                     $user_row = array_map('strip_tags', $user_row);
     			    unset($user_row[14]);
