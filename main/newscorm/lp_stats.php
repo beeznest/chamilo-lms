@@ -958,9 +958,9 @@ if ($export_csv || $exportXls) {
     array_unshift($csv_content, $CSVMainHehader);
     
     if ($export_csv) {
-        Export :: export_table_csv($csv_content, $fileName);
+        Export :: export_table_csv_utf8($csv_content, $fileName);
     } else {
-        Export :: export_table_xls($csv_content, $fileName);
+        Export :: export_table_xls($csv_content, $fileName, 'iso-8859-1');
     }
     exit;
 }
