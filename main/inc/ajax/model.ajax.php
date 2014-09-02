@@ -210,7 +210,7 @@ switch ($action) {
         $documents = getAllDocumentToWork($work_id, api_get_course_int_id());
 
         if (empty($documents)) {
-            $where_condition .= " AND u.user_id = ".api_get_user_id();
+            //$where_condition .= " AND u.user_id = ".api_get_user_id();
             $count = get_work_user_list($start, $limit, $sidx, $sord, $work_id, $where_condition, null, true);
         } else {
             $count = get_work_user_list_from_documents(
@@ -618,7 +618,7 @@ switch ($action) {
         $documents = getAllDocumentToWork($work_id, api_get_course_int_id());
 
         if (empty($documents)) {
-            $where_condition .= " AND u.user_id = ".api_get_user_id();
+            //$where_condition .= " AND u.user_id = ".api_get_user_id();
             $result = get_work_user_list($start, $limit, $sidx, $sord, $work_id, $where_condition);
         } else {
             $result = get_work_user_list_from_documents(
