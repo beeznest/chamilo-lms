@@ -735,8 +735,8 @@ if (empty($_GET['details'])) {
     $t_lp = Database :: get_course_table(TABLE_LP_MAIN);
 
     // csv export headers
-    $csv_content[] = array ();
-    $csv_content[] = array (
+    $csv_content[] = array();
+    $csv_content[] = array(
     	get_lang('Learnpath'),
     	get_lang('Time'),
     	get_lang('AverageScore'),
@@ -893,11 +893,12 @@ if (empty($_GET['details'])) {
 			</tr>
 		<?php
 
-		$csv_content[] = array ();
-		$csv_content[] = array (
+        $csv_content[] = array();
+        $csv_content[] = array(
 			get_lang('Exercices'),
-			get_lang('Score'),
-			get_lang('Attempts')
+            get_lang('LearningPath'),
+            get_lang('AvgCourseScore'),
+            get_lang('Attempts')
 		);
 
 		$t_quiz = Database :: get_course_table(TABLE_QUIZ_TEST);
@@ -924,12 +925,6 @@ if (empty($_GET['details'])) {
                     $lp_name = '-';
                 }
                 $lp_name = (!empty($lp_name))? $lp_name: get_lang('NoLearnpath');
-				$csv_content[] = array (
-					$exercices['title'],
-					$score_percentage . '%',
-					$count_attempts
-
-				);
 
 				if ($i % 2) $css_class = 'row_odd';
 				else $css_class = 'row_even';
@@ -982,6 +977,14 @@ if (empty($_GET['details'])) {
 				$data_exercices[$i][] = $exercices['title'];
 				$data_exercices[$i][] = $score_percentage . '%';
 				$data_exercices[$i][] = $count_attempts;
+
+                $csv_content[] = array(
+                    $exercices['title'],
+                    $lp_name,
+                    $score_percentage,
+                    $count_attempts,
+                );
+
 				$i++;
 
 			}
@@ -989,7 +992,6 @@ if (empty($_GET['details'])) {
 			echo '<tr><td colspan="6">'.get_lang('NoExercise').'</td></tr>';
 		}
 		echo '</table>';
-
 
         //@when using sessions we do not show the survey list
         if (empty($session_id)) {
@@ -1046,30 +1048,34 @@ if (empty($_GET['details'])) {
 		$documents				= Tracking::count_student_downloaded_documents($student_id, $course_code, $session_id);
 		$uploaded_documents		= Tracking::count_student_uploaded_documents($student_id, $course_code, $session_id);
 
-		$csv_content[] = array (
-			get_lang('Student_publication'),
-			$nb_assignments
-		);
-		$csv_content[] = array (
-			get_lang('Messages'),
-			$messages
-		);
-		$csv_content[] = array (
-			get_lang('LinksDetails'),
-			$links
-		);
-		$csv_content[] = array (
-			get_lang('DocumentsDetails'),
-			$documents
-		);
-		$csv_content[] = array (
-			get_lang('UploadedDocuments'),
-			$uploaded_documents
-		);
-		$csv_content[] = array (
-			get_lang('ChatLastConnection'),
-			$chat_last_connection
-		);
+        $csv_content[] = array(
+            get_lang('OtherTools')
+        );
+
+        $csv_content[] = array(
+            get_lang('Student_publication'),
+            $nb_assignments
+        );
+        $csv_content[] = array(
+            get_lang('Messages'),
+            $messages
+        );
+        $csv_content[] = array(
+            get_lang('LinksDetails'),
+            $links
+        );
+        $csv_content[] = array(
+            get_lang('DocumentsDetails'),
+            $documents
+        );
+        $csv_content[] = array(
+            get_lang('UploadedDocuments'),
+            $uploaded_documents
+        );
+        $csv_content[] = array(
+            get_lang('ChatLastConnection'),
+            $chat_last_connection
+        );
 ?>
 		<tr>
 			<th colspan="2"><?php echo get_lang('OtherTools'); ?></th>
