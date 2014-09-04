@@ -768,6 +768,7 @@ switch ($action) {
         break;
     case 'get_session_lp_progress':
         $sessionId = 0;
+        $courseId = 0;
         if (!empty($_GET['course_id'])) {
             $sessionId  = $_GET['session_id'] == 'T' ? 'T' : intval($_GET['session_id']);
             $courseId   = intval($_GET['course_id']);
@@ -795,7 +796,7 @@ switch ($action) {
         }
         $columns[] = 'total';
 
-        $result = SessionManager::get_session_lp_progress($sessionId, $courseId, $date_from, $date_to,
+        $result = SessionManager::get_session_lp_progress($sessionId, $courseId, null, null,
             array(
                 'where' => $where_condition,
                 'order' => "$sidx $sord",
