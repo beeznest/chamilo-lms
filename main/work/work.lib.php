@@ -39,10 +39,9 @@ if (isset($_configuration['work_user_comments'])) {
  * @param	string	Current dir
  * @param	integer	Whether to show tool options
  * @param	integer	Whether to show upload form option
- * @param   integer The session id. Default is 0
  * @return	void
  */
-function display_action_links($id, $cur_dir_path, $action, $sessionId = 0)
+function display_action_links($id, $cur_dir_path, $action)
 {
 	global $gradebook;
 
@@ -60,7 +59,7 @@ function display_action_links($id, $cur_dir_path, $action, $sessionId = 0)
 
     if (api_is_allowed_to_edit(null, true) && $origin != 'learnpath') {
         // Create dir
-        if (empty($id) && empty($sessionId)) {
+        if (empty($id)) {
             $display_output .= '<a href="'.api_get_self().'?'.api_get_cidreq().'&amp;action=create_dir&origin='.$origin.'&gradebook='.$gradebook.'">';
             $display_output .= Display::return_icon('new_work.png', get_lang('CreateAssignment'),'',ICON_SIZE_MEDIUM).'</a>';
         }
