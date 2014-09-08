@@ -1446,7 +1446,7 @@ function get_count_work($work_id, $onlyMeUserId = null, $notMeUserId = null)
     $is_allowed_to_edit = api_is_allowed_to_edit(null, true);
 
     $session_id     = api_get_session_id();
-    $condition_session  = api_get_session_condition($session_id, true, true);
+    $condition_session  = empty($session_id) ? '' : api_get_session_condition($session_id, true, true);
 
     $course_id      = api_get_course_int_id();
     $group_id       = api_get_group_id();
@@ -1923,7 +1923,7 @@ function get_work_user_list($start, $limit, $column, $direction, $work_id, $wher
 
     $work_data          = get_work_data_by_id($work_id);
     $is_allowed_to_edit = api_is_allowed_to_edit(null, true);
-    $condition_session  = api_get_session_condition($session_id, true, true);
+    $condition_session  = (empty($session_id)) ? '': api_get_session_condition($session_id, true, true);
 
     $locked = api_resource_is_locked_by_gradebook($work_id, LINK_STUDENTPUBLICATION);
 
