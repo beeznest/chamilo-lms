@@ -101,12 +101,15 @@ class CourseManager
                         require_once api_get_path(SYS_CODE_PATH).'coursecopy/classes/CourseSelectForm.class.php';
                         // Call the course copy object
                         $originCourse = api_get_course_info_by_id($_configuration['course_creation_use_template']);
-                        $originCourse['official_code'] = $originCourse['code'];
-                        $cb = new CourseBuilder(null, $originCourse);
-                        $course = $cb->build(null, $originCourse['code']);
-                        $cr = new CourseRestorer($course);
-                        $cr->set_file_option();
-                        $cr->restore($course_info['id']); //course_info[id] is the course.code value (I know...)
+                        // Make sure there was a course with this ID
+                        if (count($originCourse) > 0) {
+                            $originCourse['official_code'] = $originCourse['code'];
+                            $cb = new CourseBuilder(null, $originCourse);
+                            $course = $cb->build(null, $originCourse['code']);
+                            $cr = new CourseRestorer($course);
+                            $cr->set_file_option(FILE_OVERWRITE);
+                            $cr->restore($course_info['id']); //course_info[id] is the course.code value (I know...)
+                        }
                     }
                     return $course_info;
                 }
