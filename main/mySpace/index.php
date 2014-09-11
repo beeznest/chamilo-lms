@@ -851,8 +851,28 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
 
         //date filter
         if (!in_array($display, $opts)) {
-            $sessionFilter->addElement('text', 'from', get_lang('From'), array('id' => 'date_from', 'value' => (!empty($_GET['date_from']) ? $_GET['date_from'] : ''), 'style' => 'width:75px' ));
-            $sessionFilter->addElement('text', 'to', get_lang('Until'), array('id' => 'date_to', 'value' => (!empty($_GET['date_to']) ? $_GET['date_to'] : ''), 'style' => 'width:75px' ));
+            if ($display != 'lpprogressoverview') {
+                $sessionFilter->addElement(
+                    'text',
+                    'from',
+                    get_lang('From'),
+                    array(
+                        'id' => 'date_from',
+                        'value' => (!empty($_GET['date_from']) ? $_GET['date_from'] : ''),
+                        'style' => 'width:75px'
+                    )
+                );
+                $sessionFilter->addElement(
+                    'text',
+                    'to',
+                    get_lang('Until'),
+                    array(
+                        'id' => 'date_to',
+                        'value' => (!empty($_GET['date_to']) ? $_GET['date_to'] : ''),
+                        'style' => 'width:75px'
+                    )
+                );
+            }
        }
         $sessionFilter->addElement('submit', '', get_lang('Generate'), 'id="generateReport"');
 

@@ -711,7 +711,7 @@ class Tracking
                         $teacher['id_user'],
                         $teacher['id_session']
                        );
-   //error_log($query);
+
             $rs = Database::query($query);
             $totalDocuments = 0;
             if ($rs) {
