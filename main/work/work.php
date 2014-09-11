@@ -300,7 +300,7 @@ if ($origin == 'learnpath') {
     echo '<div style="height:15px">&nbsp;</div>';
 }
 
-display_action_links($work_id, $curdirpath, $action, $session_id);
+display_action_links($work_id, $curdirpath, $action);
 
 $message = Session::read('message');
 echo $message;
