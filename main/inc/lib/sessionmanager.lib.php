@@ -1,6 +1,6 @@
 <?php
-
 /* For licensing terms, see /license.txt */
+
 /**
  * This is the session library for Chamilo.
  * All main sessions functions should be placed here.
@@ -496,7 +496,7 @@ class SessionManager
      * @param array options order and limit keys
      * @return array table with user name, lp name, progress
      */
-    public static function get_session_lp_progress($sessionId = 0, $courseId = 0, $date_from, $date_to, $options)
+    public static function get_session_lp_progress($sessionId = 0, $courseId = 0, $date_from = null, $date_to = null, $options = array())
     {
         //escaping vars
         $sessionId = $sessionId == 'T' ? 'T' : intval($sessionId);
@@ -582,10 +582,18 @@ class SessionManager
             }
 
             // Getting LP list from the user
+            $getLPFromAllSessions = false;
+            if ($sessionId == 'T') {
+                $getLPFromAllSessions = true;
+            }
+
             $lpListForUser = new learnpathList(
                 $user['user_id'],
                 $course['code'],
-                $intSessionId
+                $intSessionId,
+                null,
+                false,
+                $getLPFromAllSessions
             );
 
             if (!empty($lpListForUser)) {
@@ -597,13 +605,14 @@ class SessionManager
             $count = 0;
             // Teacher LP list
             foreach ($lessons as $lesson) {
-                if (in_array($lesson['id'], $lpListForUser)) {
-                    $data[$lesson['id']] = (!empty($user_lessons[$lesson['id']]['progress'])) ? $user_lessons[$lesson['id']]['progress'] : 0;
-                    $progress += $data[$lesson['id']];
+                $lpId = $lesson['id'];
+                if (in_array($lpId, $lpListForUser)) {
+                    $data[$lpId] = !empty($user_lessons[$lpId]['progress']) ? $user_lessons[$lpId]['progress'] : 0;
+                    $progress += $data[$lpId];
                     $count++;
-                    $data[$lesson['id']] = $data[$lesson['id']] . '%';
+                    $data[$lpId] = $data[$lpId] . '%';
                 } else {
-                    $data[$lesson['id']] = '--';
+                    $data[$lpId] = '--';
                 }
             }
 

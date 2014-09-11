@@ -711,7 +711,7 @@ class Tracking
                         $teacher['id_user'],
                         $teacher['id_session']
                        );
-   //error_log($query);
+
             $rs = Database::query($query);
             $totalDocuments = 0;
             if ($rs) {
@@ -1050,7 +1050,7 @@ class Tracking
                     if ($divideWithUsers) {
                         $avg_progress = round($avg_progress / count($student_id), 2);
                     }
-                    return $avg_progress.'%';
+                    return $avg_progress;
                 } else {
                     return array($sum, $number_items);
                 }

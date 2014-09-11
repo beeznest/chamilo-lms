@@ -210,7 +210,7 @@ switch ($action) {
         $documents = getAllDocumentToWork($work_id, api_get_course_int_id());
 
         if (empty($documents)) {
-            $where_condition .= " AND u.user_id = ".api_get_user_id();
+            //$where_condition .= " AND u.user_id = ".api_get_user_id();
             $count = get_work_user_list($start, $limit, $sidx, $sord, $work_id, $where_condition, null, true);
         } else {
             $count = get_work_user_list_from_documents(
@@ -618,7 +618,7 @@ switch ($action) {
         $documents = getAllDocumentToWork($work_id, api_get_course_int_id());
 
         if (empty($documents)) {
-            $where_condition .= " AND u.user_id = ".api_get_user_id();
+            //$where_condition .= " AND u.user_id = ".api_get_user_id();
             $result = get_work_user_list($start, $limit, $sidx, $sord, $work_id, $where_condition);
         } else {
             $result = get_work_user_list_from_documents(
@@ -768,6 +768,7 @@ switch ($action) {
         break;
     case 'get_session_lp_progress':
         $sessionId = 0;
+        $courseId = 0;
         if (!empty($_GET['course_id'])) {
             $sessionId  = $_GET['session_id'] == 'T' ? 'T' : intval($_GET['session_id']);
             $courseId   = intval($_GET['course_id']);
@@ -795,7 +796,7 @@ switch ($action) {
         }
         $columns[] = 'total';
 
-        $result = SessionManager::get_session_lp_progress($sessionId, $courseId, $date_from, $date_to,
+        $result = SessionManager::get_session_lp_progress($sessionId, $courseId, null, null,
             array(
                 'where' => $where_condition,
                 'order' => "$sidx $sord",
