@@ -1050,7 +1050,7 @@ class Tracking
                     if ($divideWithUsers) {
                         $avg_progress = round($avg_progress / count($student_id), 2);
                     }
-                    return $avg_progress.'%';
+                    return $avg_progress;
                 } else {
                     return array($sum, $number_items);
                 }
@@ -1386,7 +1386,7 @@ class Tracking
                         return array($global_result, $lp_with_quiz);
                     }
                 } else {
-                    return '-';
+                    return '0';
                 }
             }
         }
