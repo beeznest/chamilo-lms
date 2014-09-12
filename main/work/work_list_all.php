@@ -28,7 +28,7 @@ if (empty($my_folder_data)) {
 
 $work_data = get_work_assignment_by_id($workId);
 
-if (!api_is_allowed_to_edit()) {
+if (!api_is_allowed_to_edit() && !api_is_course_admin()) {
     api_not_allowed(true);
 }
 

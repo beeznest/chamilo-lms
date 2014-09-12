@@ -226,7 +226,7 @@ switch ($action) {
         }
        break;
     case 'get_work_student_list_overview':
-        if (!api_is_allowed_to_edit()) {
+        if (!api_is_allowed_to_edit() && !api_is_course_admin()) {
             return 0;
         }
         require_once api_get_path(SYS_CODE_PATH).'work/work.lib.php';
@@ -644,7 +644,7 @@ switch ($action) {
         $result = get_exam_results_data($start, $limit, $sidx, $sord, $exercise_id, $where_condition);
 		break;
     case 'get_work_student_list_overview':
-        if (!api_is_allowed_to_edit()) {
+        if (!api_is_allowed_to_edit() && !api_is_course_admin()) {
             return array();
         }
         require_once api_get_path(SYS_CODE_PATH).'work/work.lib.php';
