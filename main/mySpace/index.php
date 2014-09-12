@@ -874,6 +874,17 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 );
             }
        }
+
+        if (in_array('lpgradereport', $opts)) {
+            $sessionFilter->addElement(
+                'checkbox',
+                'only_in_lp',
+                null,
+                get_lang('ExerciseOnlyInLp'),
+                array('id' => 'only_in_lp')
+            );
+        }
+
         $sessionFilter->addElement('submit', '', get_lang('Generate'), 'id="generateReport"');
 
         echo '<div class="">';
@@ -925,6 +936,11 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 }
                 if (!isEmpty($("#date_from").val()) && !isEmpty($("#date_to").val())) {
                     url = url + "&date_from=" + $("#date_from").val() + "&date_to=" + $("#date_to").val();
+                }
+                if (!isEmpty($("#only_in_lp").is(":checked"))) {
+                    url = url + "&only_in_lp=" + $("#only_in_lp").val();
+                } else {
+                    url = url + "&only_in_lp=0";
                 }
                 window.location = url;
                 e.preventDefault();
@@ -1144,7 +1160,12 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             break;
         case 'lpgradereport':
             if (!empty($_GET['course_id'])) {
-                echo MySpace::display_tracking_grade_overview(intval($_GET['session_id']), intval($_GET['course_id']), intval($_GET['exercise_id']));
+                echo MySpace::display_tracking_grade_overview(
+                    $_GET['session_id'],
+                    $_GET['course_id'],
+                    $_GET['exercise_id'],
+                    $_GET['only_in_lp']
+                );
             } else {
                 Display::display_warning_message(get_lang('ChooseCourse'));
             }

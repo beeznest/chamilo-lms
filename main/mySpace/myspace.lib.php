@@ -587,14 +587,30 @@ class MySpace
      * @return  string  HTML array of results formatted for gridJS
      * @author Francis Gonzales <francis.gonzales@beeznest.com>, Beeznest Team
      */
-    static function display_tracking_grade_overview($sessionId = 0, $courseId = 0, $date_from = null, $date_to = null)
-    {
+    static function display_tracking_grade_overview(
+        $sessionId = 0,
+        $courseId = 0,
+        $exerciseId = 0,
+        $onlyInLp = false,
+        $date_from = null,
+        $date_to = null
+    ) {
+        $filterBySession = true;
+        if ($sessionId == 'T') {
+            $filterBySession = false;
+        }
+        $courseId = intval($courseId);
+
         /**
          * Column names
          * The column order is important. Check $column variable in the main/inc/ajax/model.ajax.php file
          */
         $objExercise = new Exercise();
-        $exercises = $objExercise->getExercisesByCourseSession($courseId, $sessionId);
+        $exercises = $objExercise->getExercisesByCourseSession(
+            $courseId,
+            $sessionId,
+            $filterBySession
+        );
 
         $cntExer = 4;
         if (!empty($exercises)) {
@@ -665,7 +681,10 @@ class MySpace
 
         //end get dynamic column names
         // jqgrid will use this URL to do the selects
-        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=get_exercise_grade&session_id=' . $sessionId . '&course_id=' . $courseId;
+        $url = api_get_path(WEB_AJAX_PATH) . 'model.ajax.php?a=get_exercise_grade&session_id=' .
+            Security::remove_XSS($sessionId) . '&course_id=' .
+            $courseId.'&filter_by_session='.intval($filterBySession)
+            .'&only_in_lp='.intval($onlyInLp);
 
         //Autowidth
         $extra_params['autowidth'] = 'true';
@@ -709,8 +728,7 @@ class MySpace
         //add lessons of course
         $questions = survey_manager::get_questions($surveyId, $courseId);
 
-        foreach ($questions as $question_id => $question)
-        {
+        foreach ($questions as $question_id => $question) {
             $columns[] = $question['question'];
         }
 

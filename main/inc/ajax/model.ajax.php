@@ -1166,10 +1166,23 @@ switch ($action) {
         }
         break;
     case 'get_exercise_grade':
+
+        $filterBySession = true;
+        if (isset($_GET['session_id']) && $_GET['session_id'] == 'T') {
+            $filterBySession = false;
+        }
+
         $sessionId = intval($_GET['session_id']);
         $courseId = intval($_GET['course_id']);
+        $onlyInLp = intval($_GET['only_in_lp']);
+
         $objExercise = new Exercise();
-        $exercises = $objExercise->getExercisesByCourseSession($courseId, $sessionId);
+        $exercises = $objExercise->getExercisesByCourseSession(
+            $courseId,
+            $sessionId,
+            $filterBySession
+        );
+
         $cntExer = 4;
         if (!empty($exercises)) {
             $cntExer += count($exercises);
@@ -1222,7 +1235,14 @@ switch ($action) {
         $usersId = array_keys($listUserSess);
 
         $users = UserManager::get_user_list_by_ids($usersId, null, "lastname, firstname",  "$start , $limit");
-        $exeResults = $objExercise->getExerciseAndResult($_GET['course_id'], $_GET['session_id'], $quizIds);
+
+        $exeResults = $objExercise->getExerciseAndResult(
+            $_GET['course_id'],
+            $_GET['session_id'],
+            $quizIds,
+            $filterBySession,
+            $onlyInLp
+        );
 
         $arrGrade = array();
         foreach ($exeResults as $exeResult) {
