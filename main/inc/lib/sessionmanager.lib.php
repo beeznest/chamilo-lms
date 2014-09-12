@@ -610,12 +610,11 @@ class SessionManager
                     $data[$lpId] = !empty($user_lessons[$lpId]['progress']) ? $user_lessons[$lpId]['progress'] : 0;
                     $progress += $data[$lpId];
                     $count++;
-                    $data[$lpId] = $data[$lpId] . '%';
+                    $data[$lesson['name']] = $data[$lesson['id']] . '%';
                 } else {
-                    $data[$lpId] = '--';
+                    $data[$lesson['name']] = '--';
                 }
             }
-
             if ($count == 0) {
                 $data['total'] = 0;
             } else {

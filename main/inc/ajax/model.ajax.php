@@ -792,7 +792,7 @@ switch ($action) {
         require_once api_get_path(SYS_CODE_PATH).'newscorm/learnpathList.class.php';
         $lessons = LearnpathList::get_course_lessons($course['code'], $intSessionId);
         foreach ($lessons as $lesson_id => $lesson) {
-            $columns[] = $lesson_id;
+            $columns[] = $lesson['name'];
         }
         $columns[] = 'total';
 
