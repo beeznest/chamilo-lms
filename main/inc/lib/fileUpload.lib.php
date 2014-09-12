@@ -365,14 +365,12 @@ function handle_uploaded_document(
                     // init change name automatic
                     $pathDirectory = str_replace($file_path, '/', $store_path);
                     $fileDirectory = str_replace($pathDirectory,'',$store_path);
-                    $fileFlag = existFileNameInSession($pathDirectory, $fileDirectory);
-                    if (is_string($fileFlag)) {
-                        $file_path = str_replace($fileDirectory, $fileFlag, $file_path);
-                        $store_path = str_replace($fileDirectory, $fileFlag,$store_path);
-                    }
+                    $fileFlag = renameFileNameInSession($pathDirectory, $fileDirectory);
+                    $file_path = str_replace($fileDirectory, $fileFlag, $file_path);
+                    $store_path = str_replace($fileDirectory, $fileFlag,$store_path);
                     // end change name automatic
 
-					if (file_exists($store_path) || $fileFlag == true) {
+					if (file_exists($store_path) || $fileFlag == '') {
 					    if ($output) {
 						  Display::display_error_message($clean_name.' '.get_lang('UplAlreadyExists'));
 						}
@@ -442,9 +440,9 @@ function uniqueFileinDir($path, $file)
  * @param $file1
  * @return string filename
  */
-function existFileNameInSession($path, $file)
+function renameFileNameInSession($path, $file)
 {
-    $flag = true;
+    $fileSession = '';
     $id_session = api_get_session_id();
     $id_curso = api_get_course_int_id();
 
@@ -453,26 +451,11 @@ function existFileNameInSession($path, $file)
         $ext = pathinfo($path . $file, PATHINFO_EXTENSION);
         $fileLessExt = str_replace(".$ext", '', $file);
         $fileSession = $fileLessExt . "__{$id_session}__.{$ext}";
-
-        $count = searchFile($fileSession, $id_curso, $id_session);
-        if ($count == 0) {
-            $flag = $fileSession;
-        }
     }
 
-    return $flag;
+    return $fileSession;
 }
 
-function searchFile($file, $id_curso, $id_session)
-{
-    $fileSearch = (substr($file, 0, 1) != '/') ? '/' . $file : $file;
-    $table_document = Database::get_course_table(TABLE_DOCUMENT);
-    $query = "SELECT id FROM $table_document where c_id = '$id_curso' AND session_id = '$id_session' " .
-        "AND path = '$fileSearch' ";
-    $result = Database::query($query);
-
-    return Database::num_rows($result);
-}
 /**
  * Checks if there is enough place to add a file on a directory
  * on the base of a maximum directory size allowed
