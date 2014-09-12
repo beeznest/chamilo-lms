@@ -48,7 +48,7 @@ if (!empty($session_id)) {
 allowOnlySubscribedUser($user_id, $work_id, $course_id);
 
 $is_course_member = CourseManager::is_user_subscribed_in_real_or_linked_course($user_id, $course_code, $session_id);
-$is_course_member = $is_course_member || api_is_platform_admin();
+$is_course_member = $is_course_member || api_is_platform_admin() || api_is_course_admin();
 
 if ($is_course_member == false) {
     api_not_allowed(true);
