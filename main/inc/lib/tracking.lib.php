@@ -1386,7 +1386,7 @@ class Tracking
                         return array($global_result, $lp_with_quiz);
                     }
                 } else {
-                    return '-';
+                    return 0;
                 }
             }
         }
