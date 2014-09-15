@@ -419,7 +419,7 @@ function confirmation (name) {
 
 function renameFileNameInSession(name) {
     var rename = name;
-    var patt = /\w*__(\d*)__.{3,4}/;
+    var patt = /\w*__(\d*)__\.\w{3,4}/;
     var result = patt.test(name);
 
     if (result) {

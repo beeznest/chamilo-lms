@@ -443,17 +443,40 @@ function uniqueFileinDir($path, $file)
 function renameFileNameInSession($path, $file)
 {
     $fileSession = '';
-    $id_session = api_get_session_id();
-    $id_curso = api_get_course_int_id();
+    $sessionId = api_get_session_id();
+    $cursoId = api_get_course_int_id();
 
     $path = (substr($path, -1, 1) != '/') ? $path . '/' : $path;
-    if (!empty($path) && !empty($file) && $id_session >= 0) {
+    if ($sessionId == 0) {
+        $fileSession = $file;
+    } else if ($sessionId > 0 && !empty($path) && !empty($file)) {
         $ext = pathinfo($path . $file, PATHINFO_EXTENSION);
         $fileLessExt = str_replace(".$ext", '', $file);
-        $fileSession = $fileLessExt . "__{$id_session}__.{$ext}";
+        $fileSession = $fileLessExt . "__{$sessionId}__.{$ext}";
+
+        $formatFileSeach  = (substr($file, -1, 1) != '/') ? "/{$file}" : $file;
+        $status = searchFileInCurso($cursoId, $formatFileSeach);
+        if (true == $status) {
+            $fileSession = '';
+        }
     }
 
     return $fileSession;
+}
+
+/**
+ * @param int $cursoId id
+ * @param string $filePath path file name
+ * @return bool status of search
+ */
+function searchFileInCurso($cursoId, $filePath) {
+    $tableDocument = Database::get_course_table(TABLE_DOCUMENT);
+    $sql_query = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = 'file' ".
+        "AND session_id = 0 AND path = '$filePath' ";
+    $sql_result = Database::query($sql_query);
+    $count = Database::num_rows($sql_result);
+
+    return ($count > 0) ? true : false;
 }
 
 /**
