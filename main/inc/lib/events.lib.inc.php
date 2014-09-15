@@ -1552,12 +1552,12 @@ function delete_attempt_hotspot($exe_id, $user_id, $course_code, $question_id) {
  * @param int $user_id
  * @param int $session_id
  */
-function event_course_login($course_code, $user_id, $session_id) {
-    global $course_tracking_table;
+function event_course_login($course_code, $user_id, $session_id)
+{
+    $course_tracking_table = Database::get_statistic_table(TABLE_STATISTIC_TRACK_E_COURSE_ACCESS);
 
     //@todo use api_get_utc_datetime
     $time		 = api_get_utc_datetime();
-
     $course_code = Database::escape_string($course_code);
     $user_id	 = Database::escape_string($user_id);
     $session_id  = Database::escape_string($session_id);
@@ -1566,11 +1566,12 @@ function event_course_login($course_code, $user_id, $session_id) {
     //We select the last record for the current course in the course tracking table
     //But only if the login date is < than now + max_life_time
     $sql = "SELECT course_access_id FROM $course_tracking_table
-                            WHERE   user_id     = $user_id AND
-                                    course_code = '$course_code' AND
-                                    session_id  = $session_id AND
-                                    login_course_date > '$time' - INTERVAL $session_lifetime SECOND
-                        ORDER BY login_course_date DESC LIMIT 0,1";
+            WHERE
+                user_id     = $user_id AND
+                course_code = '$course_code' AND
+                session_id  = $session_id AND
+                login_course_date > '$time' - INTERVAL $session_lifetime SECOND
+            ORDER BY login_course_date DESC LIMIT 0,1";
     $result = Database::query($sql);
     //error_log(preg_replace('/\s+/',' ',$sql));
 
