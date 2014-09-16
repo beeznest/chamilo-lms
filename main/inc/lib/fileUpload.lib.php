@@ -446,16 +446,24 @@ function renameFileNameInSession($path, $file)
     $sessionId = api_get_session_id();
     $cursoId = api_get_course_int_id();
 
+    // fileUniqueSession
+    $ext = pathinfo($path . $file, PATHINFO_EXTENSION);
+    $fileLessExt = str_replace(".$ext", '', $file);
+    $fileUniqueSession = $fileLessExt . "__{$sessionId}__.{$ext}";
+    $fileQuery = "AND path REGEXP '^/{$fileLessExt}\_\_[0-9]+\_\_\.{$ext}$' ";
+
     $path = (substr($path, -1, 1) != '/') ? $path . '/' : $path;
+    $formatFileSeach  = (substr($file, -1, 1) != '/') ? "/{$file}" : $file;
+
     if ($sessionId == 0) {
         $fileSession = $file;
+        $status = searchFileInCurso($cursoId, $formatFileSeach, $fileQuery);
+        if (true == $status) {
+            $fileSession = '';
+        }
     } else if ($sessionId > 0 && !empty($path) && !empty($file)) {
-        $ext = pathinfo($path . $file, PATHINFO_EXTENSION);
-        $fileLessExt = str_replace(".$ext", '', $file);
-        $fileSession = $fileLessExt . "__{$sessionId}__.{$ext}";
-
-        $formatFileSeach  = (substr($file, -1, 1) != '/') ? "/{$file}" : $file;
-        $status = searchFileInCurso($cursoId, $formatFileSeach);
+        $fileSession = $fileUniqueSession;
+        $status = searchFileInCurso($cursoId, $formatFileSeach, $fileQuery);
         if (true == $status) {
             $fileSession = '';
         }
@@ -467,16 +475,30 @@ function renameFileNameInSession($path, $file)
 /**
  * @param int $cursoId id
  * @param string $filePath path file name
+ * @param boolean $searchInCurso true search file in course. false: search in all files (that session's)
  * @return bool status of search
  */
-function searchFileInCurso($cursoId, $filePath) {
+function searchFileInCurso($cursoId, $filePath, $fileQuery) {
+    $flag = false;
     $tableDocument = Database::get_course_table(TABLE_DOCUMENT);
     $sql_query = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = 'file' ".
-        "AND session_id = 0 AND path = '$filePath' ";
+        " AND path = '$filePath' ";
     $sql_result = Database::query($sql_query);
     $count = Database::num_rows($sql_result);
+    $count2 = 0;
 
-    return ($count > 0) ? true : false;
+    if ($count == 0) {
+        $sql_query2 = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = 'file' ".
+            " $fileQuery ";
+        $sql_result2 = Database::query($sql_query2);
+        $count2 = Database::num_rows($sql_result2);
+    }
+
+    if($count > 0 || $count2 > 0) {
+        $flag = true;
+    }
+
+    return $flag;
 }
 
 /**
@@ -496,8 +518,8 @@ function searchFileInCurso($cursoId, $filePath) {
 function enough_size($file_size, $dir, $max_dir_space)
 {
     // If the directory is the archive directory, safely ignore the size limit
-    if (api_get_path(SYS_ARCHIVE_PATH) == $dir) { 
-        return true; 
+    if (api_get_path(SYS_ARCHIVE_PATH) == $dir) {
+        return true;
     }
 
     if ($max_dir_space) {
