@@ -365,13 +365,12 @@ function handle_uploaded_document(
                     // init change name automatic
                     $pathDirectory = str_replace($file_path, '/', $store_path);
                     $fileDirectory = str_replace($pathDirectory,'',$store_path);
-                    $fileFlag = uniqueFileinDir($pathDirectory, $fileDirectory);
-                    // setting
+                    $fileFlag = renameFileNameInSession($pathDirectory, $fileDirectory);
                     $file_path = str_replace($fileDirectory, $fileFlag, $file_path);
                     $store_path = str_replace($fileDirectory, $fileFlag,$store_path);
                     // end change name automatic
 
-					if (file_exists($store_path)) {
+					if (file_exists($store_path) || $fileFlag == '') {
 					    if ($output) {
 						  Display::display_error_message($clean_name.' '.get_lang('UplAlreadyExists'));
 						}
@@ -434,6 +433,74 @@ function uniqueFileinDir($path, $file)
     }
     return $fileDefault;
 }
+
+/**
+ * Search if id_session existis in file name
+ * @param $path
+ * @param $file1
+ * @return string filename
+ */
+function renameFileNameInSession($path, $file)
+{
+    $fileSession = '';
+    $sessionId = api_get_session_id();
+    $cursoId = api_get_course_int_id();
+
+    // fileUniqueSession
+    $ext = pathinfo($path . $file, PATHINFO_EXTENSION);
+    $fileLessExt = str_replace(".$ext", '', $file);
+    $fileUniqueSession = $fileLessExt . "__{$sessionId}__.{$ext}";
+    $fileQuery = "AND path REGEXP '^/{$fileLessExt}\_\_[0-9]+\_\_\.{$ext}$' ";
+
+    $path = (substr($path, -1, 1) != '/') ? $path . '/' : $path;
+    $formatFileSeach  = (substr($file, -1, 1) != '/') ? "/{$file}" : $file;
+
+    if ($sessionId == 0) {
+        $fileSession = $file;
+        $status = searchFileInCurso($cursoId, $formatFileSeach, $fileQuery);
+        if (true == $status) {
+            $fileSession = '';
+        }
+    } else if ($sessionId > 0 && !empty($path) && !empty($file)) {
+        $fileSession = $fileUniqueSession;
+        $status = searchFileInCurso($cursoId, $formatFileSeach, $fileQuery);
+        if (true == $status) {
+            $fileSession = '';
+        }
+    }
+
+    return $fileSession;
+}
+
+/**
+ * @param int $cursoId id
+ * @param string $filePath path file name
+ * @param boolean $searchInCurso true search file in course. false: search in all files (that session's)
+ * @return bool status of search
+ */
+function searchFileInCurso($cursoId, $filePath, $fileQuery) {
+    $flag = false;
+    $tableDocument = Database::get_course_table(TABLE_DOCUMENT);
+    $sql_query = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = 'file' ".
+        " AND path = '$filePath' ";
+    $sql_result = Database::query($sql_query);
+    $count = Database::num_rows($sql_result);
+    $count2 = 0;
+
+    if ($count == 0) {
+        $sql_query2 = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = 'file' ".
+            " $fileQuery ";
+        $sql_result2 = Database::query($sql_query2);
+        $count2 = Database::num_rows($sql_result2);
+    }
+
+    if($count > 0 || $count2 > 0) {
+        $flag = true;
+    }
+
+    return $flag;
+}
+
 /**
  * Checks if there is enough place to add a file on a directory
  * on the base of a maximum directory size allowed
@@ -451,8 +518,8 @@ function uniqueFileinDir($path, $file)
 function enough_size($file_size, $dir, $max_dir_space)
 {
     // If the directory is the archive directory, safely ignore the size limit
-    if (api_get_path(SYS_ARCHIVE_PATH) == $dir) { 
-        return true; 
+    if (api_get_path(SYS_ARCHIVE_PATH) == $dir) {
+        return true;
     }
 
     if ($max_dir_space) {

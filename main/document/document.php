@@ -409,11 +409,25 @@ if ($tool_visibility == '0' && $to_group_id == '0' && !($is_allowed_to_edit || $
 
 $htmlHeadXtra[] = "<script>
 function confirmation (name) {
+    var name = renameFileNameInSession(name);
     if (confirm(\" ".get_lang("AreYouSureToDelete")." \"+ name + \" ?\")) {
         return true;
     } else {
         return false;
     }
+}
+
+function renameFileNameInSession(name) {
+    var rename = name;
+    var patt = /\w*__(\d*)__\.\w{3,4}/;
+    var result = patt.test(name);
+
+    if (result) {
+        var array = new Array();
+        array = name.split('__');
+        rename = array[0] + array[2];
+    }
+    return rename;
 }
 </script>";
 
