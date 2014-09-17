@@ -201,8 +201,16 @@ if (!empty($attempts)) {
             || ($objExercise->results_disabled == RESULT_DISABLE_SHOW_SCORE_ONLY && $objExercise->feedback_type == EXERCISE_FEEDBACK_TYPE_END)) {
             $row['attempt_link'] = $attempt_link;
         }
+
+        // if exercise have 1 attempt show 1 result see BT#8423#note-72
+        if ($objExercise->attempts == 1 && $i != 1) {
+            $i--;
+            continue;
+        }
+
         $my_attempt_array[] = $row;
         $i--;
+
 	}
 
 	$table = new HTML_Table(array('class' => 'data_table'));

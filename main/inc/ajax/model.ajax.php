@@ -1224,16 +1224,14 @@ switch ($action) {
 
         $quizIds = array();
         if (!empty($exercises)) {
-            foreach($exercises as $exercise) {
+            foreach ($exercises as $exercise) {
                 $quizIds[] = $exercise['id'];
             }
         }
 
         $course = api_get_course_info_by_id($_GET['course_id']);
         $listUserSess = CourseManager::get_student_list_from_course_code($course['code'], true, $sessionId);
-
         $usersId = array_keys($listUserSess);
-
         $users = UserManager::get_user_list_by_ids($usersId, null, "lastname, firstname",  "$start , $limit");
 
         $exeResults = $objExercise->getExerciseAndResult(
@@ -1246,12 +1244,45 @@ switch ($action) {
 
         $arrGrade = array();
         foreach ($exeResults as $exeResult) {
-            if (!empty($arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']]) || $arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']] === 0) {
+            /*if (!empty($arrGrade[$exeResult['exe_user_id']][$exeResult
+                ['exe_exo_id']]) ||
+                $arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']] === 0
+            ) {
                 continue;
-            } else {
-                $arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']] = $exeResult['exe_result'];
-            }
+            } else {*/
+                // If value already exists and only one attempt, ignore the rest
 
+                if (
+                    $exeResult['max_attempt'] == 1 &&
+                    isset($arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']])
+                ) {
+                    continue;
+                }
+
+                /*if (
+                    $exeResult['max_attempt'] > 1 &&
+                    isset($arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']])
+                ) {
+                    var_dump($exeResult['exe_date']);
+                    if (
+                    $arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']]['exe_date'] >
+                    $exeResult['exe_result']['exe_date']
+                    ) {
+                        continue;
+                    }
+                }*/
+
+
+            /*if (
+                $exeResult['max_attempt'] > 1 &&
+                isset($arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']])
+            ) {
+                continue;
+            }*/
+
+
+                $arrGrade[$exeResult['exe_user_id']][$exeResult['exe_exo_id']] = $exeResult['exe_result'];
+            //}
         }
 
         $result = array();
@@ -1265,8 +1296,10 @@ switch ($action) {
             $finalScore = 0;
             foreach ($quizIds as $quizID) {
                 $grade = "";
-                if (!empty($arrGrade [$user['user_id']][$quizID]) || $arrGrade [$user['user_id']][$quizID] == 0) {
-                    $finalScore += $grade = $arrGrade [$user['user_id']][$quizID];
+                if (!empty($arrGrade [$user['user_id']][$quizID]) ||
+                    $arrGrade [$user['user_id']][$quizID] == 0
+                ) {
+                    $finalScore += $grade = $arrGrade[$user['user_id']][$quizID];
                 }
                 $result[$i]['exer' . $j] = $grade;
                 $j++;

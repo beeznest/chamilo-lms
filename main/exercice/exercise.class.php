@@ -4191,6 +4191,7 @@ class Exercise
         $ids = implode(',', $quizId);
 
         $tbl_quiz = Database::get_course_table(TABLE_QUIZ_TEST);
+        $courseTable = Database::get_main_table(TABLE_MAIN_COURSE);
         $track_exercises = Database :: get_statistic_table(TABLE_STATISTIC_TRACK_E_EXERCICES);
         $lpCondition = null;
 
@@ -4204,31 +4205,30 @@ class Exercise
         $sessionId = intval($sessionId);
 
         if ($sessionId != 0 && $filterBySession == true) {
-            $sql = "SELECT * FROM $track_exercises te "
-              . "INNER JOIN c_quiz cq ON cq.id = te.exe_exo_id "
-              . "INNER JOIN course c ON te.exe_cours_id = c.code AND c.id = cq.c_id "
-              . "WHERE "
-              . "c.id = $courseId AND "
-              . "te.session_id = $sessionId AND "
-              . "cq.id IN ($ids) AND "
-              . "status = '' "
-              . $lpCondition
-              . "ORDER BY cq.id ";
+            $sql = "SELECT * FROM $track_exercises te
+             INNER JOIN $tbl_quiz cq ON cq.id = te.exe_exo_id
+             INNER JOIN $courseTable c ON te.exe_cours_id = c.code AND c.id = cq.c_id
+             WHERE
+             c.id = $courseId AND
+             te.session_id = $sessionId AND
+             cq.id IN ($ids) AND
+             status = '' $lpCondition
+              ORDER BY te.exe_id  ";
 
             $sql = sprintf($sql, $courseId, $sessionId, $ids);
         } else {
-            $sql = "SELECT * FROM $track_exercises te "
-              . "INNER JOIN c_quiz cq ON cq.id = te.exe_exo_id "
-              . "INNER JOIN course c ON te.exe_cours_id = c.code AND c.id = cq.c_id "
-              . "WHERE "
-              . "c.id = $courseId AND "
-              . "cq.id IN ($ids) AND "
-              . "status = '' " . $lpCondition
-              . "ORDER BY cq.id ";
+            $sql = "SELECT * FROM $track_exercises te
+                    INNER JOIN $tbl_quiz cq ON cq.id = te.exe_exo_id
+                    INNER JOIN $courseTable c ON te.exe_cours_id = c.code AND c.id = cq.c_id
+                    WHERE
+                    c.id = $courseId AND
+                    cq.id IN ($ids) AND
+                    status = '' $lpCondition
+                    ORDER BY te.exe_id ";
         }
-
         $result = Database::query($sql);
         $rows = array();
+
         while ($row = Database::fetch_array($result, 'ASSOC')) {
             $rows[] = $row;
         }
