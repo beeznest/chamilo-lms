@@ -417,16 +417,29 @@ function confirmation (name) {
     }
 }
 
+/**
+* rename name according to these patterns (file = a__123__.pdf) (folder = directory__123__)
+*/
 function renameFileNameInSession(name) {
     var rename = name;
-    var patt = /\w*__(\d*)__\.\w{3,4}/;
+    var patt = /\w*__(\d*)__/;
     var result = patt.test(name);
 
     if (result) {
         var array = new Array();
         array = name.split('__');
-        rename = array[0] + array[2];
+        rename = array[0];
+
+        // File
+        var patronFile = /\w*__(\d*)__\.\w{3,4}/;
+        var resultFile = patronFile.test(name);
+        if (resultFile) {
+            var array = new Array();
+            array = name.split('__');
+            rename = array[0] + array[2];
+        }
     }
+
     return rename;
 }
 </script>";
