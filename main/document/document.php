@@ -417,16 +417,29 @@ function confirmation (name) {
     }
 }
 
+/**
+* rename name according to these patterns (file = a__123__.pdf) (folder = directory__123__)
+*/
 function renameFileNameInSession(name) {
     var rename = name;
-    var patt = /\w*__(\d*)__\.\w{3,4}/;
+    var patt = /\w*__(\d*)__/;
     var result = patt.test(name);
 
     if (result) {
         var array = new Array();
         array = name.split('__');
-        rename = array[0] + array[2];
+        rename = array[0];
+
+        // File
+        var patronFile = /\w*__(\d*)__\.\w{3,4}/;
+        var resultFile = patronFile.test(name);
+        if (resultFile) {
+            var array = new Array();
+            array = name.split('__');
+            rename = array[0] + array[2];
+        }
     }
+
     return rename;
 }
 </script>";
@@ -840,22 +853,19 @@ if ($is_allowed_to_edit || $group_member_with_upload_rights || is_my_shared_fold
             }
             $added_slash = ($curdirpath == '/') ? '' : '/';
             $dir_name = $curdirpath.$added_slash.replace_dangerous_char($post_dir_name);
-            
-            if (!empty($session_id)) {
-                $dir_name = disable_dangerous_file($dir_name) . '_session-' . $session_id . '_';
-            } else {
-                $dir_name = disable_dangerous_file($dir_name) . '_';
-            }
 
-            $created_dir = create_unexisting_directory($_course, api_get_user_id(), $session_id, $to_group_id, $to_user_id, $base_work_dir, $dir_name, $post_dir_name);
+            $dir_name = disable_dangerous_file($dir_name);
+            $dir_name = renameDirectoryInSession($dir_name);
 
-            if ($created_dir) {
-                Display::display_confirmation_message('<span title="'.$created_dir.'">'.get_lang('DirCr').'</span>', false);
-                // Uncomment if you want to enter the created dir
-                //$curdirpath = $created_dir;
-                //$curdirpathurl = urlencode($curdirpath);
+            if ($dir_name == '') {
+                Display::display_error_message(get_lang('CannotCreateDirAlreadyExistCourseOrSession'));
             } else {
-                Display::display_error_message(get_lang('CannotCreateDir'));
+                $created_dir = create_unexisting_directory($_course, api_get_user_id(), $session_id, $to_group_id, $to_user_id, $base_work_dir, $dir_name, $post_dir_name);
+                if ($created_dir) {
+                    Display::display_confirmation_message('<span title="'.$created_dir.'">'.get_lang('DirCr').'</span>', false);
+                } else {
+                    Display::display_error_message(get_lang('CannotCreateDir'));
+                }
             }
         }
     }
