@@ -473,22 +473,51 @@ function renameFileNameInSession($path, $file)
 }
 
 /**
+ * @param string $path
+ */
+function renameDirectoryInSession($pathDir) {
+    $fileSession = '';
+    $sessionId = api_get_session_id();
+    $cursoId = api_get_course_int_id();
+
+    $fileUniqueSession = $pathDir . "__{$sessionId}__";
+    $fileQuery = "AND path REGEXP '^{$pathDir}\_\_[0-9]+\_\_$' ";
+
+    if ($sessionId == 0) {
+        $fileSession = $pathDir;
+        $status = searchFileInCurso($cursoId, $pathDir, $fileQuery, 'folder');
+        if (true == $status) {
+            $fileSession = '';
+        }
+    } else if ($sessionId > 0 && !empty($pathDir)) {
+        $fileSession = $fileUniqueSession;
+        $status = searchFileInCurso($cursoId, $pathDir, $fileQuery, 'folder');
+        if (true == $status) {
+            $fileSession = '';
+        }
+    }
+
+    return $fileSession;
+}
+
+/**
  * @param int $cursoId id
  * @param string $filePath path file name
  * @param boolean $searchInCurso true search file in course. false: search in all files (that session's)
+ * @param string $filetype identifies the type of document
  * @return bool status of search
  */
-function searchFileInCurso($cursoId, $filePath, $fileQuery) {
+function searchFileInCurso($cursoId, $filePath, $fileQuery, $filetype = 'file') {
     $flag = false;
     $tableDocument = Database::get_course_table(TABLE_DOCUMENT);
-    $sql_query = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = 'file' ".
+    $sql_query = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = '$filetype' ".
         " AND path = '$filePath' ";
     $sql_result = Database::query($sql_query);
     $count = Database::num_rows($sql_result);
     $count2 = 0;
 
     if ($count == 0) {
-        $sql_query2 = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = 'file' ".
+        $sql_query2 = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = '$filetype' ".
             " $fileQuery ";
         $sql_result2 = Database::query($sql_query2);
         $count2 = Database::num_rows($sql_result2);
@@ -766,7 +795,7 @@ function unzip_uploaded_file($uploaded_file, $upload_path, $base_work_dir, $max_
 			return api_failure::set_failure('not_enough_space');
 		}
 
-		// It happens on Linux that $upload_path sometimes doesn't start with '/'
+		// It happens on Linux that $fupload_path sometimes doesn't start with '/'
 		if ($upload_path[0] != '/' && substr($base_work_dir,-1,1) != '/') {
 			$upload_path = '/'.$upload_path;
 		}
