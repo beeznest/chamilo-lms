@@ -450,19 +450,21 @@ function renameFileNameInSession($path, $file)
     $ext = pathinfo($path . $file, PATHINFO_EXTENSION);
     $fileLessExt = str_replace(".$ext", '', $file);
     $fileUniqueSession = $fileLessExt . "__{$sessionId}__.{$ext}";
-    $fileQuery = "AND path REGEXP '^/{$fileLessExt}\_\_[0-9]+\_\_\.{$ext}$' ";
 
     $path = (substr($path, -1, 1) != '/') ? $path . '/' : $path;
     $formatFileSeach  = (substr($file, -1, 1) != '/') ? "/{$file}" : $file;
 
-    if ($sessionId == 0) {
+    if ($sessionId == 0) { //SQL = Pregunta si existe file: cursoBase(a.pdf) y en las Secciones(a__123__.pdf)
         $fileSession = $file;
+        $fileQuery = "AND path REGEXP '^/{$fileLessExt}\_\_[0-9]+\_\_\.{$ext}$' ";
         $status = searchFileInCurso($cursoId, $formatFileSeach, $fileQuery);
         if (true == $status) {
             $fileSession = '';
         }
     } else if ($sessionId > 0 && !empty($path) && !empty($file)) {
+        //SQL = Pregunta si existe file: cursoBase(a.pdf) y en seccion actual(a__123__.pdf)
         $fileSession = $fileUniqueSession;
+        $fileQuery = "AND  session_id = '$sessionId' AND path = '$fileUniqueSession' ";
         $status = searchFileInCurso($cursoId, $formatFileSeach, $fileQuery);
         if (true == $status) {
             $fileSession = '';
@@ -481,16 +483,17 @@ function renameDirectoryInSession($pathDir) {
     $cursoId = api_get_course_int_id();
 
     $fileUniqueSession = $pathDir . "__{$sessionId}__";
-    $fileQuery = "AND path REGEXP '^{$pathDir}\_\_[0-9]+\_\_$' ";
 
-    if ($sessionId == 0) {
+    if ($sessionId == 0) { //SQL = Pregunta si existe folder: cursoBase(carpeta) y en las Secciones(carpeta__123__)
         $fileSession = $pathDir;
+        $fileQuery = "AND path REGEXP '^{$pathDir}\_\_[0-9]+\_\_$' ";
         $status = searchFileInCurso($cursoId, $pathDir, $fileQuery, 'folder');
         if (true == $status) {
             $fileSession = '';
         }
-    } else if ($sessionId > 0 && !empty($pathDir)) {
+    } else if ($sessionId > 0 && !empty($pathDir)) { //SQL = Pregunta si existe folder: cursoBase(carpeta) y en seccion actual(carpeta__123__):
         $fileSession = $fileUniqueSession;
+        $fileQuery = "AND  session_id = '$sessionId' AND path = '$fileUniqueSession' ";
         $status = searchFileInCurso($cursoId, $pathDir, $fileQuery, 'folder');
         if (true == $status) {
             $fileSession = '';
@@ -510,17 +513,34 @@ function renameDirectoryInSession($pathDir) {
 function searchFileInCurso($cursoId, $filePath, $fileQuery, $filetype = 'file') {
     $flag = false;
     $tableDocument = Database::get_course_table(TABLE_DOCUMENT);
-    $sql_query = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = '$filetype' ".
-        " AND path = '$filePath' ";
-    $sql_result = Database::query($sql_query);
-    $count = Database::num_rows($sql_result);
+    $count = 0;
     $count2 = 0;
 
-    if ($count == 0) {
-        $sql_query2 = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = '$filetype' ".
-            " $fileQuery ";
-        $sql_result2 = Database::query($sql_query2);
-        $count2 = Database::num_rows($sql_result2);
+    if ('file' == $filetype) {
+        $sqlQuery = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = '$filetype' AND path = '$filePath' ";
+        $sqlResult = Database::query($sqlQuery);
+        $count = Database::num_rows($sqlResult);
+
+        if ($count == 0) {
+            $sqlQuery2 = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = '$filetype' $fileQuery ";
+            $sqlResult2 = Database::query($sqlQuery2);
+            $count2 = Database::num_rows($sqlResult2);
+        }
+
+    } elseif('folder' == $filetype) {
+        $sqlQuery = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = '$filetype' AND path = '$filePath' ";
+        $sqlResult = Database::query($sqlQuery);
+        $count = Database::num_rows($sqlResult);
+
+        if ($count == 0) {
+            if ('' == $fileQuery) {
+
+            } else {
+                $sqlQuery2 = "SELECT id FROM $tableDocument WHERE c_id ='$cursoId' AND filetype = '$filetype' $fileQuery ";
+                $sqlResult2 = Database::query($sqlQuery2);
+                $count2 = Database::num_rows($sqlResult2);
+            }
+        }
     }
 
     if($count > 0 || $count2 > 0) {
