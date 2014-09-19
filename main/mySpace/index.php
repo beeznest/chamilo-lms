@@ -875,14 +875,17 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
             }
        }
 
-        if (in_array('lpgradereport', $opts)) {
-            $sessionFilter->addElement(
+        if ($display == 'lpgradereport') {
+            $checkbox = $sessionFilter->addElement(
                 'checkbox',
                 'only_in_lp',
                 null,
                 get_lang('ExerciseOnlyInLp'),
-                array('id' => 'only_in_lp')
+                array('id' => 'only_in_lp', 'value' => 1)
             );
+            if (!isset($_GET['only_in_lp']) or ($_GET['only_in_lp'] == 1)) {
+                $checkbox->setChecked(true);
+            }
         }
 
         $sessionFilter->addElement('submit', '', get_lang('Generate'), 'id="generateReport"');
