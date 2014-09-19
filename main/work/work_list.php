@@ -55,6 +55,11 @@ if (!empty($group_id)) {
     $interbreadcrumb[] = array ('url' => '../group/group_space.php?gidReq='.$group_id, 'name' => get_lang('GroupSpace').' '.$group_properties['name']);
 }
 
+$isCourseMember = CourseManager::is_user_subscribed_in_real_or_linked_course($user_id, $course_code, $session_id);
+$userIsInSession = $sessionId > 0;
+$workWasCreatedInSession = $my_folder_data['session_id'] > 0;
+$workSessionIsCurrentSession = $sessionId == $my_folder_data['session_id'];
+
 $interbreadcrumb[] = array ('url' => api_get_path(WEB_CODE_PATH).'work/work.php?'.api_get_cidreq(), 'name' => get_lang('StudentPublications'));
 $interbreadcrumb[] = array ('url' => api_get_path(WEB_CODE_PATH).'work/work_list.php?'.api_get_cidreq().'&id='.$workId, 'name' =>  $my_folder_data['title']);
 
@@ -67,9 +72,16 @@ echo '<a href="'.api_get_path(WEB_CODE_PATH).'work/work.php?'.api_get_cidreq().'
 if (api_is_allowed_to_session_edit(false, true) && !empty($workId)) {
     $allowUpload = false;
 
-    if (!empty($sessionId)) {
-        if ($sessionId == $my_folder_data['session_id']) {
-            $allowUpload = true;
+    if ($userIsInSession) {
+        if ($workWasCreatedInSession) {
+            if ($workSessionIsCurrentSession) {
+                $allowUpload = true;
+            }
+        }
+        else {
+            if ($isCourseMember && api_is_student()) {
+                $allowUpload = true;
+            }
         }
     }
 
