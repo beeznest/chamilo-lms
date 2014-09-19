@@ -454,7 +454,10 @@ function renameFileNameInSession($path, $file)
     $path = (substr($path, -1, 1) != '/') ? $path . '/' : $path;
     $formatFileSeach  = (substr($file, -1, 1) != '/') ? "/{$file}" : $file;
 
-    if ($sessionId == 0) { //SQL = Pregunta si existe file: cursoBase(a.pdf) y en las Secciones(a__123__.pdf)
+    if ($sessionId == 0) {
+        // The query checks if a file of name a.pdf exists in the
+        // course or of name a__123__.pdf in any session (where 123 is a
+        // session ID)
         $fileSession = $file;
         $fileQuery = "AND path REGEXP '^/{$fileLessExt}\_\_[0-9]+\_\_\.{$ext}$' ";
         $status = searchFileInCurso($cursoId, $formatFileSeach, $fileQuery);
@@ -462,7 +465,9 @@ function renameFileNameInSession($path, $file)
             $fileSession = '';
         }
     } else if ($sessionId > 0 && !empty($path) && !empty($file)) {
-        //SQL = Pregunta si existe file: cursoBase(a.pdf) y en seccion actual(a__123__.pdf)
+        // The query checks if a file of name a.pdf exists in the
+        // course or of name a__123__.pdf in the current session (where 123 is 
+        // the session ID)
         $fileSession = $fileUniqueSession;
         $fileQuery = "AND  session_id = '$sessionId' AND path = '$fileUniqueSession' ";
         $status = searchFileInCurso($cursoId, $formatFileSeach, $fileQuery);
@@ -484,14 +489,20 @@ function renameDirectoryInSession($pathDir) {
 
     $fileUniqueSession = $pathDir . "__{$sessionId}__";
 
-    if ($sessionId == 0) { //SQL = Pregunta si existe folder: cursoBase(carpeta) y en las Secciones(carpeta__123__)
+    if ($sessionId == 0) {
+        // The query checks if a folder of name abc exists in the
+        // course or of name abc__123__ in any session (where 123 is a session
+        // ID)
         $fileSession = $pathDir;
         $fileQuery = "AND path REGEXP '^{$pathDir}\_\_[0-9]+\_\_$' ";
         $status = searchFileInCurso($cursoId, $pathDir, $fileQuery, 'folder');
         if (true == $status) {
             $fileSession = '';
         }
-    } else if ($sessionId > 0 && !empty($pathDir)) { //SQL = Pregunta si existe folder: cursoBase(carpeta) y en seccion actual(carpeta__123__):
+    } else if ($sessionId > 0 && !empty($pathDir)) {
+        // The query checks if a folder of name abc exists in the
+        // course or of name abc__123__ in the current session (where 123 is the
+        // session ID)
         $fileSession = $fileUniqueSession;
         $fileQuery = "AND  session_id = '$sessionId' AND path = '$fileUniqueSession' ";
         $status = searchFileInCurso($cursoId, $pathDir, $fileQuery, 'folder');
