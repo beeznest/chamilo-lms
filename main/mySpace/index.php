@@ -883,8 +883,10 @@ if ($is_platform_admin && in_array($view, array('admin')) && $display != 'yourst
                 get_lang('ExerciseOnlyInLp'),
                 array('id' => 'only_in_lp', 'value' => 1)
             );
-            if (!isset($_GET['only_in_lp']) or ($_GET['only_in_lp'] == 1)) {
+            if (isset($_GET['only_in_lp']) && $_GET['only_in_lp'] == 1) {
                 $checkbox->setChecked(true);
+            } else {
+                $checkbox->setChecked(false);
             }
         }
 
