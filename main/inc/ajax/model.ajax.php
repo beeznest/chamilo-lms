@@ -9,6 +9,15 @@ require_once '../global.inc.php';
 
 $libpath = api_get_path(LIBRARY_PATH);
 
+// Chamilo UTP Development 
+require_once api_get_path(SYS_PATH).'dev/vendor/autoload.php';
+
+// Uncomment enable debug
+// use Symfony\Component\Debug\Debug;
+// Debug::enable();
+
+use Chamilo\Component\Tracking as TrackingNew; 
+
 // 1. Setting variables needed by jqgrid
 
 $action = $_GET['a'];
@@ -397,7 +406,16 @@ switch ($action) {
         $count = count($session);
         break;
     case 'get_evaluation_detail':
-        $records = Tracking::get_exercise_progress(
+        /*$records = Tracking::get_exercise_progress(
+            $_GET['session_id'],
+            $_GET['course_id'],
+            $_GET['exercise_id'],
+            "",
+            "",
+            "",
+            true
+        );*/
+        $records = TrackingNew::get_exercise_progress(
             $_GET['session_id'],
             $_GET['course_id'],
             $_GET['exercise_id'],
@@ -1407,14 +1425,23 @@ switch ($action) {
             'limit' => "$start , $limit"
         );
 
+        // $result = Tracking::get_exercise_progress(
+        //     $sessionId,
+        //     $courseId,
+        //     $exerciseId,
+        //     "",
+        //     "",
+        //     $option,
+        //     true
+        // );
         $result = Tracking::get_exercise_progress(
             $sessionId,
             $courseId,
             $exerciseId,
             "",
             "",
-            $option,
-            true
+            array(),
+            false
         );
         break;
     case 'get_evaluation_detail_DHR':

@@ -1,0 +1,9 @@
+{
+    "require": {
+        "symfony/debug": "@stable",
+        "symfony/finder": "@stable",
+        "symfony/filesystem": "@stable",
+        "swiftmailer/swiftmailer": "@stable",
+        "illuminate/database": "@stable"
+    }
+}
