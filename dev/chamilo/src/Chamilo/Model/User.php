@@ -106,4 +106,4 @@ class User extends Eloquent
 }
 
 /* End of file User.php */
-/* Location: .//var/www/html/chamilo-lms-utp/dev/models/User.php */
+/* Location: dev/models/User.php */

@@ -60,4 +60,4 @@ class Course extends Eloquent
 }
 
 /* End of file Course.php */
-/* Location: .//var/www/html/chamilo-lms-utp/dev/models/Course.php */
+/* Location: .dev/models/Course.php */

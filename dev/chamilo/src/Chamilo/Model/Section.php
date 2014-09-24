@@ -45,4 +45,4 @@ class Section extends Eloquent
 }
 
 /* End of file Section.php */
-/* Location: .//var/www/html/chamilo-lms-utp/dev/models/Section.php */
+/* Location: dev/models/Section.php */

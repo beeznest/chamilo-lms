@@ -10,4 +10,4 @@ class QuizQuestion extends Eloquent
 }
 
 /* End of file QuizQuestion.php */
-/* Location: .//var/www/html/chamilo-lms-utp/dev/models/QuizQuestion.php */
+/* Location: dev/models/QuizQuestion.php */
