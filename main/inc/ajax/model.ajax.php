@@ -9,6 +9,14 @@ require_once '../global.inc.php';
 
 $libpath = api_get_path(LIBRARY_PATH);
 
+// Load components
+require_once api_get_path(SYS_PATH).'dev/vendor/autoload.php';
+// Uncomment enable debug
+// use Symfony\Component\Debug\Debug;
+// Debug::enable();
+
+use Chamilo\Component\Tracking as TrackingNew; 
+
 // 1. Setting variables needed by jqgrid
 
 $action = $_GET['a'];
@@ -397,7 +405,16 @@ switch ($action) {
         $count = count($session);
         break;
     case 'get_evaluation_detail':
-        $records = Tracking::get_exercise_progress(
+        /*$records = Tracking::get_exercise_progress(
+            $_GET['session_id'],
+            $_GET['course_id'],
+            $_GET['exercise_id'],
+            "",
+            "",
+            "",
+            true
+        );*/
+        $records = TrackingNew::get_exercise_progress(
             $_GET['session_id'],
             $_GET['course_id'],
             $_GET['exercise_id'],
@@ -553,7 +570,7 @@ switch ($action) {
         );
 
         break;
-	case 'get_user_skill_ranking':
+    case 'get_user_skill_ranking':
         $columns = array('photo', 'firstname', 'lastname', 'skills_acquired', 'currently_learning', 'rank');
         $result = $skill->get_user_list_skill_ranking($start, $limit, $sidx, $sord, $where_condition);
         $result = msort($result, 'skills_acquired', 'asc');
@@ -642,7 +659,7 @@ switch ($action) {
             );
         }
         $result = get_exam_results_data($start, $limit, $sidx, $sord, $exercise_id, $where_condition);
-		break;
+        break;
     case 'get_work_student_list_overview':
         if (!api_is_allowed_to_edit() && !api_is_course_admin()) {
             return array();
@@ -661,13 +678,13 @@ switch ($action) {
             $sidx,
             $sord
         );
-		break;
-	case 'get_hotpotatoes_exercise_results':
-		$course = api_get_course_info();
-		$documentPath = api_get_path(SYS_COURSE_PATH) . $course['path'] . "/document";
-		$columns = array('firstname', 'lastname', 'username', 'group_name', 'exe_date',  'score', 'actions');
-		$result = get_exam_results_hotpotatoes_data($start, $limit, $sidx, $sord, $hotpot_path, $where_condition); //get_exam_results_data($start, $limit, $sidx, $sord, $exercise_id, $where_condition);
-		break;
+        break;
+    case 'get_hotpotatoes_exercise_results':
+        $course = api_get_course_info();
+        $documentPath = api_get_path(SYS_COURSE_PATH) . $course['path'] . "/document";
+        $columns = array('firstname', 'lastname', 'username', 'group_name', 'exe_date',  'score', 'actions');
+        $result = get_exam_results_hotpotatoes_data($start, $limit, $sidx, $sord, $hotpot_path, $where_condition); //get_exam_results_data($start, $limit, $sidx, $sord, $exercise_id, $where_condition);
+        break;
     case 'get_sessions_tracking':
         if (api_is_drh()) {
             $sessions = SessionManager::get_sessions_followed_by_drh(api_get_user_id(), $start, $limit);
@@ -1407,14 +1424,23 @@ switch ($action) {
             'limit' => "$start , $limit"
         );
 
+        // $result = Tracking::get_exercise_progress(
+        //     $sessionId,
+        //     $courseId,
+        //     $exerciseId,
+        //     "",
+        //     "",
+        //     $option,
+        //     true
+        // );
         $result = Tracking::get_exercise_progress(
             $sessionId,
             $courseId,
             $exerciseId,
             "",
             "",
-            $option,
-            true
+            array(),
+            false
         );
         break;
     case 'get_evaluation_detail_DHR':
